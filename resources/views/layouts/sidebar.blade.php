@@ -1,8 +1,9 @@
 <div class="bg-dark text-white vh-100 p-3" style="width:250px;">
 
-    <h3 class="text-center mb-4">
+    <h5 class="text-center mb-4 d-flex align-items-center justify-content-center">
+        <img src="{{asset('assets/images/favicon.ico')}}" alt="Logo" width="32" height="32" class="me-2">
         Complaint System
-    </h3>
+    </h5>
 
     <ul class="nav flex-column">
 

@@ -15,11 +15,11 @@ class UploadController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'report_date' => 'required|date',
-            'excel_file' => 'required|file|mimes:xlsx,xls'
+            'report_date'   => 'required|date',
+            'excel_file'    => 'required|file|mimes:xlsx,xls'
         ],[
-            'report_date.required' => 'Please select report date.',
-            'excel_file.required' => 'Please select excel file.'
+            'report_date.required'  => 'Please select report date.',
+            'excel_file.required'   => 'Please select excel file.'
         ]);
 
         if(Upload::whereDate('report_date',$request->report_date)->exists()){
@@ -45,7 +45,7 @@ class UploadController extends Controller
         );
 
         return redirect()
-                ->route('dashboard')
+                ->route('complaints.index')
                 ->with('success','Excel uploaded successfully.');
     }
 }
