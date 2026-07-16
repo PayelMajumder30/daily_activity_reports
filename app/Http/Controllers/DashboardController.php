@@ -9,34 +9,6 @@ use Illuminate\Http\Request;
 class DashboardController extends Controller
 {
     //
-    // public function index()
-    // {
-    //     $complaints = Complaint::with('upload')
-    //                     ->latest()
-    //                     ->get();
-
-    //     $engineers = Complaint::select('engineer_name')
-    //                     ->distinct()
-    //                     ->orderBy('engineer_name')
-    //                     ->get();
-
-    //     $totalComplaints = Complaint::count();
-
-    //     $openComplaints = Complaint::where('status', 'Open')->count();
-
-    //     $closedComplaints = Complaint::where('status', 'Closed')->count();
-
-    //     $totalEngineers = Complaint::distinct('engineer_name')->count();
-
-    //     return view('dashboard.index', compact(
-    //         'complaints',
-    //         'engineers',
-    //         'totalComplaints',
-    //         'openComplaints',
-    //         'closedComplaints',
-    //         'totalEngineers'
-    //     ));
-    // }
 
     public function dashboard(){
         $totalComplaints = Complaint::count();

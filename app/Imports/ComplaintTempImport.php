@@ -2,16 +2,13 @@
 
 namespace App\Imports;
 
-use App\Models\Complaint;
-use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\ToCollection;
+use App\Models\ComplaintTemp;
 use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
-use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-
-class ComplaintImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts  
+class ComplaintTempImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts  
 {
     protected $uploadId;
 
@@ -30,7 +27,7 @@ class ComplaintImport implements ToModel, WithHeadingRow, WithChunkReading, With
             return null;
         }
 
-        return new Complaint([
+        return new ComplaintTemp([
             'upload_id'        => $this->uploadId,
             'complaint_title'  => trim($row['complainttitle'] ?? ''),
             'engineer_name'    => trim($row['engg_name'] ?? ''),

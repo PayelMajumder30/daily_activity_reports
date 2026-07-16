@@ -5,7 +5,7 @@
 @section('content')
 
 <div class="container-fluid py-4">
-      <div class="row mb-4">
+    <div class="row mb-4">
         <div class="col-md-8">
             <h2 class="fw-bold">
                 <i class="bi bi-speedometer2"></i>
