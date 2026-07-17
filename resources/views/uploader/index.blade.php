@@ -271,9 +271,10 @@
 
             let button = $(this);
             let id = button.data('id');
+            let updateUrl = "{{ route('uploader.update', ['id' => '__ID__']) }}";
 
             $.ajax({
-                url: "/uploader/update/" + id,
+                url: updateUrl.replace('__ID__', id),
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",

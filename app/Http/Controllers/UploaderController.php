@@ -27,17 +27,19 @@ class UploaderController extends Controller
 
         $file = $request->file('excel_file');
 
-        $filename = time().'_'.$file->getClientOriginalName();
-        $file->move(public_path('uploads'), $filename);
+        // $filename = time().'_'.$file->getClientOriginalName();
+        // $file->move(public_path('uploads'), $filename);
 
         $upload=Upload::create([
             'report_date'=>$request->report_date,
-            'file_name'=>$filename
+            // 'file_name'=>$filename
+            'file_name'=>$file->getClientOriginalName()
         ]);
 
         Excel::import(
             new ComplaintTempImport($upload->id),
-            public_path('uploads/'.$filename)
+            // public_path('uploads/'.$filename)
+            $file
         );
 
         $rows=ComplaintTemp::where('upload_id',$upload->id)->get();
