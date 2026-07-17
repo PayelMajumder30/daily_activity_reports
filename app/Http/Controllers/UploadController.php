@@ -15,11 +15,11 @@ class UploadController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'report_date' => 'required|date',
-            'excel_file' => 'required|file|mimes:xlsx,xls'
+            'report_date'   => 'required|date',
+            'excel_file'    => 'required|file|mimes:xlsx,xls'
         ],[
-            'report_date.required' => 'Please select report date.',
-            'excel_file.required' => 'Please select excel file.'
+            'report_date.required'  => 'Please select report date.',
+            'excel_file.required'   => 'Please select excel file.'
         ]);
 
         if(Upload::whereDate('report_date',$request->report_date)->exists()){
@@ -30,22 +30,24 @@ class UploadController extends Controller
 
         $file = $request->file('excel_file');
 
-        $fileName = time().'_'.$file->getClientOriginalName();
+        // $fileName = time().'_'.$file->getClientOriginalName();
 
-        $file->move(public_path('uploads'),$fileName);
+        // $file->move(public_path('uploads'),$fileName);
 
         $upload = Upload::create([
             'report_date'=>$request->report_date,
-            'file_name'=>$fileName
+            // 'file_name'=>$fileName
+            'file_name'=>$file->getClientOriginalName(),
         ]);
 
         Excel::import(
             new ComplaintImport($upload->id),
-            public_path('uploads/'.$fileName)
+            // public_path('uploads/'.$fileName)
+            $file
         );
 
         return redirect()
-                ->route('dashboard')
+                ->route('complaints.index')
                 ->with('success','Excel uploaded successfully.');
     }
 }

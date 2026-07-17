@@ -10,36 +10,7 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-// class ComplaintImport implements ToCollection, WithHeadingRow
-// {
-//     protected $uploadId;
 
-//     public function __construct($uploadId)
-//     {
-//         $this->uploadId = $uploadId;
-//     }
-
-//     public function collection(Collection $rows)
-//     {
-//         foreach ($rows as $row) {
-
-//             Complaint::create([
-
-//                 'upload_id' => $this->uploadId,
-
-//                 'complaint_title' => trim($row['complainttitle']),
-
-//                 'engineer_name' => trim($row['engg_name']),
-
-//                 'status' => trim($row['status']),
-
-//                 'resolution_time' => trim($row['actual_resolution_time'])
-
-//             ]);
-
-//         }
-//     }
-// }
 class ComplaintImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts  
 {
     protected $uploadId;

@@ -51,7 +51,7 @@
                     <div class="col-md-3">
 
                         <label class="form-label d-block">&nbsp;</label>
-                        <button id ="uploadBtn" class="btn btn-success w-100">
+                        <button id ="uploadBtn" class="btn btn-success w-100" disabled>
                             <i class="bi bi-upload"></i>
                             Upload
                         </button>
@@ -272,9 +272,23 @@
 
         });
 
+        $('#uploadForm').submit(function(){
+            $('#uploadBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Uploading...');
+
+        });
+
     }); 
     
-    
+    @if(session('success'))
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: "{{ session('success') }}",
+            confirmButtonText: 'OK'
+        });
+
+    @endif
 
 </script>
 @endpush

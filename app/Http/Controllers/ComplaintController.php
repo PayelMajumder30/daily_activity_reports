@@ -51,12 +51,12 @@ class ComplaintController extends Controller
 
             $complaints->map(function($row){
                 return [
-                    'complaint_title' => $row->complaint_title,
-                    'engineer_name' => $row->engineer_name,
-                    'status' => $row->status,
-                    'resolution_time' => $row->resolution_time,
-                    'report_date' => optional($row->upload?->report_date)
-                                        ->format('d-m-Y')
+                    'complaint_title'   => $row->complaint_title,
+                    'engineer_name'     => $row->engineer_name,
+                    'status'            => $row->status,
+                    'resolution_time'   => $row->resolution_time,
+                    'report_date'       => optional($row->upload?->report_date)
+                                            ->format('d-m-Y')
 
                 ];
 
