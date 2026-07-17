@@ -1,19 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Upload File')
+@section('title', 'Upload Complaints')
 
 @section('content')
 
 <div class="container-fluid py-4">
 
+    {{-- Page Heading --}}
     <div class="row mb-4">
         <div class="col-md-8">
             <h2 class="fw-bold">
-                <i class="bi bi-speedometer2"></i>
-                Complaint Management Dashboard
+                <i class="bi bi-cloud-upload"></i>
+                Upload Complaint
             </h2>
             <p class="text-muted">
-                Upload daily complaint reports and search complaint details.
+                Upload daily complaint reports.
             </p>
         </div>
 
@@ -23,9 +24,8 @@
             </h6>
         </div>
     </div>
-    
-    {{-- Upload Card --}}
 
+    {{-- Upload Card --}}
     <div class="card shadow border-0 mb-4">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
@@ -35,140 +35,113 @@
         </div>
 
         <div class="card-body">
-            <form id="uploadForm" action="{{ route('uploader.preview') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="row">
-                    <div class="col-md-4">
-                        <label class="form-label">
-                            Report Date
-                        </label>
 
-                        <input type="text" name="report_date" class="form-control datepicker" required>
+            <form id="uploadForm" method="POST" enctype="multipart/form-data">
+                @csrf
+
+                <div class="row">
+
+                    <div class="col-md-4">
+                        <label>Report Date</label>
+                        <input type="text" name="report_date" class="form-control datepicker" required>                       
                     </div>
 
                     <div class="col-md-5">
-
-                        <label class="form-label">
-                            Excel File
-                        </label>
-
-                        <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls" required>
-
+                        <label>Excel File</label>
+                        <input type="file" name="excel_file" class="form-control" accept=".xlsx,.xls"  required>      
                     </div>
 
                     <div class="col-md-3">
+                        <label>&nbsp;</label>
 
-                        <label class="form-label d-block">&nbsp;</label>
-                        <button class="btn btn-success w-100">
-                            <i class="bi bi-upload"></i>
-                            Upload
+                        <button type="submit" id="btnUpload" class="btn btn-success w-100" disabled>                              
+                             <i class="bi bi-upload"></i> Upload
                         </button>
                     </div>
+
                 </div>
+
             </form>
+
+            <input type="hidden" id="upload_id">
+
         </div>
     </div>
 
-{{-- Upload preview Card --}}
+    {{-- Preview Card --}}
+    <div class="card shadow border-0 d-none"
+        id="previewCard">
 
-    @if($preview->count())
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Preview Data</h5>
+        </div>
 
-        <div class="card shadow">
+        <div class="card-body">
 
-            <div class="card-header">
+            <table class="table table-bordered" id="previewTable">
+  
+                <thead>
 
-                <h5>Preview</h5>
+                    <tr>
+                        <th width="5%">SL</th>
+                        <th>Complaint</th>
+                        <th>Engineer</th>
+                        <th>Status</th>
+                        <th>Resolution</th>
+                        <th width="12%">Action</th>
+                    </tr>
 
-            </div>
+                </thead>
 
-            <div class="card-body">
+                <tbody>
 
-                <table class="table table-bordered" id="previewTable">
+                </tbody>
 
-                    <thead>
+            </table>
 
-                        <tr>
-
-                            <th>SL</th>
-
-                            <th>Complaint</th>
-
-                            <th>Engineer</th>
-
-                            <th>Status</th>
-
-                            <th>Resolution</th>
-
-                            <th>Action</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @foreach($preview as $key=>$row)
-
-                        <tr id="row_{{ $row->id }}">
-                            <td>{{ $loop->iteration }}</td>
-
-                            <td id="complaint_title_{{ $row->id }}">
-                                {{ $row->complaint_title }}
-                            </td>
-
-                            <td id="engineer_name_{{ $row->id }}">
-                                {{ $row->engineer_name }}
-                            </td>
-
-                            <td id="status_{{ $row->id }}">
-                                {{ $row->status }}
-                            </td>
-
-                            <td id="resolution_time_{{ $row->id }}">
-                                {{ $row->resolution_time }}
-                            </td>
-
-                            <td>
-                                <button
-                                    class="btn btn-sm btn-warning btnEdit"
-                                    data-id="{{ $row->id }}">
-                                    Edit
-                                </button>
-                            </td>
-                        </tr>
-
-                        @endforeach
-
-                    </tbody>
-
-                </table>
-
-                <form action="{{ route('uploader.save') }}" method="POST">
-                    
-                    @csrf
-                    <input type="hidden" name="upload_id" value="{{ $uploadId }}" name="upload_id">
-
-                    <button class="btn btn-success">
-
-                        Save All
-
-                    </button>
-
-                </form>
-
-            </div>
+            <button type="button"
+                    id="btnFinalSave"
+                    class="btn btn-success">
+                Final Save
+            </button>
 
         </div>
 
-    @endif
+    </div>
+
 </div>
 
-    @push('scripts')
+@push('scripts')
     <script>
+       
+        function checkUploadForm() {
+            let reportDate = $('input[name="report_date"]').val();
+            let excelFile  = $('input[name="excel_file"]').val();
+
+            if(reportDate !== '' && excelFile !== ''){
+                $('#btnUpload').prop('disabled', false);
+            } else{
+                $('#btnUpload').prop('disabled', true);
+            }
+        }
+
+        $(document).on('change keyup', 'input[name="report_date"], input[name="excel_file"]',
+            function(){
+                checkUploadForm();
+            }
+        )
+        // Upload AJAX
         $('#uploadForm').submit(function(e){
 
             e.preventDefault();
 
+            $('#btnUpload')
+            .prop('disabled', true)
+            .html('<i class="bi bi-arrow-repeat"></i> Uploading...');
+
+            // 1. Show your loading indicator here (this is likely already happening somewhere)
+            // $('#loadingModal').modal('show'); 
+       
             let formData=new FormData(this);
 
             $.ajax({
@@ -178,8 +151,32 @@
                 data:formData,
                 processData:false,
                 contentType:false,
+                dataType: "json",
 
                 success:function(res){
+                    // --- ADD THIS LINE TO HIDE THE MODAL ---
+                    $('#loadingModal').modal('hide'); 
+                    // If it is a custom overlay instead of a modal, use: 
+                    // $('#loadingOverlay').addClass('d-none');
+
+                    Swal.fire({
+
+                        icon:'success',
+                        title:'Upload Successful',
+                        text:'Preview generated successfully.',
+                        timer:1500,
+                        showConfirmButton:false
+
+                    });
+
+                    $('#btnUpload')
+                    .prop('disabled', false)
+                    .html('<i class="bi bi-upload"></i> Upload');
+
+                    console.log(res);
+                    $('#upload_id').val(res.upload_id);
+
+                    $('#previewCard').removeClass('d-none');
 
                     $('#previewTable tbody').html('');
 
@@ -187,42 +184,132 @@
 
                         $('#previewTable tbody').append(`
 
-                        <tr>
+                            <tr id="row_${row.id}">
 
-                            <td>${i+1}</td>
+                                <td>${i+1}</td>
 
-                            <td id="complaint_title_${row.id}">
-                                ${row.complaint_title}
-                            </td>
+                                <td id="complaint_${row.id}">
+                                    ${row.complaint_title}
+                                </td>
 
-                            <td id="engineer_name_${row.id}">
-                                ${row.engineer_name}
-                            </td>
+                                <td id="engineer_${row.id}">
+                                    ${row.engineer_name}
+                                </td>
 
-                            <td id="status_${row.id}">
-                                ${row.status}
-                            </td>
+                                <td id="status_${row.id}">
+                                    ${row.status}
+                                </td>
 
-                            <td id="resolution_time_${row.id}">
-                                ${row.resolution_time ?? ''}
-                            </td>
+                                <td id="time_${row.id}">
+                                    ${row.resolution_time || ''}
+                                </td>
 
-                            <td>
-                                <button
-                                    type="button"
-                                    class="btn btn-warning btnEdit"
-                                    data-id="${row.id}">
-                                    Edit
-                                </button>
-                            </td>
+                                <td>
+                                    <button
+                                        class="btn btn-warning btnEdit"
+                                        data-id="${row.id}">
 
-                        </tr>
+                                        Edit
+
+                                    </button>
+                                </td>
+
+                            </tr>
 
                         `);
+                    });
+
+                },
+                error:function(xhr){
+                    // --- ALSO ADD THIS LINE TO HIDE THE MODAL ON FAILURE ---
+                    $('#loadingModal').modal('hide'); 
+
+                    console.log(xhr.responseText);
+                    Swal.fire({
+
+                        icon:'error',
+                        title:'Upload Failed',
+                        text:'Something went wrong while uploading.'
 
                     });
 
-                    $('#upload_id').val(res.upload_id);
+                    $('#btnUpload')
+                    .prop('disabled', false)
+                    .html('<i class="bi bi-upload"></i> Upload');
+                }
+
+            });
+
+        });
+
+        // Edit Button
+        $(document).on('click','.btnEdit',function(){
+
+            let id=$(this).data('id');
+
+            $('#complaint_'+id).html(
+                '<input class="form-control" value="'+$('#complaint_'+id).text().trim()+'">'
+            );
+
+            $('#engineer_'+id).html(
+                '<input class="form-control" value="'+$('#engineer_'+id).text().trim()+'">'
+            );
+
+            $('#status_'+id).html(
+                '<input class="form-control" value="'+$('#status_'+id).text().trim()+'">'
+            );
+
+            $('#time_'+id).html(
+                '<input class="form-control" value="'+$('#time_'+id).text().trim()+'">'
+            );
+
+            $(this).removeClass('btn-warning btnEdit').addClass('btn-success btnSave').text('Save');
+        });
+
+        // Save Row AJAX
+        $(document).on('click', '.btnSave', function () {
+
+            let button = $(this);
+            let id = button.data('id');
+
+            $.ajax({
+                url: "/uploader/update/" + id,
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    complaint_title: $('#complaint_' + id + ' input').val(),
+                    engineer_name: $('#engineer_' + id + ' input').val(),
+                    status: $('#status_' + id + ' input').val(),
+                    resolution_time: $('#time_' + id + ' input').val()
+
+                },
+
+                success: function () {
+
+                    let title = $('#complaint_' + id + ' input').val();
+                    let engineer = $('#engineer_' + id + ' input').val();
+                    let status = $('#status_' + id + ' input').val();
+                    let time = $('#time_' + id + ' input').val();
+
+                    $('#complaint_' + id).text(title);
+                    $('#engineer_' + id).text(engineer);
+                    $('#status_' + id).text(status);
+                    $('#time_' + id).text(time);
+
+                    button
+                        .removeClass('btn-success btnSave')
+                        .addClass('btn-warning btnEdit')
+                        .text('Edit');
+
+                    Swal.fire({
+
+                        icon:'success',
+                        title:'Updated',
+                        text:'Row updated successfully.',
+                        timer:1200,
+                        showConfirmButton:false
+
+                    });
 
                 }
 
@@ -230,36 +317,34 @@
 
         });
 
-        $(document).on('click', '.btnEdit', function () {
+        // Final Save AJAX
+        $('#btnFinalSave').click(function(){
 
-            let id = $(this).data('id');
+            $.ajax({
 
-            let title = $('#complaint_title_' + id).text().trim();
-            let engineer = $('#engineer_name_' + id).text().trim();
-            let status = $('#status_' + id).text().trim();
-            let time = $('#resolution_time_' + id).text().trim();
+                url:"{{ route('uploader.save') }}",
+                type:"POST",
+                data:{
+                _token:"{{ csrf_token() }}",
+                upload_id:$('#upload_id').val()
+                },
+                success:function(){
+                    Swal.fire({
 
-            $('#complaint_title_' + id).html(
-                `<input type="text" class="form-control" value="${title}">`
-            );
+                        icon:'success',
+                        title:'Success',
+                        text:'Complaint data saved successfully.'
 
-            $('#engineer_name_' + id).html(
-                `<input type="text" class="form-control" value="${engineer}">`
-            );
+                    }).then(function(){
 
-            $('#status_' + id).html(
-                `<input type="text" class="form-control" value="${status}">`
-            );
+                        location.reload();
 
-            $('#resolution_time_' + id).html(
-                `<input type="text" class="form-control" value="${time}">`
-            );
+                    });
+                }
 
-            $(this)
-                .removeClass('btn-warning btnEdit')
-                .addClass('btn-success btnSaveRow')
-                .text('Save');
+            });
         });
     </script>
+@endpush
 
 @endsection

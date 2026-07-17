@@ -7,7 +7,7 @@
 
     <ul class="nav flex-column">
 
-        <li class="nav-item">
+        <li class="nav-item mb-2">
 
             <a href="{{ route('uploader.index') }}"
             class="nav-link text-white {{ request()->routeIs('uploader.*') ? 'active bg-primary' : '' }}">
@@ -33,7 +33,7 @@
 
         </li>
 
-        <li class="nav-item">
+        <li class="nav-item mb-2">
 
             <a href="{{ route('complaints.index') }}"
                class="nav-link text-white {{ request()->routeIs('complaints.index') ? 'active bg-primary' : '' }}">

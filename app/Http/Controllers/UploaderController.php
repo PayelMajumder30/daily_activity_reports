@@ -41,6 +41,7 @@ class UploaderController extends Controller
         );
 
         $rows=ComplaintTemp::where('upload_id',$upload->id)->get();
+        // dd($rows);
 
         return response()->json([
             'upload_id'=>$upload->id,
@@ -48,15 +49,16 @@ class UploaderController extends Controller
         ]);
     }
 
+
     public function updateTemp(Request $request,$id)
     {
         $row=ComplaintTemp::findOrFail($id);
 
         $row->update([
-            'complaint_title'=>$request->complaint_title,
-            'engineer_name'=>$request->engineer_name,
-            'status'=>$request->status,
-            'resolution_time'=>$request->resolution_time
+            'complaint_title'   =>$request->complaint_title,
+            'engineer_name'     =>$request->engineer_name,
+            'status'            =>$request->status,
+            'resolution_time'   =>$request->resolution_time
         ]);
 
         return response()->json([
@@ -75,11 +77,11 @@ class UploaderController extends Controller
 
             Complaint::create([
 
-                'upload_id'=>$temp->upload_id,
-                'complaint_title'=>$temp->complaint_title,
-                'engineer_name'=>$temp->engineer_name,
-                'status'=>$temp->status,
-                'resolution_time'=>$temp->resolution_time
+                'upload_id'         =>$temp->upload_id,
+                'complaint_title'   =>$temp->complaint_title,
+                'engineer_name'     =>$temp->engineer_name,
+                'status'            =>$temp->status,
+                'resolution_time'   =>$temp->resolution_time
 
             ]);
 

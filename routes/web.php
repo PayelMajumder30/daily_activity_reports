@@ -15,11 +15,11 @@ Route::post('/upload', [UploadController::class, 'store'])->name('upload.store')
 
 Route::get('/complaints/search', [ComplaintController::class, 'search'])->name('complaints.search');
 
+Route::prefix('uploader')->name('uploader.')->group(function(){
+    Route::get('/', [UploaderController::class,'index'])->name('index');
+    Route::post('/preview', [UploaderController::class,'uploadPreview'])->name('preview');
+    Route::post('/update/{id}',[UploaderController::class,'updateTemp'])->name('update');
+    Route::post('/save',[UploaderController::class,'savePermanent'])->name('save');
+});
 
-Route::get('/uploader', [UploaderController::class,'index'])->name('uploader.index');
-        
-// Route::post('/uploader/upload', [UploaderController::class,'upload'])->name('uploader.upload');
-Route::post('/uploader/upload-preview', [UploaderController::class,'uploadPreview'])->name('uploader.preview');
-Route::post('/uploader/update-temp/{id}',[UploaderController::class,'updateTemp'])->name('uploader.update');
-Route::post('/uploader/save',[UploaderController::class,'savePermanent'])->name('uploader.save');
         

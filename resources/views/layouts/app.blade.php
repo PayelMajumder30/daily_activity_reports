@@ -54,9 +54,6 @@
     <!-- Common JS -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
 
-    <!-- Upload -->
-    <script src="{{ asset('assets/js/upload.js') }}"></script>
-
     <!-- Search -->
     <script src="{{ asset('assets/js/search.js') }}"></script>
 

@@ -133,7 +133,6 @@
     </div>
 
 
-
     {{-- Search Card --}}
 
     <div class="card shadow border-0 mb-4">
