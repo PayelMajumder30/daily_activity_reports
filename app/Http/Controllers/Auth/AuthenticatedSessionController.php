@@ -28,7 +28,18 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        if(auth()->user()->role == 0)
+            {
+                return redirect()->route('dashboard');
+            }
+
+        if(auth()->user()->role == 1){
+            return redirect()->route('uploader.index');
+        }
+
+        return redirect()->route('dashboard');
+
+        // return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**
@@ -42,6 +53,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login');
     }
 }

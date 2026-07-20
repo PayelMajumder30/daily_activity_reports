@@ -25,15 +25,35 @@ class UploaderController extends Controller
             'excel_file'=>'required|mimes:xlsx,xls'
         ]);
 
+        if(Upload::whereDate('report_date',$request->report_date)->exists()){
+            return back()->withErrors([
+                'report_date'=>'Report already uploaded for this date.'
+            ]);
+        }
+
         $file = $request->file('excel_file');
+
+        $exists = Upload::where(function ($query) use ($request, $file) {
+            $query->whereDate('report_date', $request->report_date)
+                ->orWhere('file_name', $file->getClientOriginalName());
+        })->exists();
+
+        if ($exists) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'report_date' => 'This report date or file already exists.'
+                ]);
+        }
 
         // $filename = time().'_'.$file->getClientOriginalName();
         // $file->move(public_path('uploads'), $filename);
 
         $upload=Upload::create([
-            'report_date'=>$request->report_date,
+            'user_id'       => auth()->id(),
+            'report_date'   =>$request->report_date,
             // 'file_name'=>$filename
-            'file_name'=>$file->getClientOriginalName()
+            'file_name'     =>$file->getClientOriginalName()
         ]);
 
         Excel::import(
@@ -70,10 +90,17 @@ class UploaderController extends Controller
 
     public function savePermanent(Request $request)
     {
-        $temps=ComplaintTemp::where(
-            'upload_id',
-            $request->upload_id
-        )->get();
+        $upload = Upload::findOrFail($request->upload_id);
+
+        if (Complaint::where('upload_id', $upload->id)->exists()) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'This report has already been saved.'
+            ], 422);
+        }
+
+        $temps=ComplaintTemp::where('upload_id',$upload->id)->get();
 
         foreach($temps as $temp){
 
@@ -89,13 +116,11 @@ class UploaderController extends Controller
 
         }
 
-        ComplaintTemp::where(
-            'upload_id',
-            $request->upload_id
-        )->delete();
+        ComplaintTemp::where('upload_id', $upload->id)->delete();
 
         return response()->json([
-            'success'=>true
+            'success'=> true,
+            'message' => 'Complaint data saved successfully.'
         ]);
     }
 }

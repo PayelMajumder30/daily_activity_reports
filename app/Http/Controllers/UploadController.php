@@ -28,16 +28,42 @@ class UploadController extends Controller
             ]);
         }
 
+        // $file = $request->file('excel_file');
+
+        // $exists = Upload::whereDate('report_date', $request->report_date)
+        //     ->where('file_name', $file->getClientOriginalName())
+        //     ->exists();
+
+        // if ($exists) {
+        //     return response()->json([
+        //         'message' => 'This report date or file already exist.'
+        //     ], 422);
+        // }
+        
         $file = $request->file('excel_file');
+
+        $exists = Upload::where(function ($query) use ($request, $file) {
+            $query->whereDate('report_date', $request->report_date)
+                ->orWhere('file_name', $file->getClientOriginalName());
+        })->exists();
+
+        if ($exists) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'report_date' => 'This report date or file already exists.'
+                ]);
+        }
 
         // $fileName = time().'_'.$file->getClientOriginalName();
 
         // $file->move(public_path('uploads'),$fileName);
 
         $upload = Upload::create([
-            'report_date'=>$request->report_date,
+            'user_id'       => auth()->id(),
+            'report_date'   =>$request->report_date,
             // 'file_name'=>$fileName
-            'file_name'=>$file->getClientOriginalName(),
+            'file_name'     =>$file->getClientOriginalName(),
         ]);
 
         Excel::import(

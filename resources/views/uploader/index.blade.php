@@ -36,7 +36,7 @@
 
         <div class="card-body">
 
-            <form id="uploadForm" method="POST" enctype="multipart/form-data">
+            <form id="uploadForm" method="POST" enctype="multipart/form-data" autocomplete="off">
                 @csrf
 
                 <div class="row">
@@ -98,10 +98,8 @@
                 </tbody>
 
             </table>
-
-            <button type="button"
-                    id="btnFinalSave"
-                    class="btn btn-success">
+ 
+            <button type="button" id="btnFinalSave" class="btn btn-success">             
                 Final Save
             </button>
 
@@ -221,21 +219,27 @@
 
                 },
                 error:function(xhr){
-                    // --- ALSO ADD THIS LINE TO HIDE THE MODAL ON FAILURE ---
-                    $('#loadingModal').modal('hide'); 
+
+                    $('#loadingModal').modal('hide');
 
                     console.log(xhr.responseText);
-                    Swal.fire({
-
-                        icon:'error',
-                        title:'Upload Failed',
-                        text:'Something went wrong while uploading.'
-
-                    });
 
                     $('#btnUpload')
-                    .prop('disabled', false)
-                    .html('<i class="bi bi-upload"></i> Upload');
+                        .prop('disabled', false)
+                        .html('<i class="bi bi-upload"></i> Upload');
+
+                    let message = 'This report date or file already exist.';
+
+                    if (xhr.status === 422 && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Upload Failed',
+                        text: message
+                    });
+
                 }
 
             });
@@ -321,29 +325,46 @@
         // Final Save AJAX
         $('#btnFinalSave').click(function(){
 
+            let btn = $(this);
+
+            btn.prop('disabled', true)
+            .html('<i class="bi bi-arrow-repeat"></i> Saving...');
+
             $.ajax({
-
-                url:"{{ route('uploader.save') }}",
-                type:"POST",
-                data:{
-                _token:"{{ csrf_token() }}",
-                upload_id:$('#upload_id').val()
+                url: "{{ route('uploader.save') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    upload_id: $('#upload_id').val()
                 },
-                success:function(){
+
+                success: function(response){
+
                     Swal.fire({
-
-                        icon:'success',
-                        title:'Success',
-                        text:'Complaint data saved successfully.'
-
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message
                     }).then(function(){
-
                         location.reload();
-
                     });
+
+                },
+
+                error: function(xhr){
+
+                    btn.prop('disabled', false)
+                    .html('<i class="bi bi-save"></i> Final Save');
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON.message
+                    });
+
                 }
 
             });
+
         });
     </script>
 @endpush
