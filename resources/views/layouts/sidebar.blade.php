@@ -2,8 +2,23 @@
 
     <h6 class="text-center mb-4 d-flex align-items-center justify-content-center">
         <img src="{{asset('assets/images/favicon.ico')}}" alt="Logo" width="32" height="32" class="me-2">
-        Complaint Management System
+        Daily Activity Management System
     </h6>
+
+    <hr>
+        <div class="text-center mb-4">
+            <div class="mb-2">
+                <i class="bi bi-person-circle fs-1 text-info"></i>
+            </div>
+            <div class="mb-1 text-white">
+                {{ auth()->user()->name}}
+            </div>
+
+            <span class="badge {{ auth()->user()->role == 0 ? 'bg-success' : 'bg-warning text-dark' }}">
+                {{ auth()->user()->role == 0 ? 'Management' : 'Uploader' }}
+            </span>
+        </div>
+    </hr>
 
     <ul class="nav flex-column">
 

@@ -19,7 +19,7 @@
             <div class="card shadow">
 
                 <div class="card-header text-center bg-primary text-white">
-                    <h4>Complaint Management System</h4>
+                    <h4>Daily Activity Management System</h4>
                 </div>
 
                 <div class="card-body">
@@ -29,19 +29,12 @@
 
                         <div class="mb-3">
                             <label>Email</label>
-                            <input type="email"
-                                   name="email"
-                                   class="form-control"
-                                   value="{{ old('email') }}"
-                                   required>
+                            <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>      
                         </div>
 
                         <div class="mb-3">
                             <label>Password</label>
-                            <input type="password"
-                                   name="password"
-                                   class="form-control"
-                                   required>
+                            <input type="password" name="password" class="form-control" required>       
                         </div>
 
                         @error('email')

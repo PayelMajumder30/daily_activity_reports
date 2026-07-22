@@ -13,16 +13,16 @@ class RoleMiddleware
      *
      * @param  Closure(Request): (Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
         
-        // if(!auth()->check()) {
-        //     return redirect()->route('login');
-        // }
+        if(!auth()->check()) {
+            return redirect()->route('login');
+        }
 
-        // if(!in_array(auth()->user()->role, $roles)){
-        //     abort(403, 'Unauthorized');
-        // }
+        if(!in_array(auth()->user()->role, $roles)){
+            abort(403, 'Unauthorized');
+        }
 
         return $next($request);
 
