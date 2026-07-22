@@ -60,6 +60,9 @@
     <!-- DataTable -->
     <script src="{{ asset('assets/js/datatable.js') }}"></script>
 
+    <!-- PieChart -->
+    <script src="{{ asset('assets/js/chart.js') }}"></script>
+
     @stack('scripts')
 
 </body>

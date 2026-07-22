@@ -22,67 +22,194 @@
             </h6>
         </div>
     </div>
+    <div class="card shadow">
 
-    {{-- Statistics --}}
-    <div class="row">
-        <div class="col-lg-3 mb-3">
-            <div class="card shadow border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6>Total Complaints</h6>
-                            <h3>{{ $totalComplaints }}</h3>
-                        </div>
-                        <div>
-                            <i class="bi bi-file-earmark-text fs-1 text-primary"></i>
-                        </div>
-                    </div>
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-3">
+                    <label>From Date</label>
+                    <input type="text"
+                        id="from_date"
+                        class="form-control datepicker">
                 </div>
+
+                <div class="col-md-3">
+                    <label>To Date</label>
+                    <input type="text"
+                        id="to_date"
+                        class="form-control datepicker">
+                </div>
+
+                <div class="col-md-3">
+                    <label>Engineer</label>
+
+                    <select id="engineer" class="form-select">
+
+                        <option value="">All</option>
+
+                        @foreach($engineers as $eng)
+
+                        <option value="{{ $eng->engineer_name }}">
+                            {{ $eng->engineer_name }}
+                        </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label>Status</label>
+
+                    <select id="status" class="form-select">
+
+                        <option value="">All</option>
+
+                        @foreach($statuses as $status)
+
+                        <option value="{{ $status->status }}">
+                            {{ $status->status }}
+                        </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
+
             </div>
+
+            <div class="mt-3">
+
+                <button class="btn btn-primary" id="btnSearch">
+                    Search
+                </button>
+
+                <button class="btn btn-secondary" id="btnReset">
+                    Reset
+                </button>
+
+            </div>
+
         </div>
 
-        <div class="col-lg-3 mb-3">
-            <div class="card shadow border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6>Open</h6>
-                            <h3>{{ $openComplaints }}</h3>
-                        </div>
-                        <i class="bi bi-hourglass-split fs-1 text-warning"></i>
-                    </div>
-                </div>
-            </div>
+    </div>
+
+    <div class="card shadow mt-4">
+
+        <div class="card-header">
+
+            <h5>Status Distribution</h5>
+
         </div>
 
-        <div class="col-lg-3 mb-3">
-            <div class="card shadow border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6>Closed</h6>
-                            <h3>{{ $closedComplaints }}</h3>
-                        </div>
-                        <i class="bi bi-check-circle fs-1 text-success"></i>
-                    </div>
-                </div>
-            </div>
+        <div class="card-body">
+
+            <canvas id="statusChart" width="50" height="50"></canvas>
         </div>
 
-        <div class="col-lg-3 mb-3">
-            <div class="card shadow border-0">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h6>Engineers</h6>
-                            <h3>{{ $totalEngineers }}</h3>
-                        </div>
-                        <i class="bi bi-people fs-1 text-danger"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let chart;
+
+    loadChart();
+
+    $('#btnSearch').click(function(){
+
+        loadChart();
+
+    });
+
+    $('#btnReset').click(function(){
+
+        $('#from_date').val('');
+        $('#to_date').val('');
+        $('#engineer').val('');
+        $('#status').val('');
+
+        loadChart();
+
+    });
+
+    function loadChart(){
+
+        $.get("{{ route('dashboard.chart') }}",{
+
+            from_date:$('#from_date').val(),
+            to_date:$('#to_date').val(),
+            engineer:$('#engineer').val(),
+            status:$('#status').val()
+
+        },function(data){
+
+            let labels=[];
+            let totals=[];
+
+            $.each(data,function(i,row){
+
+                labels.push(row.status);
+                totals.push(row.total);
+
+            });
+
+            if(chart){
+
+                chart.destroy();
+
+            }
+
+            chart=new Chart(document.getElementById('statusChart'),{
+
+                type:'pie',
+
+                data:{
+
+                    labels:labels,
+
+                    datasets:[{
+
+                        data:totals,
+
+                        backgroundColor:[
+                            '#36A2EB',
+                            '#FF6384',
+                            '#FFCE56',
+                            '#4BC0C0',
+                            '#9966FF',
+                            '#FF9F40'
+                        ]
+
+                    }]
+
+                },
+
+                options:{
+
+                    responsive:true,
+
+                    plugins:{
+
+                        legend:{
+                            position:'bottom'
+                        }
+
+                    }
+
+                }
+
+            });
+
+        });
+
+    }
+</script>
+@endpush
 @endsection

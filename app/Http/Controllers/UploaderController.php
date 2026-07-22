@@ -78,6 +78,8 @@ class UploaderController extends Controller
 
         $row->update([
             'complaint_title'   =>$request->complaint_title,
+            'type_of_activity'  =>$request->type_of_activity,
+            'asset_tag_no'      =>$request->asset_tag_no,
             'engineer_name'     =>$request->engineer_name,
             'status'            =>$request->status,
             'resolution_time'   =>$request->resolution_time
@@ -108,6 +110,8 @@ class UploaderController extends Controller
 
                 'upload_id'         =>$temp->upload_id,
                 'complaint_title'   =>$temp->complaint_title,
+                'type_of_activity'  =>$temp->type_of_activity,
+                'asset_tag_no'      =>$temp->asset_tag_no,
                 'engineer_name'     =>$temp->engineer_name,
                 'status'            =>$temp->status,
                 'resolution_time'   =>$temp->resolution_time

@@ -84,10 +84,12 @@
 
                     <tr>
                         <th width="5%">SL</th>
-                        <th>Complaint</th>
+                        <th>Activity Details</th>
+                        <th>Type of Activity</th>
+                        <th>Asset Tag No</th>
                         <th>Engineer</th>
                         <th>Status</th>
-                        <th>Resolution</th>
+                        <th>Activity Duration</th>
                         <th width="12%">Action</th>
                     </tr>
 
@@ -190,6 +192,14 @@
                                     ${row.complaint_title}
                                 </td>
 
+                                <td id="activity_${row.id}">
+                                    ${row.type_of_activity ?? 'NA'}
+                                </td>
+
+                                <td id="asset_${row.id}">
+                                    ${row.asset_tag_no ?? 'NA'}
+                                </td>
+
                                 <td id="engineer_${row.id}">
                                     ${row.engineer_name}
                                 </td>
@@ -206,9 +216,7 @@
                                     <button
                                         class="btn btn-warning btnEdit"
                                         data-id="${row.id}">
-
                                         Edit
-
                                     </button>
                                 </td>
 
@@ -255,6 +263,14 @@
                 '<input class="form-control" value="'+$('#complaint_'+id).text().trim()+'">'
             );
 
+            $('#activity_'+id).html(
+                '<input class="form-control" value="'+$('#activity_'+id).text().trim()+'">'
+            );
+
+            $('#asset_'+id).html(
+                '<input class="form-control" value="'+$('#asset_'+id).text().trim()+'">'
+            );
+
             $('#engineer_'+id).html(
                 '<input class="form-control" value="'+$('#engineer_'+id).text().trim()+'">'
             );
@@ -283,6 +299,8 @@
                 data: {
                     _token: "{{ csrf_token() }}",
                     complaint_title: $('#complaint_' + id + ' input').val(),
+                    type_of_activity: $('#activity_' + id + ' input').val(),
+                    asset_tag_no: $('#asset_' + id + ' input').val(),
                     engineer_name: $('#engineer_' + id + ' input').val(),
                     status: $('#status_' + id + ' input').val(),
                     resolution_time: $('#time_' + id + ' input').val()
@@ -292,11 +310,15 @@
                 success: function () {
 
                     let title = $('#complaint_' + id + ' input').val();
+                    let activity = $('#activity_' + id + ' input').val();
+                    let asset = $('#asset_' + id + ' input').val();
                     let engineer = $('#engineer_' + id + ' input').val();
                     let status = $('#status_' + id + ' input').val();
                     let time = $('#time_' + id + ' input').val();
 
                     $('#complaint_' + id).text(title);
+                    $('#activity_' + id).text(activity || 'NA');
+                    $('#asset_' + id).text(asset || 'NA');
                     $('#engineer_' + id).text(engineer);
                     $('#status_' + id).text(status);
                     $('#time_' + id).text(time);

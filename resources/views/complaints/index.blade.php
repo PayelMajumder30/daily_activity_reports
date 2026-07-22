@@ -61,8 +61,6 @@
         </div>
     </div>
 
-
-
     {{-- Search Card --}}
 
     <div class="card shadow border-0 mb-4">
@@ -84,16 +82,12 @@
                         <option value="">
                             All Engineers
                         </option>
-
                         @foreach($engineers as $eng)
                             <option value="{{ $eng->engineer_name }}">
                                 {{ $eng->engineer_name }}
                             </option>
-
                         @endforeach
-
                     </select>
-
                 </div>
 
                 <div class="col-md-3">
@@ -102,15 +96,15 @@
                 </div>
 
                 <div class="col-md-3">
-
                     <label>Status</label>
-
                     <select id="status" class="form-select">
-                        <option value="">All</option>
-                        <option>Open</option>
-                        <option>Closed</option>
+                        <option value="">All status</option>
+                        @foreach($statuses as $status)
+                            <option value="{{$status}}">
+                                {{ $status}}
+                            </option>
+                        @endforeach
                     </select>
-
                 </div>
 
                 <div class="col-md-3">
@@ -151,10 +145,12 @@
 
                     <tr>
                         <th>SL</th>
-                        <th>Complaint</th>
+                        <th>Activity Details</th>
+                        <th>Type of Activity</th>
+                        <th>Asset Tag No</th>
                         <th>Engineer</th>
                         <th>Status</th>
-                        <th>Resolution Time</th>
+                        <th>Activity Duration</th>
                         <th>Report Date</th>
                     </tr>
 
@@ -167,6 +163,10 @@
                                 <td>{{ $key+1 }}</td>
 
                                 <td>{{ $row->complaint_title }}</td>
+
+                                <td>{{ !empty($row->type_of_activity) ? $row->type_of_activity : 'NA' }}</td>
+
+                                <td>{{ !empty($row->asset_tag_no) ? $row->asset_tag_no : 'NA'}}</td>
 
                                 <td>{{ $row->engineer_name }}</td>
 
@@ -247,6 +247,8 @@
                         table.row.add([
                             index + 1,
                             item.complaint_title,
+                            item.type_of_activity ?? '-',
+                            item.asset_tag_no ?? '-',
                             item.engineer_name,
                             badge,
                             item.resolution_time,
