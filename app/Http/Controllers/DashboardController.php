@@ -52,23 +52,19 @@ class DashboardController extends Controller
         ));
     }
 
-    public function chartData(Request $request)
+    public function pieChartData(Request $request)
     {
         $query = Complaint::query();
 
         if($request->filled('from_date')){
             $query->whereHas('upload', function($q) use($request){
-
                 $q->whereDate('report_date','>=',$request->from_date);
-
             });
         }
 
         if($request->filled('to_date')){
             $query->whereHas('upload', function($q) use($request){
-
                 $q->whereDate('report_date','<=',$request->to_date);
-
             });
         }
 
@@ -86,5 +82,37 @@ class DashboardController extends Controller
                 ->get();
 
         return response()->json($result);
+    }
+
+    public function barpieChartData(Request $request){
+        $query = Complaint::query();
+
+        if($request->filled('from_date')){
+            $query->whereHas('upload', function ($q) use ($request){
+                $q->wheredate('report_date', '>=',$request->from_date);
+            });
+        }
+
+        
+        if($request->filled('to_date')){
+            $query->whereHas('upload', function ($q) use ($request){
+                $q->wheredate('report_date', '<=',$request->to_date);
+            });
+        }
+
+        if($request->filled('engineer')){
+            $query->where('engineer_name', $request->engineer);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        return response()->json(
+            $query->selectRaw('engineer_name, status, COUNT(*) total')
+                    ->groupBy('engineer_name','status')
+                    ->orderBy('engineer_name')
+                    ->get()
+        );
     }
 }

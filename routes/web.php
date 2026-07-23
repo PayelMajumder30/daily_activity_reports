@@ -16,7 +16,8 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function() {
     // For management
     Route::middleware('role:0')->group(function(){
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
-        Route::get('/dashboard/chart', [DashboardController::class, 'chartData'])->name('dashboard.chart');
+        Route::get('/dashboard/pie_chart', [DashboardController::class, 'pieChartData'])->name('dashboard.pieChart');
+        Route::get('/dashboard/bar_chart', [DashboardController::class, 'barpieChartData'])->name('dashboard.barChart');
         Route::get('/total_complaints', [ComplaintController::class, 'index'])->name('complaints.index');
         Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
 

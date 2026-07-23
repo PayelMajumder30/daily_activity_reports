@@ -1,4 +1,4 @@
-<div class="bg-dark text-white vh-100 p-3 d-flex flex-column" style="width:250px;">
+<div class="bg-dark text-white p-3 d-flex flex-column" style="width:250px;">
 
     <h6 class="text-center mb-4 d-flex align-items-center justify-content-center">
         <img src="{{asset('assets/images/favicon.ico')}}" alt="Logo" width="32" height="32" class="me-2">

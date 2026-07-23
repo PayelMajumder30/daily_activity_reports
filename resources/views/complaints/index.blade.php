@@ -5,6 +5,24 @@
 @section('content')
 
 <div class="container-fluid py-4">
+
+   <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold">
+                <i class="bi bi-file-earmark-text"></i>
+                Total Complaints
+            </h2>
+            <p class="text-muted">
+                View, search, and manage complaint records with engineer-wise details, status, and report information.
+            </p>
+        </div>
+
+        <div class="col-md-4 text-end">
+            <h6 class="text-secondary">
+                {{ now()->format('d M Y') }}
+            </h6>
+        </div>
+    </div>
       {{-- Upload Card --}}
 
     <div class="card shadow border-0 mb-4">
