@@ -40,9 +40,25 @@ class ComplaintController extends Controller
             $query->where('complaint_title', 'LIKE', '%' . $request->complaint . '%');
         }
 
-        if ($request->filled('date')) {
-            $query->whereHas('upload', function ($q) use ($request) {
-                $q->whereDate('report_date', $request->date);
+        // if ($request->filled('date')) {
+        //     $query->whereHas('upload', function ($q) use ($request) {
+        //         $q->whereDate('report_date', $request->date);
+        //     });
+        // }
+
+        if($request->filled('from_date')){
+            $query->whereHas('upload', function($q) use($request){
+
+                $q->whereDate('report_date', '>=', $request->from_date);
+
+            });
+        }
+
+        if($request->filled('to_date')){
+            $query->whereHas('upload', function($q) use($request){
+
+                $q->whereDate('report_date', '<=', $request->to_date);
+
             });
         }
 

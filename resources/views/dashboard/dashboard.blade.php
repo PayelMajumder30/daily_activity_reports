@@ -95,7 +95,7 @@
             </div>
         </div>
 
-        <!-- bar chart -->
+         <!-- bar chart -->
         <div class="col-lg-6 mb-3">
             <div class="card shadow h-100">
                 <div class="card-header">
@@ -108,6 +108,31 @@
                 </div>
             </div>
         </div>
+
+        <!-- Activity details -->
+        <div class="card shadow mt-3" id="complaintListCard" style="display:none;">
+            <div class="card-header">
+                <h5 id="selectedStatusHeading"></h5>
+            </div>
+
+            <div class="card-body">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>SL</th>
+                            <th>Activity Details</th>
+                            <th>Engineer</th>
+            <               <th>Report Date</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="complaintListBody"></tbody>
+                </table>
+            </div>
+        
+        </div>
+
+       
     </div>
    
     
@@ -157,6 +182,9 @@
         $('#to_date_error').text('');
         loadChart();
         loadEngineerChart();
+
+        $('#complaintListCard').hide();
+        $('#complaintListBody').html('');
 
     });
 
@@ -216,6 +244,14 @@
                     responsive:true,
                     // Allow custom width and height from CSS
                     maintainAspectRatio:false,
+                    onClick:function(event,elements){
+                        if(elements.length==0)
+                            return;
+
+                        let index=elements[0].index;
+                        let status=labels[index];
+                        loadComplaintList(status);
+                    },
                     plugins:{
                         // Configure the legend (status names)
                         legend:{
@@ -225,6 +261,46 @@
                     }
                 }
             });
+        });
+
+    }
+
+    function loadComplaintList(status){
+        $.get("{{route('dashboard.statusDetails')}}",{
+            from_date:$('#from_date').val(),
+            to_date:$('#to_date').val(),
+            engineer:$('#engineer').val(),
+            status:status
+        },function(data){
+            $('#selectedStatusHeading').text(status + "Activities");
+            let html = '';
+            
+            $.each(data,function(i,row){
+
+                let report_date = '-';
+                if(row.upload && row.upload.report_date){
+                   
+                let d = new Date(row.upload.report_date);
+
+                let day = String(d.getDate()).padStart(2, '0');
+                let month = String(d.getMonth() + 1).padStart(2, '0');
+                let year = d.getFullYear();
+
+                reportDate = `${day}-${month}-${year}`;
+                }
+                html += `
+                    <tr>
+                        <td>${i+1}</td>
+                        <td>${row.complaint_title}</td>
+                        <td>${row.engineer_name}</td>
+                        <td>${reportDate}</td>
+                    </tr>
+                `;
+            });
+
+            $('#complaintListBody').html(html);
+
+            $('#complaintListCard').show();
         });
 
     }
@@ -267,12 +343,9 @@
                 let values=[];
 
                 engineers.forEach(function(engineer){
-
                     let found=data.find(function(r){
-
                         return r.engineer_name==engineer &&
                             r.status==status;
-
                     });
 
                     values.push(found?found.total:0);

@@ -108,12 +108,23 @@
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <!-- <div class="col-md-3">
                     <label>Date</label>
                     <input type="text" id="date" class="form-control datepicker">
+                </div> -->
+                <div class="col-md-2">
+                    <label>From date</label>
+                    <input type="text" id="from_date" class="form-control datepicker">
+                    <small id="from_date_error" class="text-danger"></small>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label>To date</label>
+                    <input type="text" id="to_date" class="form-control datepicker">
+                    <small id="to_date_error" class="text-danger"></small>
+                </div>
+
+                <div class="col-md-2">
                     <label>Status</label>
                     <select id="status" class="form-select">
                         <option value="">All status</option>
@@ -239,6 +250,25 @@
 
         $('#btnSearch').click(function (e) {
             e.preventDefault();
+            //Clear previous validation
+            $('#from_date_error').text('');
+            $('#to_date_error').text('');
+
+            let fromDate = $('#from_date').val();
+            let toDate = $('#to_date').val();
+
+            //Validate only both dates are selected
+            if(fromDate !== '' && toDate !== ''){
+                let from = new Date(fromDate);
+                let to = new Date(toDate);
+
+                if(from > to){
+                    $('#from_date_error').text('From Date must be less than or equal to To Date.');
+                    $('#to_date_error').text('To Date must be greater than or equal to From Date.');
+
+                    return;
+                }
+            }
             $.ajax({
                 url: "{{ route('complaints.search') }}",
                 type: "GET",
@@ -246,12 +276,15 @@
                     engineer: $('#engineer').val(),
                     status: $('#status').val(),
                     complaint: $('#complaint').val(),
-                    date: $('#date').val()
+                    from_date: $('#from_date').val(),
+                    to_date: $('#to_date').val()
                 },
 
                 success: function (response) {
                     let table = $('#complaintTable').DataTable();
+
                     table.clear();
+
                     $.each(response, function (index, item) {
                         let badge = '';
                         if(item.status == 'Closed'){
@@ -287,7 +320,11 @@
             $('#engineer').val('');
             $('#status').val('');
             $('#complaint').val('');
-            $('#date').val('');
+            $('#from_date').val('');
+            $('#to_date').val('');
+
+            $('#from_date_error').text('');
+            $('#to_date_error').text('');
             location.reload();
 
         });

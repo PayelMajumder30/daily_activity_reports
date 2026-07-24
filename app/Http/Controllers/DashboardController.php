@@ -115,4 +115,34 @@ class DashboardController extends Controller
                     ->get()
         );
     }
+
+    public function statusDetails(Request $request){
+        // $query = Complaint::query();
+        $query = Complaint::with('upload');
+
+        if($request->filled('from_date')){
+            $query->whereHas('upload', function($q) use ($request){
+                $q->whereDate('report_date', '>=',$request->from_date);
+            });
+        }
+
+        if($request->filled('to_date')){
+            $query->whereHas('upload', function($q) use ($request){
+                $q->whereDate('report_date', '<=',$request->to_date);
+            });
+        }
+
+        if($request->filled('engineer')){
+            $query->where('engineer_name', $request->engineer);
+        }
+
+        // Status selected from Pie Slice
+        if($request->filled('status')){
+            $query->where('status', $request->status);
+        }
+
+        return response()->json(
+            $query->select('complaint_title', 'engineer_name', 'status', 'upload_id')->orderBy('complaint_title')->get()
+        );
+    }
 }

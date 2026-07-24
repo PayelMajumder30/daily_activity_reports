@@ -18,10 +18,10 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function() {
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('/dashboard/pie_chart', [DashboardController::class, 'pieChartData'])->name('dashboard.pieChart');
         Route::get('/dashboard/bar_chart', [DashboardController::class, 'barpieChartData'])->name('dashboard.barChart');
+        Route::get('/dashboard/status_details', [DashboardController::class, 'statusDetails'])->name('dashboard.statusDetails');
         Route::get('/total_complaints', [ComplaintController::class, 'index'])->name('complaints.index');
-        Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
-
         Route::get('/complaints/search', [ComplaintController::class, 'search'])->name('complaints.search');
+        Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');       
 
     });
 
