@@ -52,6 +52,46 @@
                     Total Complaints
                 </a>
             </li>
+
+            <li class="nav-item mb-2">
+
+                <a class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#configureMenu" role="button" 
+                    area-expanded="false" area-controls="configureMenu">
+                    <span>
+                        <i class="bi bi-gear"></i>
+                        Configuration
+                    </span>
+                    <i class="bi bi-chevron-down"></i>
+                </a>
+
+                <div class="collapse" id="configureMenu">
+                    <ul class="nav flex-column ms-3 mt-2">
+                        <li class="nav-item">
+                            <a href="{{ route('user-configuration.index') }}"
+                                class="nav-link text-white {{ request()->routeIs('user-configuration.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-person"></i>
+                                User Configuration
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('activity.configuration.index') }}"
+                            class="nav-link text-white {{ request()->routeIs('activity.configuration.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-list-task"></i>
+                                Activity Configuration
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('status.configuration.index') }}"
+                            class="nav-link text-white {{ request()->routeIs('status.configuration.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-check2-circle"></i>
+                                Status Configuration
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
         @endif
     </ul>
 

@@ -122,20 +122,17 @@
                             <th>SL</th>
                             <th>Activity Details</th>
                             <th>Engineer</th>
-            <               <th>Report Date</th>
+                            <th>Status</th>
+                            <th>Activity Duration</th>
+                            <th>Report Date</th>
                         </tr>
                     </thead>
 
                     <tbody id="complaintListBody"></tbody>
                 </table>
             </div>
-        
         </div>
-
-       
-    </div>
-   
-    
+    </div>   
 </div>
 
 @push('scripts')
@@ -167,6 +164,8 @@
                 return; 
             }
         }
+
+        hideComplaintList();
         loadChart();
         loadEngineerChart();
     });
@@ -180,6 +179,7 @@
 
         $('#from_date_error').text('');
         $('#to_date_error').text('');
+        hideComplaintList();
         loadChart();
         loadEngineerChart();
 
@@ -189,6 +189,8 @@
     });
 
     function loadChart(){
+        
+        hideComplaintList();
 
         $.get("{{ route('dashboard.pieChart') }}",{
 
@@ -265,6 +267,12 @@
 
     }
 
+    function hideComplaintList(){
+        $('#complaintListCard').hide();
+        $('#complaintListBody').empty();
+        $('#selectedStatusHeading').text('');
+    }
+
     function loadComplaintList(status){
         $.get("{{route('dashboard.statusDetails')}}",{
             from_date:$('#from_date').val(),
@@ -293,6 +301,8 @@
                         <td>${i+1}</td>
                         <td>${row.complaint_title}</td>
                         <td>${row.engineer_name}</td>
+                        <td>${row.status}</td>
+                        <td>${row.resolution_time ? row.resolution_time : 'NA'}</td>
                         <td>${reportDate}</td>
                     </tr>
                 `;

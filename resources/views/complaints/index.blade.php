@@ -207,7 +207,7 @@
                                     @endif
                                 </td>
 
-                                <td>{{ $row->resolution_time }}</td>
+                                <td>{{ !empty($row->resolution_time) ? $row->resolution_time : 'NA' }}</td>
 
                                 <td>
                                     {{ optional($row->upload?->report_date)->format('d-m-Y') ?? '-' }}
@@ -302,7 +302,7 @@
                             item.asset_tag_no ?? '-',
                             item.engineer_name,
                             badge,
-                            item.resolution_time,
+                            item.resolution_time ?? '-',
                             item.report_date
 
                         ]);

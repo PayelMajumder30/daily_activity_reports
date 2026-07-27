@@ -136,13 +136,17 @@ class DashboardController extends Controller
             $query->where('engineer_name', $request->engineer);
         }
 
+        if($request->filled('resolution_time')){
+            $query->where('resolution_time', $request->resolution_time);
+        }
+
         // Status selected from Pie Slice
         if($request->filled('status')){
             $query->where('status', $request->status);
         }
 
         return response()->json(
-            $query->select('complaint_title', 'engineer_name', 'status', 'upload_id')->orderBy('complaint_title')->get()
+            $query->select('complaint_title', 'engineer_name', 'status', 'upload_id', 'resolution_time')->orderBy('complaint_title')->get()
         );
     }
 }

@@ -74,7 +74,7 @@ class ComplaintController extends Controller
                     'asset_tag_no'      => $row->asset_tag_no ?: 'NA',
                     'engineer_name'     => $row->engineer_name,
                     'status'            => $row->status,
-                    'resolution_time'   => $row->resolution_time,
+                    'resolution_time'   => $row->resolution_time ?: 'NA',
                     'report_date'       => optional($row->upload?->report_date)
                                             ->format('d-m-Y')
 

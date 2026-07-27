@@ -2,7 +2,7 @@
 
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController};
+use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController};
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -21,7 +21,31 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function() {
         Route::get('/dashboard/status_details', [DashboardController::class, 'statusDetails'])->name('dashboard.statusDetails');
         Route::get('/total_complaints', [ComplaintController::class, 'index'])->name('complaints.index');
         Route::get('/complaints/search', [ComplaintController::class, 'search'])->name('complaints.search');
-        Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');       
+        Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');   
+        
+        //User configuration
+        // Route::resource('user-configuration', UserConfigurationController::class);
+        Route::prefix('configure/user')->name('user-configuration.')->group(function () {
+            Route::get('/', [UserConfigurationController::class,'index'])->name('index');
+            Route::get('/create', [UserConfigurationController::class,'create'])->name('create');
+            Route::post('/store', [UserConfigurationController::class,'store'])->name('store');
+            Route::get('/edit/{user}', [UserConfigurationController::class,'edit'])->name('edit');
+            Route::put('/update/{user}', [UserConfigurationController::class,'update'])->name('update');
+            Route::delete('/delete/{user}', [UserConfigurationController::class,'destroy'])->name('destroy');
+        });
+        
+        // configure
+        // Route::get('/configure/user', function () {
+        //     return view('configuration.user.index');
+        // })->name('user.configuration.index');
+
+        Route::get('/configure/activity', function () {
+            return view('configuration.activity.index');
+        })->name('activity.configuration.index');
+
+        Route::get('/configure/status', function () {
+            return view('configuration.status.index');
+        })->name('status.configuration.index');
 
     });
 
