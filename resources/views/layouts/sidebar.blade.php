@@ -75,16 +75,16 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('activity.configuration.index') }}"
-                            class="nav-link text-white {{ request()->routeIs('activity.configuration.*') ? 'active bg-primary' : '' }}">
+                            <a href="{{ route('activity-configuration.index') }}"
+                            class="nav-link text-white {{ request()->routeIs('activity-configuration.*') ? 'active bg-primary' : '' }}">
                                 <i class="bi bi-list-task"></i>
                                 Activity Configuration
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('status.configuration.index') }}"
-                            class="nav-link text-white {{ request()->routeIs('status.configuration.*') ? 'active bg-primary' : '' }}">
+                            <a href="{{ route('status-configuration.index') }}"
+                            class="nav-link text-white {{ request()->routeIs('status-configuration.*') ? 'active bg-primary' : '' }}">
                                 <i class="bi bi-check2-circle"></i>
                                 Status Configuration
                             </a>

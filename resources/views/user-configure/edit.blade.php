@@ -36,7 +36,7 @@
         </div>
 
         <div class="card-body">
-            <form action="{{ route('user-configuration.update', $user->id) }}" method="POST">
+            <form action="{{ route('user-configuration.update', encryptId($user->id)) }}" method="POST">
                 @csrf
                 @method('PUT')
 
