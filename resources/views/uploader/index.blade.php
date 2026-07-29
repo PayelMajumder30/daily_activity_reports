@@ -52,11 +52,21 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label>&nbsp;</label>
+                        <label class="d-block">&nbsp;</label>
 
-                        <button type="submit" id="btnUpload" class="btn btn-success w-100" disabled>                              
-                             <i class="bi bi-upload"></i> Upload
-                        </button>
+                        <div class="d-flex gap-2">
+
+                            <button type="submit" id="btnUpload" class="btn btn-success flex-fill" disabled>    
+                                <i class="bi bi-upload"></i>
+                                Upload
+                            </button>
+
+                            <a href="{{ route('uploader.downloadTemplate') }}" class="btn btn-warning flex-fill" title="Download Sample Excel File">                           
+                                <i class="bi bi-file-earmark-excel"></i>
+                                Sample Excel
+                            </a>
+
+                        </div>
                     </div>
 
                 </div>
@@ -213,9 +223,7 @@
                                 </td>
 
                                 <td>
-                                    <button
-                                        class="btn btn-warning btnEdit"
-                                        data-id="${row.id}">
+                                    <button class="btn btn-warning btnEdit" data-id="${row.id}"> 
                                         Edit
                                     </button>
                                 </td>

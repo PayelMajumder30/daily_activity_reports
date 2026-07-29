@@ -63,7 +63,7 @@
 
                             <td>{{ $loop->iteration }}</td>
 
-                            <td>{{ $user->name }}</td>
+                            <td>{{ ucwords($user->name) }}</td>
 
                             <td>{{ $user->email }}</td>
 

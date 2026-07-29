@@ -51,38 +51,16 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function() {
             Route::delete('/delete/{id}', [ConfigureController::class,'statusDestroy'])->name('destroy');
         });
         
-        // configure
-        // Route::get('/configure/activity', function () {
-        //     return view('configuration.activity.index');
-        // })->name('activity.configuration.index');
-
-        // Route::get('/configure/status', function () {
-        //     return view('configuration.status.index');
-        // })->name('status.configuration.index');
-
     });
 
     //For Uploader
-    // Route::middleware('role:1')->group(function() {
-    //     Route::prefix('upload_complaint')->name('uploader.')->group(function(){
-    //         Route::get('/', [UploaderController::class,'index'])->name('index');
-    //         Route::post('/preview', [UploaderController::class,'uploadPreview'])->name('preview');
-    //         Route::post('/update/{id}',[UploaderController::class,'updateTemp'])->name('update');
-    //         Route::post('/save',[UploaderController::class,'savePermanent'])->name('save');
-    //     });
-
-    // });
-    // Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
-    // Route::get('/total_complaints', [ComplaintController::class, 'index'])->name('complaints.index');
-    // Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');
-
-    // Route::get('/complaints/search', [ComplaintController::class, 'search'])->name('complaints.search');
 
     Route::prefix('upload_complaint')->name('uploader.')->group(function(){
         Route::get('/', [UploaderController::class,'index'])->name('index');
         Route::post('/preview', [UploaderController::class,'uploadPreview'])->name('preview');
         Route::post('/update/{id}',[UploaderController::class,'updateTemp'])->name('update');
         Route::post('/save',[UploaderController::class,'savePermanent'])->name('save');
+        Route::get('/download_template',[UploaderController::class,'downloadTemplate'])->name('downloadTemplate');
     });
 });
 

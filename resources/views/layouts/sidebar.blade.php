@@ -55,8 +55,11 @@
 
             <li class="nav-item mb-2">
 
-                <a class="nav-link text-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#configureMenu" role="button" 
-                    area-expanded="false" area-controls="configureMenu">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center 
+                {{request()->routeIs('user-configuration.*') || request()->routeIs('activity-configuration.*') || request()->routeIs('status-configuration.*') ? '' : 'collapsed'}}" 
+                data-bs-toggle="collapse" href="#configureMenu" role="button" 
+                    aria-expanded="{{request()->routeIs('user-configuration.*') || request()->routeIs('activity-configuration.*') || request()->routeIs('status-configuration.*') ? 'true' : 'false'}}" 
+                    aria-controls="configureMenu">
                     <span>
                         <i class="bi bi-gear"></i>
                         Configuration
@@ -64,7 +67,8 @@
                     <i class="bi bi-chevron-down"></i>
                 </a>
 
-                <div class="collapse" id="configureMenu">
+                <div class="collapse {{request()->routeIs('user-configuration.*') || request()->routeIs('activity-configuration.*') || request()->routeIs('status-configuration.*') ? 'show' : ''}}" 
+                    id="configureMenu">
                     <ul class="nav flex-column ms-3 mt-2">
                         <li class="nav-item">
                             <a href="{{ route('user-configuration.index') }}"
@@ -78,7 +82,7 @@
                             <a href="{{ route('activity-configuration.index') }}"
                             class="nav-link text-white {{ request()->routeIs('activity-configuration.*') ? 'active bg-primary' : '' }}">
                                 <i class="bi bi-list-task"></i>
-                                Activity Configuration
+                                Activity Type Configuration
                             </a>
                         </li>
 

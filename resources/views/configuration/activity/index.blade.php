@@ -30,7 +30,7 @@
         <div class="col-lg-8 mb-4">
             <div class="card shadow border-0 h-100">
                 <div class="card-header">
-                    <h5 class="mb-0">Activity List</h5>
+                    <h5 class="mb-0">Type of Activity List</h5>
                 </div>
 
                 <div class="card-body">
@@ -51,15 +51,11 @@
                                 <td>{{ ucwords($activity->title) }}</td>
 
                                 <td>
-                                    <button type="button"
-                                            class="btn btn-warning btn-sm editActivity"
-                                            data-id="{{ encryptId($activity->id) }}">
+                                    <button type="button" class="btn btn-warning btn-sm editActivity" data-id="{{ encryptId($activity->id) }}">     
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    <form action="{{ route('activity-configuration.destroy', encryptId($activity->id)) }}"
-                                        method="POST"
-                                        class="delete-form d-inline">
+                                    <form action="{{ route('activity-configuration.destroy', encryptId($activity->id)) }}" method="POST" class="delete-form d-inline">
                                         @csrf
                                         @method('DELETE')
 
@@ -96,10 +92,7 @@
 
                 <div class="card-body">
 
-                    <form id="activityForm"
-                        action="{{ route('activity-configuration.store') }}"
-                        method="POST">
-
+                    <form id="activityForm" action="{{ route('activity-configuration.store') }}" method="POST">
                         @csrf
 
                         <div id="methodField"></div>
@@ -110,11 +103,7 @@
                                 Activity Title
                             </label>
 
-                            <input type="text"
-                                class="form-control"
-                                name="title"
-                                id="title">
-
+                            <input type="text" class="form-control" name="title" id="title">
                         </div>
 
                         <button class="btn btn-primary" id="submitBtn">
@@ -122,9 +111,7 @@
                             Save Activity
                         </button>
 
-                        <button type="button"
-                                class="btn btn-secondary d-none"
-                                id="cancelBtn">
+                        <button type="button" class="btn btn-secondary d-none" id="cancelBtn">      
                             Cancel
                         </button>
 

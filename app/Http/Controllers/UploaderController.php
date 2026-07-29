@@ -127,4 +127,10 @@ class UploaderController extends Controller
             'message' => 'Complaint data saved successfully.'
         ]);
     }
+
+    public function downloadTemplate(){
+        return response()->download(
+            public_path('templates/complaint_template.xlsx')
+        );
+    }
 }

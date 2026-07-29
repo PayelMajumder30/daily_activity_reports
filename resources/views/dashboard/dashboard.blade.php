@@ -273,6 +273,7 @@
         $('#selectedStatusHeading').text('');
     }
 
+      // for pie chart details status-wise
     function loadComplaintList(status){
         $.get("{{route('dashboard.statusDetails')}}",{
             from_date:$('#from_date').val(),
@@ -315,6 +316,40 @@
 
     }
 
+    // for bar chart details engineer-wise
+    function loadEngineerComplaintList(engineer,status){
+        $.get("{{route('dashboard.statusDetails')}}", {
+            from_date: $('#from_date').val(),
+            to_date: $('#to_date').val(),
+            engineer: engineer,
+            status: status
+        }, function(data){
+            $('#selectedStatusHeading').text(engineer + " - " + status + " Activities ");
+            let html='';
+            $.each(data,function(i,row){
+                let reportDate='-';
+                if(row.upload && row.upload.report_date){
+                    let d=new Date(row.upload.report_date);
+                    reportDate= String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()).padStart(2,'0')+'-'+d.getFullYear();
+                }
+
+                html +=`
+                    <tr>
+                        <td>${i+1}</td>
+                        <td>${row.complaint_title}</td>
+                        <td>${row.engineer_name}</td>
+                        <td>${row.status}</td>
+                        <td>${row.resolution_time ?? 'NA'}</td>
+                        <td>${reportDate}</td>
+                    </tr>`;
+            });
+
+            $('#complaintListBody').html(html);
+
+            $('#complaintListCard').show();
+        });
+    }
+
     function loadEngineerChart(){
 
         $.get("{{ route('dashboard.barChart') }}",{
@@ -343,7 +378,8 @@
                 'Open':'#36A2EB',
                 'Resolved':'#FFCE56',
                 'Completed':'#4BC0C0',
-                'Closed':'#FF6384'
+                'Closed':'#FF6384',
+                "Done":'#9966FF'
             };
 
             let datasets=[];
@@ -388,6 +424,16 @@
                     options:{
                         responsive:true,
                         maintainAspectRatio:false,
+
+                        onClick:function(event,elements){
+                            if(elements.length===0)
+                                return;
+
+                            let point=elements[0];
+                            let engineer=engineers[point.index];
+                            let status=datasets[point.datasetIndex].label;
+                            loadEngineerComplaintList(engineer,status);
+                        },
                         plugins:{
                             legend:{
                                 position:'bottom'
