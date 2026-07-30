@@ -53,13 +53,14 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function() {
         
     });
 
-    //For Uploader
+    //For Uploader and management both
 
     Route::prefix('upload_complaint')->name('uploader.')->group(function(){
         Route::get('/', [UploaderController::class,'index'])->name('index');
         Route::post('/preview', [UploaderController::class,'uploadPreview'])->name('preview');
         Route::post('/update/{id}',[UploaderController::class,'updateTemp'])->name('update');
         Route::post('/save',[UploaderController::class,'savePermanent'])->name('save');
+        Route::delete('/delete/{upload_id}',[UploaderController::class,'deleteUpload'])->name('delete');
         Route::get('/download_template',[UploaderController::class,'downloadTemplate'])->name('downloadTemplate');
     });
 });

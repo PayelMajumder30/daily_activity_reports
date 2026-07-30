@@ -11,7 +11,7 @@
                 <i class="bi bi-person-circle fs-1 text-info"></i>
             </div>
             <div class="mb-1 text-white">
-                {{ auth()->user()->name}}
+                {{ ucwords(auth()->user()->name)}}
             </div>
 
             <span class="badge {{ auth()->user()->role == 0 ? 'bg-success' : 'bg-warning text-dark' }}">

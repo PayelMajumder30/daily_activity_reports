@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\{Upload, Complaint, ComplaintTemp};
 use Illuminate\Http\Request;
 use App\Imports\ComplaintTempImport;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UploaderController extends Controller
@@ -12,23 +13,92 @@ class UploaderController extends Controller
     //
 
     public function index(){
+        // return view('uploader.index', [
+        //     'preview'=>collect(),
+        //     'uploadId'=>null
+        // ]);
+
+        $upload = Upload::where('user_id', auth()->id())
+            ->whereDoesntHave('complaints') // not permanently saved
+            ->latest()
+            ->first();
+
+        $preview = collect();
+
+        if ($upload) {
+            $preview = ComplaintTemp::where('upload_id', $upload->id)->get();
+        }
+
         return view('uploader.index', [
-            'preview'=>collect(),
-            'uploadId'=>null
+            'preview'  => $preview,
+            'uploadId' => $upload?->id,
+            'upload'   => $upload,
         ]);
     }
 
-    public function uploadPreview(Request $request){
+    // public function uploadPreview(Request $request){
 
+    //     $request->validate([
+    //         'report_date'=>'required|date',
+    //         'excel_file'=>'required|mimes:xlsx,xls'
+    //     ]);
+
+    //     if(Upload::whereDate('report_date',$request->report_date)->exists()){
+    //         return back()->withErrors([
+    //             'report_date'=>'Report already uploaded for this date.'
+    //         ]);
+    //     }
+
+    //     $file = $request->file('excel_file');
+
+    //     $exists = Upload::where(function ($query) use ($request, $file) {
+    //         $query->whereDate('report_date', $request->report_date)
+    //             ->orWhere('file_name', $file->getClientOriginalName());
+    //     })->exists();
+
+    //     if ($exists) {
+    //         return back()
+    //             ->withInput()
+    //             ->withErrors([
+    //                 'report_date' => 'This report date or file already exists.'
+    //             ]);
+    //     }
+
+    //     // $filename = time().'_'.$file->getClientOriginalName();
+    //     // $file->move(public_path('uploads'), $filename);
+
+    //     $upload=Upload::create([
+    //         'user_id'       => auth()->id(),
+    //         'report_date'   =>$request->report_date,
+    //         // 'file_name'=>$filename
+    //         'file_name'     =>$file->getClientOriginalName()
+    //     ]);
+
+    //     Excel::import(
+    //         new ComplaintTempImport($upload->id),
+    //         // public_path('uploads/'.$filename)
+    //         $file
+    //     );
+
+    //     $rows=ComplaintTemp::where('upload_id',$upload->id)->get();
+    //     // dd($rows);
+
+    //     return response()->json([
+    //         'upload_id'=>$upload->id,
+    //         'rows'=>$rows
+    //     ]);
+    // }
+
+    public function uploadPreview(Request $request) {
         $request->validate([
-            'report_date'=>'required|date',
-            'excel_file'=>'required|mimes:xlsx,xls'
+            'report_date' => 'required|date',
+            'excel_file'  => 'required|mimes:xlsx,xls'
         ]);
 
-        if(Upload::whereDate('report_date',$request->report_date)->exists()){
-            return back()->withErrors([
-                'report_date'=>'Report already uploaded for this date.'
-            ]);
+        if (Upload::whereDate('report_date', $request->report_date)->exists()) {
+            return response()->json([
+                'message' => 'Report already uploaded for this date.'
+            ], 422);
         }
 
         $file = $request->file('excel_file');
@@ -39,38 +109,58 @@ class UploaderController extends Controller
         })->exists();
 
         if ($exists) {
-            return back()
-                ->withInput()
-                ->withErrors([
-                    'report_date' => 'This report date or file already exists.'
-                ]);
+            return response()->json([
+                'message' => 'This report date or file already exists.'
+            ], 422);
         }
 
-        // $filename = time().'_'.$file->getClientOriginalName();
-        // $file->move(public_path('uploads'), $filename);
+        DB::beginTransaction();
 
-        $upload=Upload::create([
-            'user_id'       => auth()->id(),
-            'report_date'   =>$request->report_date,
-            // 'file_name'=>$filename
-            'file_name'     =>$file->getClientOriginalName()
-        ]);
+        try {
 
-        Excel::import(
-            new ComplaintTempImport($upload->id),
-            // public_path('uploads/'.$filename)
-            $file
-        );
+            $upload = Upload::create([
+                'user_id'     => auth()->id(),
+                'report_date' => $request->report_date,
+                'file_name'   => $file->getClientOriginalName()
+            ]);
 
-        $rows=ComplaintTemp::where('upload_id',$upload->id)->get();
-        // dd($rows);
+            Excel::import(
+                new ComplaintTempImport($upload->id),
+                $file
+            );
 
-        return response()->json([
-            'upload_id'=>$upload->id,
-            'rows'=>$rows
-        ]);
+            $rows = ComplaintTemp::where('upload_id', $upload->id)->get();
+
+            // No valid rows imported
+            if ($rows->count() == 0) {
+
+                throw new \Exception(
+                    'Invalid Excel format or the Excel contains no valid data. Please use the sample template.'
+                );
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'upload_id' => $upload->id,
+                'rows'      => $rows
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            // Extra safety (normally rollback removes it)
+            if (isset($upload)) {
+                ComplaintTemp::where('upload_id', $upload->id)->delete();
+                $upload->delete();
+            }
+
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
-
 
     public function updateTemp(Request $request,$id)
     {
@@ -125,6 +215,27 @@ class UploaderController extends Controller
         return response()->json([
             'success'=> true,
             'message' => 'Complaint data saved successfully.'
+        ]);
+    }
+
+    public function deleteUpload($upload_id){
+
+        $upload = Upload::findOrFail($upload_id);
+
+        // Prevent deletion if already permanently saved
+        if(Complaint::where('upload_id',$upload->id)->exists()){
+            return response()->json([
+                'success' => false,
+                'message'   => 'This report has already been permanently saved.'
+            ],422);
+        }
+
+        ComplaintTemp::where('upload_id', $upload->id)->delete();
+        $upload->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Uploaded data deleted successfully.'
         ]);
     }
 

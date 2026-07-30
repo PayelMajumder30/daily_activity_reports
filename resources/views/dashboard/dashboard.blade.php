@@ -122,6 +122,7 @@
                             <th>SL</th>
                             <th>Activity Details</th>
                             <th>Engineer</th>
+                            <th>Asset Tag No.</th>
                             <th>Status</th>
                             <th>Activity Duration</th>
                             <th>Report Date</th>
@@ -279,6 +280,7 @@
             from_date:$('#from_date').val(),
             to_date:$('#to_date').val(),
             engineer:$('#engineer').val(),
+            asset_tag_no:$('#asset_tag_no').val(),
             status:status
         },function(data){
             $('#selectedStatusHeading').text(status + "Activities");
@@ -302,6 +304,7 @@
                         <td>${i+1}</td>
                         <td>${row.complaint_title}</td>
                         <td>${row.engineer_name}</td>
+                        <td>${row.asset_tag_no}</td>
                         <td>${row.status}</td>
                         <td>${row.resolution_time ? row.resolution_time : 'NA'}</td>
                         <td>${reportDate}</td>
@@ -321,6 +324,7 @@
         $.get("{{route('dashboard.statusDetails')}}", {
             from_date: $('#from_date').val(),
             to_date: $('#to_date').val(),
+            asset_tag_no: $('#asset_tag_no').val(),
             engineer: engineer,
             status: status
         }, function(data){
@@ -338,6 +342,7 @@
                         <td>${i+1}</td>
                         <td>${row.complaint_title}</td>
                         <td>${row.engineer_name}</td>
+                        <td>${row.asset_tag_no}</td>
                         <td>${row.status}</td>
                         <td>${row.resolution_time ?? 'NA'}</td>
                         <td>${reportDate}</td>

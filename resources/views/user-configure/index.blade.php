@@ -58,15 +58,10 @@
                 <tbody>
 
                     @forelse($users as $user)
-
                         <tr>
-
                             <td>{{ $loop->iteration }}</td>
-
                             <td>{{ ucwords($user->name) }}</td>
-
                             <td>{{ $user->email }}</td>
-
                             <td>
                                 @if($user->role == 0)
                                     Management

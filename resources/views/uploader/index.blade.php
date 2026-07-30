@@ -73,15 +73,28 @@
 
             </form>
 
-            <input type="hidden" id="upload_id">
+            <input type="hidden" id="upload_id" value="{{ $uploadId }}">
 
         </div>
     </div>
 
     {{-- Preview Card --}}
-    <div class="card shadow border-0 d-none"
-        id="previewCard">
+    <div class="card shadow border-0 {{ $preview->count() ? '' : 'd-none' }}" id="previewCard">
+        
+        <div class="alert alert-info mb-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Report Date :</strong>
+                    {{ optional($upload)->report_date?->format('d-m-Y') }}
+                </div>
 
+                <div class="col-md-6 text-end">
+                    <strong>File :</strong>
+                    {{ $upload->file_name ?? 'N/A' }}
+                </div>
+            </div>
+        </div>
+        
         <div class="card-header bg-dark text-white">
             <h5 class="mb-0">Preview Data</h5>
         </div>
@@ -105,15 +118,60 @@
 
                 </thead>
 
-                <tbody>
+               <tbody>
+
+                    @foreach($preview as $row)
+                    <tr id="row_{{ $row->id }}">
+
+                        <td>{{ $loop->iteration }}</td>
+
+                        <td id="complaint_{{ $row->id }}">
+                            {{ $row->complaint_title }}
+                        </td>
+
+                        <td id="activity_{{ $row->id }}">
+                            {{ $row->type_of_activity ?? 'NA' }}
+                        </td>
+
+                        <td id="asset_{{ $row->id }}">
+                            {{ $row->asset_tag_no ?? 'NA' }}
+                        </td>
+
+                        <td id="engineer_{{ $row->id }}">
+                            {{ $row->engineer_name }}
+                        </td>
+
+                        <td id="status_{{ $row->id }}">
+                            {{ $row->status }}
+                        </td>
+
+                        <td id="time_{{ $row->id }}">
+                            {{ $row->resolution_time }}
+                        </td>
+
+                        <td>
+                            <button class="btn btn-warning btnEdit"
+                                    data-id="{{ $row->id }}">
+                                Edit
+                            </button>
+                        </td>
+
+                    </tr>
+                    @endforeach
 
                 </tbody>
 
             </table>
  
-            <button type="button" id="btnFinalSave" class="btn btn-success">             
-                Final Save
-            </button>
+            <div class="d-flex gap-2 mt-3">
+                <button type="button" id="btnFinalSave" class="btn btn-success">             
+                    <i class="bi bi-save"></i>Final Save
+                </button>
+
+                <button type="button" id="btnDeleteUpload" class="btn btn-danger">
+                    <i class="bi bi-trash"></i>Delete Upload
+                </button>
+            </div>
 
         </div>
 
@@ -122,6 +180,7 @@
 </div>
 
 @push('scripts')
+
     <script>
        
         function checkUploadForm() {
@@ -389,6 +448,70 @@
                         icon: 'error',
                         title: 'Error',
                         text: xhr.responseJSON.message
+                    });
+
+                }
+
+            });
+
+        });
+
+        // delete temporary uploaded file
+        $('#btnDeleteUpload').click(function () {
+            let uploadId = $('#upload_id').val();
+            let btn = $(this);
+
+            Swal.fire({
+                title: 'Delete Uploaded Data?',
+                text: 'This uploaded Excel preview will be removed.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+
+                if(result.isConfirmed){
+
+                    // Disable button while deleting
+                    btn.prop('disabled', true).html('<i class="bi bi-arrow-repeat"></i> Deleting...');
+
+                    $.ajax({
+                        url: "{{ route('uploader.delete', '__ID__') }}".replace('__ID__', uploadId),
+                        type: "DELETE",
+                        data:{
+                            _token:"{{ csrf_token() }}"
+                        },
+
+                        success:function(res){
+
+                            Swal.fire({
+                                icon:'success',
+                                title:'Deleted',
+                                text:res.message
+                            });
+
+                            $('#previewCard').addClass('d-none');
+                            $('#previewTable tbody').html('');
+                            $('#uploadForm')[0].reset();
+                            $('#upload_id').val('');
+                            $('#btnUpload').prop('disabled', true).html('<i class="bi bi-upload"></i> Upload');
+
+                            //restore delete button
+                            btn.prop('disabled', false).html('<i class="bi bi-trash"></i> Delete Upload');
+         
+                        },
+
+                        error:function(xhr){
+
+                            btn.prop('disabled', false).html('<i class="bi bi-trash"></i> Delete Upload');
+                            Swal.fire({
+                                icon:'error',
+                                title:'Error',
+                                text:xhr.responseJSON.message
+                            });
+
+                        }
+
                     });
 
                 }

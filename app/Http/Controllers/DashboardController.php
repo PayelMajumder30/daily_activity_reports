@@ -10,30 +10,6 @@ class DashboardController extends Controller
 {
     //
 
-    // public function dashboard(){
-    //     $totalComplaints = Complaint::count();
-
-    //     $totalEngineers = Complaint::distinct('engineer_name')->count();
-
-    //     $openComplaints = Complaint::where('status', 'Open')->count();
-
-    //     $closedComplaints = Complaint::where('status', 'Closed')->count();
-
-    //     $resolved = Complaint::where('status','Resolved')->count();
-
-    //     $pending = Complaint::where('status','!=','Resolved')->count();
-
-    //     $latestUpload = Upload::latest()->first();
-
-    //     return view('dashboard.dashboard',compact(
-    //         'totalComplaints',
-    //         'totalEngineers',
-    //         'resolved',
-    //         'pending',
-    //         'latestUpload', 'openComplaints', 'closedComplaints'
-    //     ));
-    // }
-
     public function dashboard()
     {
         $engineers = Complaint::select('engineer_name')
@@ -72,6 +48,10 @@ class DashboardController extends Controller
             $query->where('engineer_name',$request->engineer);
         }
 
+        if($request->filled('asset_tag_no')){
+            $query->where('asset_tag_no',$request->asset_tag_no);
+        }
+
         if($request->filled('status')){
             $query->where('status',$request->status);
         }
@@ -102,6 +82,10 @@ class DashboardController extends Controller
 
         if($request->filled('engineer')){
             $query->where('engineer_name', $request->engineer);
+        }
+
+        if($request->filled('asset_tag_no')){
+            $query->where('asset_tag_no',$request->asset_tag_no);
         }
 
         if ($request->filled('status')) {
@@ -140,13 +124,17 @@ class DashboardController extends Controller
             $query->where('resolution_time', $request->resolution_time);
         }
 
+        if($request->filled('asset_tag_no')){
+            $query->where('asset_tag_no',$request->asset_tag_no);
+        }
+
         // Status selected from Pie Slice
         if($request->filled('status')){
             $query->where('status', $request->status);
         }
 
         return response()->json(
-            $query->select('complaint_title', 'engineer_name', 'status', 'upload_id', 'resolution_time')->orderBy('complaint_title')->get()
+            $query->select('complaint_title', 'engineer_name', 'status', 'upload_id', 'resolution_time', 'asset_tag_no')->orderBy('complaint_title')->get()
         );
     }
 }
