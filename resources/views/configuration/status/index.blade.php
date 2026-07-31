@@ -39,28 +39,35 @@
                             <tr>
                                 <th width="70">SL</th>
                                 <th>Title</th>
+                                <th>Status</th>
                                 <th width="120">Action</th>
                             </tr>
                         </thead>
 
                         <tbody>
-                            @forelse($statuslist as $status)
+                            @forelse($statuslist as $statususe)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ ucwords($status->title) }}</td>
+                                <td>{{ ucwords($statususe->title) }}</td>
+                                <td class="text-center">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input statususe-status" type="checkbox"                                       
+                                            data-id="{{ encryptId($statususe->id) }}" {{ $statususe->status ? 'checked' : '' }}>                                       
+                                    </div>
+                                </td>
                                 <td>
-                                    <button type="button" class="btn btn-warning btn-sm editStatus" data-id="{{ encryptId($status->id) }}">           
+                                    <button type="button" class="btn btn-warning btn-sm editStatus" data-id="{{ encryptId($statususe->id) }}">           
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
 
-                                    <form action="{{ route('status-configuration.destroy', encryptId($status->id)) }}" method="POST" class="delete-form d-inline"> 
+                                    <!-- <form action="{{ route('status-configuration.destroy', encryptId($statususe->id)) }}" method="POST" class="delete-form d-inline"> 
                                         @csrf
                                         @method('DELETE')
 
                                         <button class="btn btn-danger btn-sm">
                                             <i class="bi bi-trash"></i>
                                         </button>
-                                    </form>
+                                    </form> -->
                                 </td>
                             </tr>
                             @empty
@@ -226,6 +233,44 @@
                     }
 
                 });
+
+            });
+        });
+
+        $(document).on('change', '.statususe-status', function () {
+            let checkbox = $(this);
+            $.ajax({
+
+                url: "{{ route('status-configuration.statusChange', ':id') }}"
+                        .replace(':id', checkbox.data('id')),
+
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+
+                success: function (res) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated',
+                        text: res.status
+                                ? 'Status Activated'
+                                : 'Status Deactivated',
+                        timer: 1200,
+                        showConfirmButton: false
+                    });
+                },
+
+                error: function () {
+                    checkbox.prop('checked', !checkbox.prop('checked'));
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Unable to update status.'
+                    });
+
+                }
 
             });
 

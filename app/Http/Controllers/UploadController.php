@@ -27,18 +27,6 @@ class UploadController extends Controller
                 'report_date'=>'Report already uploaded for this date.'
             ]);
         }
-
-        // $file = $request->file('excel_file');
-
-        // $exists = Upload::whereDate('report_date', $request->report_date)
-        //     ->where('file_name', $file->getClientOriginalName())
-        //     ->exists();
-
-        // if ($exists) {
-        //     return response()->json([
-        //         'message' => 'This report date or file already exist.'
-        //     ], 422);
-        // }
         
         $file = $request->file('excel_file');
 
@@ -71,6 +59,8 @@ class UploadController extends Controller
             // public_path('uploads/'.$fileName)
             $file
         );
+
+        eventLog('Upload', 'Complaint', 'Uploaded complaint report for '.$upload->report_date);
 
         return redirect()
                 ->route('complaints.index')

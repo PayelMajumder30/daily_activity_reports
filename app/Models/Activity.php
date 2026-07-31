@@ -8,6 +8,6 @@ class Activity extends Model
 {
     //
     public $table = 'activities';
-    protected $fillable = ['title'];
+    protected $fillable = ['title', 'status',];
 
 }

@@ -27,6 +27,8 @@ class ConfigureController extends Controller
             'title' => $request->title
         ]);
 
+        eventLog('Create', 'Activity', 'Create activity: '.$request->title);
+
         return redirect()->back()->with('success','Activity added successfully.');
     }
 
@@ -48,14 +50,31 @@ class ConfigureController extends Controller
             'title'=>$request->title
         ]);
 
+        eventLog('Update', 'Activity', 'Updated activity: '.$activity->title);
+
         return redirect()->back()->with('success','Activity updated successfully.');
     }
 
     public function destroy($id) {
         Activity::findOrFail(decryptId($id))->delete();
 
+        eventLog('Delete','Activity','Deleted activity: '.$title);
+
         return redirect()->back()->with('success','Activity deleted successfully.');
     }
+
+    public function changeStatus($id){
+        
+        $activity = Activity::findOrFail(decryptId($id));
+        $activity->status = !$activity->status;
+        $activity->save();
+
+        eventLog('Status Change', 'Activity', $activity->status ? 'Activated activity: '.$activity->title : 'Deactivated activity: '.$activity->title);
+        return response()->json([
+            'success' => true,
+            'status'  => $activity->status
+        ]);
+    }  
 
     // Status Configuration
 
@@ -77,6 +96,8 @@ class ConfigureController extends Controller
         Status::create([
             'title' => $request->title
         ]);
+
+        eventLog('Create', 'Status', 'Create status: '.$request->title);
 
         return redirect()->back()->with('success','Status added successfully.');
     }
@@ -100,12 +121,38 @@ class ConfigureController extends Controller
             'title'=>$request->title
         ]);
 
+        eventLog('Update', 'Status', 'Create status: '.$request->title);
+
         return redirect()->back()->with('success','Status updated successfully.');
     }
 
     public function statusDestroy($id) {
         Status::findOrFail(decryptId($id))->delete();
 
+        eventLog('Delete','Status','Deleted status: '.$title);
+
         return redirect()->back()->with('success','Status deleted successfully.');
     }
+
+    public function statusChange($id){
+
+        $statususe = Status::findOrFail(decryptId($id));
+        $statususe->status = !$statususe->status;
+        $statususe->save();
+
+         eventLog(
+        'Status Change',
+        'Status',
+        $statususe->status
+                ? 'Activated status: '.$statususe->title
+                : 'Deactivated status: '.$statususe->title
+        );
+        return response()->json([
+            'success'   => true,
+            'status'    => $statususe->status
+        ]);
+
+    }
+
+   
 }

@@ -51,6 +51,7 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th width="150">Role</th>
+                        <th>Status</th>
                         <th width="140" class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -71,6 +72,12 @@
                                     Manpower
                                 @endif
                             </td>
+                            <td class="text-center">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input user-status" type="checkbox"                                       
+                                        data-id="{{ encryptId($user->id) }}" {{ $user->status ? 'checked' : '' }}>                                       
+                                </div>
+                            </td>
 
                             <td class="text-center">
 
@@ -80,7 +87,7 @@
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
 
-                                <form action="{{ route('user-configuration.destroy', encryptId($user->id)) }}"  method="POST" class="delete-form d-inline" style="display:inline">
+                                <!-- <form action="{{ route('user-configuration.destroy', encryptId($user->id)) }}"  method="POST" class="delete-form d-inline" style="display:inline">
                                    
                                     @csrf
                                     @method('DELETE')
@@ -88,7 +95,7 @@
                                     <button class="btn btn-danger btn-sm" title="Delete">         
                                         <i class="bi bi-trash"></i>
                                     </button>
-                                </form>
+                                </form> -->
                             </td>
 
                         </tr>
@@ -143,7 +150,47 @@
         });
     </script>
     @endif
+  
+    <script>
+        $(document).on('change', '.user-status', function () {
+            let checkbox = $(this);
+            $.ajax({
 
-   
+                url: "{{ route('user-configuration.changeStatus', ':id') }}"
+                        .replace(':id', checkbox.data('id')),
+
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+
+                success: function (res) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated',
+                        text: res.status
+                                ? 'User Activated'
+                                : 'User Deactivated',
+                        timer: 1200,
+                        showConfirmButton: false
+                    });
+
+                },
+
+                error: function () {
+                    checkbox.prop('checked', !checkbox.prop('checked'));
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Unable to update status.'
+                    });
+
+                }
+
+            });
+
+        });
+    </script>
 @endpush
 @endsection

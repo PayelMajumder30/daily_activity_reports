@@ -11,8 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('all_configuration_tables', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             //
+            $table->tinyInteger('status')
+                  ->default(1)
+                  ->after('role');
+        });
+
+        Schema::table('activities', function (Blueprint $table) {
+            //
+            $table->tinyInteger('status')
+                  ->default(1)
+                  ->after('title');
+        });
+
+        Schema::table('statuses', function (Blueprint $table) {
+            //
+            $table->tinyInteger('status')
+                  ->default(1)
+                  ->after('title');
         });
     }
 
@@ -21,8 +38,19 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('all_configuration_tables', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             //
+            $table->dropColumn('status');
+        });
+
+        Schema::table('activities', function (Blueprint $table) {
+            //
+            $table->dropColumn('status');
+        });
+
+        Schema::table('statuses', function (Blueprint $table) {
+            //
+            $table->dropColumn('status');
         });
     }
 };

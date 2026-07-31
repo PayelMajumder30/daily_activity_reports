@@ -8,5 +8,5 @@ class Status extends Model
 {
     //
     public $table = 'statuses';
-    protected $fillable = ['title'];
+    protected $fillable = ['title','status',];
 }

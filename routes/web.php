@@ -11,7 +11,7 @@ use App\Http\Controllers\{DashboardController, UploadController, ComplaintContro
 Route::get('/', function () {
     return redirect()->route('login');
 });
-Route::middleware(['auth', 'prevent-back-history'])->group(function() {
+Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(function() {
 
     // For management
     Route::middleware('role:0')->group(function(){
@@ -31,6 +31,7 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function() {
             Route::get('/edit/{id}', [UserConfigurationController::class,'edit'])->name('edit');
             Route::put('/update/{id}', [UserConfigurationController::class,'update'])->name('update');
             Route::delete('/delete/{id}', [UserConfigurationController::class,'destroy'])->name('destroy');
+            Route::post('/status/{id}', [UserConfigurationController::class,'changeStatus'])->name('changeStatus');
         });
 
         // Activity Configuration
@@ -40,6 +41,7 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function() {
             Route::get('/edit/{id}', [ConfigureController::class,'edit'])->name('edit');
             Route::put('/update/{id}', [ConfigureController::class,'update'])->name('update');
             Route::delete('/delete/{id}', [ConfigureController::class,'destroy'])->name('destroy');
+            Route::post('/status/{id}', [ConfigureController::class,'changeStatus'])->name('changeStatus');
         });
 
         // Status Configuration
@@ -49,6 +51,7 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function() {
             Route::get('/edit/{id}', [ConfigureController::class,'statusEdit'])->name('edit');
             Route::put('/update/{id}', [ConfigureController::class,'statusUpdate'])->name('update');
             Route::delete('/delete/{id}', [ConfigureController::class,'statusDestroy'])->name('destroy');
+            Route::post('/status/{id}', [ConfigureController::class,'statusChange'])->name('statusChange');
         });
         
     });

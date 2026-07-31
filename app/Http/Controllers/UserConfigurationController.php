@@ -50,6 +50,8 @@ class UserConfigurationController extends Controller
             'role'=>$request->role
         ]);
 
+        eventLog('Create', 'User', 'Created user: '.$request->name);
+
         return redirect()->route('user-configuration.index')->with('success', 'User added successfully.');
     }
 
@@ -84,7 +86,7 @@ class UserConfigurationController extends Controller
         $request->validate([
             'name'=>'required',
             'email'=>'required|email|unique:users,email,'.$user->id,
-            'role'=>'required|in:1,2'
+            'role'=>'required|in:0,1,2'
         ],[
             'email.unique'  => 'This email already registered',
         ]);
@@ -100,6 +102,8 @@ class UserConfigurationController extends Controller
         }
 
         $user->update($data);
+
+        eventLog('Update', 'User', 'Updated user:'.$user->name);
 
         return redirect()->route('user-configuration.index')
             ->with('success','User updated successfully.');
@@ -118,4 +122,20 @@ class UserConfigurationController extends Controller
         return redirect()->route('user-configuration.index')
             ->with('success','User deleted successfully.');
     }
+
+    public function changeStatus($id){
+        
+        $user = User::findOrFail(decryptId($id));
+
+        $user->status = !$user->status;
+
+        $user->save();
+
+        eventLog('Status Change', 'User', $user->status ? 'Activated user: '.$user->name : 'Deactivated user: '.$user->name);
+
+        return response()->json([
+            'success' => true,
+            'status'  => $user->status
+        ]);
+    }  
 }

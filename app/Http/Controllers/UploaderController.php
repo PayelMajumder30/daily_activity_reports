@@ -141,6 +141,12 @@ class UploaderController extends Controller
 
             DB::commit();
 
+            eventLog(
+                'Upload Preview',
+                'Complaint',
+                'Uploaded preview for report date '.$upload->report_date
+            );
+
             return response()->json([
                 'upload_id' => $upload->id,
                 'rows'      => $rows
@@ -174,6 +180,8 @@ class UploaderController extends Controller
             'status'            =>$request->status,
             'resolution_time'   =>$request->resolution_time
         ]);
+
+        eventLog('Update', 'Complaint Preview', 'Updated preview row ID '.$row->id);
 
         return response()->json([
             'success'=>true
@@ -212,6 +220,12 @@ class UploaderController extends Controller
 
         ComplaintTemp::where('upload_id', $upload->id)->delete();
 
+        eventLog(
+            'Final Save',
+            'Complaint',
+            'Final saved complaint report for '.$upload->report_date
+        );
+
         return response()->json([
             'success'=> true,
             'message' => 'Complaint data saved successfully.'
@@ -233,6 +247,11 @@ class UploaderController extends Controller
         ComplaintTemp::where('upload_id', $upload->id)->delete();
         $upload->delete();
 
+        eventLog(
+            'Delete',
+            'Complaint Preview',
+            'Deleted uploaded preview for '.$upload->report_date
+        );
         return response()->json([
             'success' => true,
             'message' => 'Uploaded data deleted successfully.'
@@ -240,6 +259,12 @@ class UploaderController extends Controller
     }
 
     public function downloadTemplate(){
+
+        eventLog(
+            'Download',
+            'Template',
+            'Downloaded complaint template'
+        );
         return response()->download(
             public_path('templates/complaint_template.xlsx')
         );
