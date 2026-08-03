@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EventLog extends Model
 {
@@ -16,4 +18,8 @@ class EventLog extends Model
         'ip_address',
         'browser',
     ];
+
+    public function user(): BelongsTo {
+        return $this->belongsTo(User::class);
+    }
 }

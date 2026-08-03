@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Imports\ComplaintTempImport;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
 
 class UploaderController extends Controller
 {
@@ -144,7 +145,9 @@ class UploaderController extends Controller
             eventLog(
                 'Upload Preview',
                 'Complaint',
-                'Uploaded preview for report date '.$upload->report_date
+                // 'Uploaded preview for report date '.$upload->report_date
+                'Upload preview for report date '.
+                Carbon::parse($upload->report_date)->format('d-m-Y')
             );
 
             return response()->json([
@@ -250,7 +253,8 @@ class UploaderController extends Controller
         eventLog(
             'Delete',
             'Complaint Preview',
-            'Deleted uploaded preview for '.$upload->report_date
+            'Deleted uploaded preview for '.
+            Carbon::parse($upload->report_date)->format('d-m-Y')
         );
         return response()->json([
             'success' => true,

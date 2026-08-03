@@ -13,7 +13,7 @@
                 Complaint Management Dashboard
             </h2>
             <p class="text-muted">
-                 Monitor complaint status, analyze engineer performance, and view complaint distribution using interactive filters and charts.
+                Monitor complaint status, analyze engineer performance, and view complaint distribution using interactive filters and charts.
             </p>
         </div>
 
@@ -131,6 +131,11 @@
 
                     <tbody id="complaintListBody"></tbody>
                 </table>
+
+                <!-- pagination -->
+                <div class="mt-3 d-flex justify-content-center">
+                    <div id="paginationLinks"></div>
+                </div>
             </div>
         </div>
     </div>   
@@ -275,19 +280,21 @@
     }
 
       // for pie chart details status-wise
-    function loadComplaintList(status){
+    function loadComplaintList(status,page=1){
         $.get("{{route('dashboard.statusDetails')}}",{
             from_date:$('#from_date').val(),
             to_date:$('#to_date').val(),
             engineer:$('#engineer').val(),
             asset_tag_no:$('#asset_tag_no').val(),
-            status:status
-        },function(data){
-            $('#selectedStatusHeading').text(status + "Activities");
+            status:status,
+            page: page
+        },function(res){
+           
             let html = '';
             
-            $.each(data,function(i,row){
+            $.each(res.data,function(i,row){
 
+                let sl = ((res.current_page - 1) * res.per_page) + i + 1;
                 let report_date = '-';
                 if(row.upload && row.upload.report_date){
                    
@@ -301,7 +308,7 @@
                 }
                 html += `
                     <tr>
-                        <td>${i+1}</td>
+                        <td>${sl}</td>
                         <td>${row.complaint_title}</td>
                         <td>${row.engineer_name}</td>
                         <td>${row.asset_tag_no}</td>
@@ -313,24 +320,151 @@
             });
 
             $('#complaintListBody').html(html);
-
+            buildPagination(res,status);
+            $('#selectedStatusHeading').text(status + "Activities");
             $('#complaintListCard').show();
         });
 
     }
 
+    // build pagination function
+    function buildPagination(res, status) {
+        let html = '';
+        if (res.last_page > 1) {
+            html += '<nav><ul class="pagination justify-content-end">';
+            // First
+            html += `
+                <li class="page-item ${res.current_page == 1 ? 'disabled' : ''}">
+                    <a href="#" class="page-link page-number"
+                        data-page="1"
+                        data-status="${status}">
+                        &laquo;
+                    </a>
+                </li>
+            `;
+
+            // Previous
+            html += `
+                <li class="page-item ${res.current_page == 1 ? 'disabled' : ''}">
+                    <a href="#" class="page-link page-number"
+                        data-page="${res.current_page-1}"
+                        data-status="${status}">
+                        &lsaquo;
+                    </a>
+                </li>
+            `;
+
+            let start = Math.max(1, res.current_page - 2);
+            let end   = Math.min(res.last_page, res.current_page + 2);
+            if(start > 1){
+                html += `
+                    <li class="page-item">
+                        <a href="#" class="page-link page-number"
+                            data-page="1"
+                            data-status="${status}">
+                            1
+                        </a>
+                    </li>
+                `;
+
+                if(start > 2){
+                    html += `
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `;
+                }
+            }
+
+            for(let i=start;i<=end;i++){
+                html += `
+                    <li class="page-item ${i==res.current_page?'active':''}">
+                        <a href="#"
+                        class="page-link page-number"
+                        data-page="${i}"
+                        data-status="${status}">
+                            ${i}
+                        </a>
+                    </li>
+                `;
+            }
+
+            if(end < res.last_page){
+                if(end < res.last_page-1){
+                    html += `
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `;
+                }
+
+                html += `
+                    <li class="page-item">
+                        <a href="#"
+                        class="page-link page-number"
+                        data-page="${res.last_page}"
+                        data-status="${status}">
+                            ${res.last_page}
+                        </a>
+                    </li>
+                `;
+            }
+
+            // Next
+            html += `
+                <li class="page-item ${res.current_page==res.last_page?'disabled':''}">
+                    <a href="#"
+                    class="page-link page-number"
+                    data-page="${res.current_page+1}"
+                    data-status="${status}">
+                        &rsaquo;
+                    </a>
+                </li>
+            `;
+
+            // Last
+            html += `
+                <li class="page-item ${res.current_page==res.last_page?'disabled':''}">
+                    <a href="#"
+                    class="page-link page-number"
+                    data-page="${res.last_page}"
+                    data-status="${status}">
+                        &raquo;
+                    </a>
+                </li>
+            `;
+
+            html += '</ul></nav>';
+        }
+
+        $('#paginationLinks').html(html);
+    }
+
+    $(document).on('click','.page-number',function(e){
+        e.preventDefault();
+
+        loadComplaintList(
+            $(this).data('status'),
+            $(this).data('page')
+        );
+
+    });
+
     // for bar chart details engineer-wise
-    function loadEngineerComplaintList(engineer,status){
+    function loadEngineerComplaintList(engineer,status,page=1){
         $.get("{{route('dashboard.statusDetails')}}", {
             from_date: $('#from_date').val(),
             to_date: $('#to_date').val(),
             asset_tag_no: $('#asset_tag_no').val(),
             engineer: engineer,
-            status: status
-        }, function(data){
-            $('#selectedStatusHeading').text(engineer + " - " + status + " Activities ");
+            status: status,
+            page: page
+        }, function(res){
+            
             let html='';
-            $.each(data,function(i,row){
+            $.each(res.data,function(i,row){
+
+                let sl = ((res.current_page - 1) * res.per_page) + i + 1;
                 let reportDate='-';
                 if(row.upload && row.upload.report_date){
                     let d=new Date(row.upload.report_date);
@@ -339,7 +473,7 @@
 
                 html +=`
                     <tr>
-                        <td>${i+1}</td>
+                        <td>${sl}</td>
                         <td>${row.complaint_title}</td>
                         <td>${row.engineer_name}</td>
                         <td>${row.asset_tag_no}</td>
@@ -350,10 +484,44 @@
             });
 
             $('#complaintListBody').html(html);
-
+            buildEngineerPagination(res,engineer,status);
+            $('#selectedStatusHeading').text(engineer + " - " + status + " Activities ");
             $('#complaintListCard').show();
         });
     }
+
+    // pagination
+    function buildEngineerPagination(res,engineer,status){
+        let html='';
+        if(res.last_page>1){
+            html+='<nav><ul class="pagination">';
+            for(let i=1;i<=res.last_page;i++){
+                html+=`
+                    <li class="page-item ${i==res.current_page?'active':''}">
+                        <a href="#"
+                        class="page-link engineer-page"
+                        data-page="${i}"
+                        data-engineer="${engineer}"
+                        data-status="${status}">
+                            ${i}
+                        </a>
+                    </li>
+                `;
+            }
+
+            html+='</ul></nav>';
+        }
+        $('#paginationLinks').html(html);
+    }
+
+    $(document).on('click','.engineer-page',function(e){
+        e.preventDefault();
+        loadEngineerComplaintList(
+            $(this).data('engineer'),
+            $(this).data('status'),
+            $(this).data('page')
+        );
+    });
 
     function loadEngineerChart(){
 

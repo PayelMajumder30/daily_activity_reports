@@ -46,7 +46,7 @@
             <li class="nav-item mb-2">
 
                 <a href="{{ route('complaints.index') }}"
-                class="nav-link text-white {{ request()->routeIs('complaints.index') ? 'active bg-primary' : '' }}">
+                    class="nav-link text-white {{ request()->routeIs('complaints.index') ? 'active bg-primary' : '' }}">
 
                     <i class="bi bi-file-earmark-text"></i>
                     Total Complaints
@@ -95,6 +95,13 @@
                         </li>
                     </ul>
                 </div>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('audit.trail') }}" class="nav-link text-white {{ request()->routeIs('audit.trail') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-clock-history"></i>
+                    Audit Trail
+                </a>
             </li>
         @endif
     </ul>

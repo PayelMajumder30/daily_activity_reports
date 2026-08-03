@@ -76,13 +76,14 @@
                     <div class="col-md-6 mb-4">
                         <label>Password <span class="text-danger">*</span></label>
 
-                        <input type="password"
-                            name="password"
-                            class="form-control @error('password') is-invalid @enderror">
-
-                        @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <div class="input-group">
+                            <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword"><i class="bi bi-eye"></i></button>
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                       
                     </div>
 
                     <div class="col-md-6 mb-4">
@@ -124,5 +125,23 @@
 
 </div>
 
+@push('scripts')
+<script>
+    $('#togglePassword').click(function () {
+        
+        let password = $('#password');
+        let icon = $(this).find('i');
+
+        if(password.attr('type') === 'password'){
+            password.attr('type', 'text');
+            console.log('text');
+            icon.removeClass('bi-eye').addClass('bi-eye-slash');
+        } else {
+            password.attr('type', 'password');
+            icon.removeClass('bi-eye-slash').addClass('bi-eye');
+        }
+    })
+</script>
+@endpush
 
 @endsection

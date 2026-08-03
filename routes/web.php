@@ -2,7 +2,7 @@
 
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController};
+use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController, EventLogController};
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -53,6 +53,9 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
             Route::delete('/delete/{id}', [ConfigureController::class,'statusDestroy'])->name('destroy');
             Route::post('/status/{id}', [ConfigureController::class,'statusChange'])->name('statusChange');
         });
+
+        // for audit trail
+        Route::get('/audit-trail', [EventLogController::class, 'index'])->name('audit.trail');
         
     });
 
