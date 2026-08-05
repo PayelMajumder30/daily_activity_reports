@@ -59,8 +59,13 @@ class User extends Authenticatable
         return $this->hasMany(Upload::class);
     }
 
-    public function eventlogs(): HasOne
+    public function eventlogs(): HasMany
     {
         return $this->hasMany(EventLog::class);
+    }
+
+    public function assetAssigned(): Hasmany
+    {
+        return $this->hasMany(AssetAssigned::class, 'created_by');
     }
 }

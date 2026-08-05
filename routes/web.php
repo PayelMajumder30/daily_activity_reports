@@ -2,7 +2,8 @@
 
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController, EventLogController};
+use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController, EventLogController,
+                            SettingController};
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -68,6 +69,34 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('/save',[UploaderController::class,'savePermanent'])->name('save');
         Route::delete('/delete/{upload_id}',[UploaderController::class,'deleteUpload'])->name('delete');
         Route::get('/download_template',[UploaderController::class,'downloadTemplate'])->name('downloadTemplate');
+    });
+
+    // Asset Inventory
+        // setting/Designation
+    Route::prefix('setting/designation')->name('designation.')->group(function () {   
+        Route::get('/', [SettingController::class,'desIndex'])->name('index');
+        Route::post('/store', [SettingController::class,'desStore'])->name('store');
+        Route::get('/edit/{id}', [SettingController::class,'desEdit'])->name('edit');
+        Route::put('/update/{id}', [SettingController::class,'desUpdate'])->name('update');
+        Route::post('/status/{id}', [SettingController::class,'desChangeStatus'])->name('changeStatus');
+    });
+
+        // setting/Discipline
+    Route::prefix('setting/discipline')->name('discipline.')->group(function () {   
+        Route::get('/', [SettingController::class,'discIndex'])->name('index');
+        Route::post('/store', [SettingController::class,'discStore'])->name('store');
+        Route::get('/edit/{id}', [SettingController::class,'discEdit'])->name('edit');
+        Route::put('/update/{id}', [SettingController::class,'discUpdate'])->name('update');
+        Route::post('/status/{id}', [SettingController::class,'discChangeStatus'])->name('changeStatus');
+    });
+
+         // setting/Asset Type
+    Route::prefix('setting/asset_type')->name('asset-type.')->group(function () {   
+        Route::get('/', [SettingController::class,'assetIndex'])->name('index');
+        Route::post('/store', [SettingController::class,'assetStore'])->name('store');
+        Route::get('/edit/{id}', [SettingController::class,'assetEdit'])->name('edit');
+        Route::put('/update/{id}', [SettingController::class,'assetUpdate'])->name('update');
+        Route::post('/status/{id}', [SettingController::class,'assetChangeStatus'])->name('changeStatus');
     });
 });
 

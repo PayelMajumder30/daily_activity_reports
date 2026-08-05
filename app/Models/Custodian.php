@@ -19,4 +19,9 @@ class Custodian extends Model
     public function discipline(): BelongsTo {
         return $this->belongsTo(Discipline::class);
     }
+
+    public function assetAssigned(): Hasmany
+    {
+        return $this->hasMany(AssetAssigned::class);
+    }
 }

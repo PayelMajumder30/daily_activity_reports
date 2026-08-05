@@ -19,4 +19,9 @@ class AssetInventory extends Model
     public function assetTag(): BelongsTo {
         return $this->belongsTo(AssetTag::class);
     }
+
+    public function assetAssigned(): Hasmany
+    {
+        return $this->hasMany(AssetAssigned::class);
+    }
 }

@@ -104,6 +104,101 @@
                 </a>
             </li>
         @endif
+
+        @if(auth()->user()->role == 0 || auth()->user()->role == 1)
+            <li class="nav-item mb-2">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center
+                    {{ request()->routeIs('designation.*')|| request()->routeIs('discipline.*')|| request()->routeIs('asset-type.*')|| request()->routeIs('asset-model.*')
+                        || request()->routeIs('asset-tag.*')|| request()->routeIs('asset-inventory.*')|| request()->routeIs('custodian.*')
+                        || request()->routeIs('asset-assignment.*')
+                        ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#settingsMenu" role="button"
+
+                    aria-expanded="{{ request()->routeIs('designation.*') || request()->routeIs('discipline.*')|| request()->routeIs('asset-type.*')                        
+                        || request()->routeIs('asset-model.*')|| request()->routeIs('asset-tag.*')|| request()->routeIs('asset-inventory.*')                       
+                        || request()->routeIs('custodian.*')|| request()->routeIs('asset-assignment.*') ? 'true' : 'false' }}" aria-controls="settingsMenu">
+
+                    <span>
+                        <i class="bi bi-sliders"></i>
+                        Settings
+                    </span>
+
+                    <i class="bi bi-chevron-down"></i>
+                </a>
+
+                <div class="collapse
+                    {{ request()->routeIs('designation.*')|| request()->routeIs('discipline.*')|| request()->routeIs('asset-type.*')|| request()->routeIs('asset-model.*')   
+                        || request()->routeIs('asset-tag.*')|| request()->routeIs('asset-inventory.*')|| request()->routeIs('custodian.*')                       
+                        || request()->routeIs('asset-assignment.*')? 'show' : '' }}" id="settingsMenu">
+                    <ul class="nav flex-column ms-3 mt-2">
+
+                        <li class="nav-item">
+                            <a href="{{ route('designation.index') }}"
+                                class="nav-link text-white {{ request()->routeIs('designation.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-person-badge"></i>
+                                Designation
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{route('discipline.index')}}"
+                                class="nav-link text-white {{ request()->routeIs('discipline.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-diagram-3"></i>
+                                Discipline
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('asset-type.index')}}"
+                                class="nav-link text-white {{ request()->routeIs('asset-type.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-box"></i>
+                                Asset Type
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#"
+                                class="nav-link text-white {{ request()->routeIs('asset-model.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-cpu"></i>
+                                Asset Model
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#"
+                                class="nav-link text-white {{ request()->routeIs('asset-tag.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-upc-scan"></i>
+                                Asset Tag
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#"
+                                class="nav-link text-white {{ request()->routeIs('asset-inventory.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-box-seam"></i>
+                                Asset Inventory
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#"
+                                class="nav-link text-white {{ request()->routeIs('custodian.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-person-workspace"></i>
+                                Custodian
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="#"
+                                class="nav-link text-white {{ request()->routeIs('asset-assignment.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-arrow-left-right"></i>
+                                Asset Assignment
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+            </li>
+        @endif
     </ul>
 
     <div class="mt-auto">
