@@ -82,22 +82,10 @@
                             <td class="text-center">
 
                                 <a href="{{ route('user-configuration.edit', encryptId($user->id)) }}"
-                                class="btn btn-warning btn-sm"
-                                title="Edit">
+                                class="btn btn-warning btn-sm" title="Edit">                                
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-
-                                <!-- <form action="{{ route('user-configuration.destroy', encryptId($user->id)) }}"  method="POST" class="delete-form d-inline" style="display:inline">
-                                   
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button class="btn btn-danger btn-sm" title="Delete">         
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form> -->
                             </td>
-
                         </tr>
 
                     @empty
@@ -119,78 +107,4 @@
     </div>
 </div>
 
-@push('scripts')
-    @if(session('success'))
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: "{{ session('success') }}",
-            timer: 2000,
-            showConfirmButton: false
-        });
-
-             // delete user confirmation
-        $(document).on('submit', '.delete-form', function(e) {
-            e.preventDefault();
-
-            let form = this;
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'You want to delete this user.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Delete',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if(result.isConfirmed) {
-                    form.submit();
-                }
-            });
-        });
-    </script>
-    @endif
-  
-    <script>
-        $(document).on('change', '.user-status', function () {
-            let checkbox = $(this);
-            $.ajax({
-
-                url: "{{ route('user-configuration.changeStatus', ':id') }}"
-                        .replace(':id', checkbox.data('id')),
-
-                type: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
-
-                success: function (res) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Updated',
-                        text: res.status
-                                ? 'User Activated'
-                                : 'User Deactivated',
-                        timer: 1200,
-                        showConfirmButton: false
-                    });
-
-                },
-
-                error: function () {
-                    checkbox.prop('checked', !checkbox.prop('checked'));
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Unable to update status.'
-                    });
-
-                }
-
-            });
-
-        });
-    </script>
-@endpush
 @endsection

@@ -9,7 +9,7 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <h2 class="fw-bold">
-                <i class="bi bi-file-earmark-text"></i>
+                <i class="bi bi-box"></i>
                 Asset type
             </h2>
             <p class="text-muted">
@@ -102,7 +102,10 @@
                                 Asset type name
                             </label>
 
-                            <input type="text" class="form-control" name="name" id="name">
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" id="name">
+                            @error('name')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
 
                         <button class="btn btn-primary" id="submitBtn">
@@ -136,12 +139,18 @@
     <script>
         $(document).ready(function () {
 
+            function clearFormErrors() {
+                $('.text-danger').text('');
+                $('.form-control').removeClass('is-invalid');
+            }
             // Route templates
             const editUrl = "{{ route('asset-type.edit', ':id') }}";
             const updateUrl = "{{ route('asset-type.update', ':id') }}";
             const storeUrl = "{{ route('asset-type.store') }}";
 
             $(document).on('click', '.editAssetType', function () {
+
+                clearFormErrors();
                 let id = $(this).data('id');
                 $.ajax({
                     url: editUrl.replace(':id', id),
@@ -170,14 +179,12 @@
 
             $('#cancelBtn').on('click', function () {
 
+                clearFormErrors();
+
                 $('#assetTypeForm').attr('action', storeUrl);
-
                 $('#methodField').html('');
-
                 $('#name').val('');
-
                 $('#formTitle').text('Add Asset type');
-
                 $('#submitBtn')
                     .removeClass('btn-warning')
                     .addClass('btn-primary')
@@ -189,29 +196,6 @@
 
         });
 
-        // $(document).on('submit', '.delete-form', function(e){
-
-        //     e.preventDefault();
-
-        //     let form = this;
-
-        //     Swal.fire({
-        //         title: 'Delete Activity?',
-        //         text: "This record will be permanently deleted.",
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonColor: '#d33',
-        //         cancelButtonColor: '#6c757d',
-        //         confirmButtonText: 'Yes, Delete',
-        //         cancelButtonText: 'Cancel'
-        //     }).then((result)=>{
-
-        //         if(result.isConfirmed){
-        //             form.submit();
-        //         }
-
-        //     });
-        // });
 
         $(document).on('change', '.assetType-status', function () {
             let checkbox = $(this);

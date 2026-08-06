@@ -90,13 +90,31 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('/status/{id}', [SettingController::class,'discChangeStatus'])->name('changeStatus');
     });
 
-         // setting/Asset Type
+    // setting/Asset Type
     Route::prefix('setting/asset_type')->name('asset-type.')->group(function () {   
         Route::get('/', [SettingController::class,'assetIndex'])->name('index');
         Route::post('/store', [SettingController::class,'assetStore'])->name('store');
         Route::get('/edit/{id}', [SettingController::class,'assetEdit'])->name('edit');
         Route::put('/update/{id}', [SettingController::class,'assetUpdate'])->name('update');
         Route::post('/status/{id}', [SettingController::class,'assetChangeStatus'])->name('changeStatus');
+    });
+
+    // setting/asset model
+    Route::prefix('setting/asset_model')->name('asset-model.')->group(function () {   
+        Route::get('/', [SettingController::class,'assetModelIndex'])->name('index');
+        Route::post('/store', [SettingController::class,'assetModelStore'])->name('store');
+        Route::get('/edit/{id}', [SettingController::class,'assetModelEdit'])->name('edit');
+        Route::put('/update/{id}', [SettingController::class,'assetModelUpdate'])->name('update');
+        Route::post('/status/{id}', [SettingController::class,'assetModelChangeStatus'])->name('changeStatus');
+    });
+
+       // setting/Asset Tag no
+    Route::prefix('setting/asset_tag')->name('asset-tag.')->group(function () {   
+        Route::get('/', [SettingController::class,'tagIndex'])->name('index');
+        Route::post('/store', [SettingController::class,'tagStore'])->name('store');
+        Route::get('/edit/{id}', [SettingController::class,'tagEdit'])->name('edit');
+        Route::put('/update/{id}', [SettingController::class,'tagUpdate'])->name('update');
+        Route::post('/status/{id}', [SettingController::class,'tagChangeStatus'])->name('changeStatus');
     });
 });
 

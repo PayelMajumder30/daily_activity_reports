@@ -156,7 +156,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="#"
+                            <a href="{{ route('asset-model.index')}}"
                                 class="nav-link text-white {{ request()->routeIs('asset-model.*') ? 'active bg-primary' : '' }}">
                                 <i class="bi bi-cpu"></i>
                                 Asset Model
@@ -164,7 +164,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="#"
+                            <a href="{{ route('asset-tag.index')}}"
                                 class="nav-link text-white {{ request()->routeIs('asset-tag.*') ? 'active bg-primary' : '' }}">
                                 <i class="bi bi-upc-scan"></i>
                                 Asset Tag

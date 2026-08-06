@@ -11,7 +11,7 @@ class AssetModel extends Model
     //
 
     public $table = 'asset_models';
-    protected $fillable = ['asset_type_id','model_name', 'manufacturer'];
+    protected $fillable = ['asset_type_id','model_name', 'manufacturer', 'status'];
 
     public function assetType(): BelongsTo {
         return $this->belongsTo(AssetType::class);

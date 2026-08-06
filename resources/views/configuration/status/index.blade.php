@@ -9,7 +9,7 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <h2 class="fw-bold">
-                <i class="bi bi-file-earmark-text"></i>
+                <i class="bi bi-check2-circle"></i>
                 Status Configuration
             </h2>
             <p class="text-muted">

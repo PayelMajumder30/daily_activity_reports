@@ -9,7 +9,7 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <h2 class="fw-bold">
-                <i class="bi bi-file-earmark-text"></i>
+                <i class="bi bi-person-badge"></i>
                 Designation
             </h2>
             <p class="text-muted">
@@ -102,7 +102,10 @@
                                 Designation name
                             </label>
 
-                            <input type="text" class="form-control" name="name" id="name">
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" id="name">
+                            @error('name')
+                                <small class="text-danger">{{ $message }}</small>
+                            @enderror
                         </div>
 
                         <button class="btn btn-primary" id="submitBtn">
@@ -136,6 +139,10 @@
     <script>
         $(document).ready(function () {
 
+            function clearFormErrors() {
+                $('.text-danger').text('');
+                $('.form-control').removeClass('is-invalid');
+            }
             // Route templates
             const editUrl = "{{ route('designation.edit', ':id') }}";
             const updateUrl = "{{ route('designation.update', ':id') }}";
@@ -143,6 +150,7 @@
 
             $('.editDesignation').on('click', function () {
 
+                clearFormErrors();
                 let id = $(this).data('id');
 
                 $.ajax({
@@ -173,6 +181,7 @@
 
             $('#cancelBtn').on('click', function () {
 
+                clearFormErrors();
                 $('#designationForm').attr('action', storeUrl);
 
                 $('#methodField').html('');
