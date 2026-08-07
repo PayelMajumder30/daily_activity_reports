@@ -163,19 +163,19 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a href="{{ route('asset-tag.index')}}"
                                 class="nav-link text-white {{ request()->routeIs('asset-tag.*') ? 'active bg-primary' : '' }}">
                                 <i class="bi bi-upc-scan"></i>
                                 Asset Tag
                             </a>
-                        </li>
+                        </li> -->
 
                         <li class="nav-item">
-                            <a href="#"
-                                class="nav-link text-white {{ request()->routeIs('asset-inventory.*') ? 'active bg-primary' : '' }}">
-                                <i class="bi bi-box-seam"></i>
-                                Asset Inventory
+                            <a href="{{ route('location.index')}}"
+                                class="nav-link text-white {{ request()->routeIs('location.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-geo-alt"></i>
+                                Location
                             </a>
                         </li>
 
@@ -196,7 +196,15 @@
                         </li>
                     </ul>
                 </div>
+            </li>
+        @endif
 
+        @if(auth()->user()->role == 0 || auth()->user()->role == 1)            
+            <li class="nav-item">
+                <a href="{{ route('asset-inventory.index') }}" class="nav-link text-white {{ request()->routeIs('asset-inventory') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-box-seam"></i>
+                    Asset Inventory
+                </a>
             </li>
         @endif
     </ul>

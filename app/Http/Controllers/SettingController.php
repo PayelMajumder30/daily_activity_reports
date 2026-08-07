@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Designation, Discipline, AssetType, AssetModel, AssetTag};
+use App\Models\{Designation, Discipline, AssetType, AssetModel, AssetTag, Location};
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -148,17 +148,21 @@ class SettingController extends Controller
     public function assetStore(Request $request){
         // dd($request->all());
         $request->validate([
-            'name' => 'required|unique:asset_types,name'
+            'name' => 'required|unique:asset_types,name',
+            'short_name' => 'required|unique:asset_types,short_name',
         ],[
-            'name.required' => 'Asset is required.',
-            'name.unique'   => 'This Asset already exists.',
+            'name.required' => 'Asset name is required.',
+            'name.unique'   => 'This Asset name already exists.',
+            'short_name.required' => 'Short name is required.',
+            'short_name.unique'   => 'This short name already exists.',
         ]);
 
-        AssetType::create([
-            'name' => $request->name
+        $assetType = AssetType::create([
+            'name' => $request->name,
+            'short_name' => strtoupper($request->short_name),
         ]);
 
-        eventLog('Create', 'Asset Type', 'Create asset type: '.$request->name);
+        eventLog('Create', 'Asset Type', 'Created asset type: '.$assetType->name.' ('.$assetType->short_name.')');
 
         return redirect()->back()->with('success','Asset type added successfully.');
     }
@@ -166,7 +170,7 @@ class SettingController extends Controller
     public function assetEdit($id) {
         $assetType = AssetType::findOrFail(decryptId($id));
 
-        return response()->json($assetType);
+        return response()->json(['name' => $assetType->name, 'short_name' => $assetType->short_name,]);
     }
 
     public function assetUpdate(Request $request, $id){
@@ -174,17 +178,21 @@ class SettingController extends Controller
         $assetType = AssetType::findOrFail(decryptId($id));
 
         $request->validate([
-            'name' => 'required|unique:asset_types,name,'.$assetType->id
+            'name' => 'required|unique:asset_types,name,'.$assetType->id,
+            'short_name' => 'required|unique:asset_types,short_name,'.$assetType->id,
         ],[
-            'name.required' => 'Asset is required.',
-            'name.unique'   => 'This Asset already exists.',
+            'name.required' => 'Asset name is required.',
+            'name.unique'   => 'This Asset name already exists.',
+            'short_name.required' => 'Short name is required.',
+            'short_name.unique'   => 'This short name already exists.',
         ]);
 
         $assetType->update([
-            'name'=>$request->name
+            'name'=>$request->name,
+            'short_name'=>strtoupper($request->short_name),
         ]);
 
-        eventLog('Update', 'Asset type', 'Updated asset type: '.$assetType->name);
+        eventLog('Update', 'Asset type', 'Updated asset type: ' . $assetType->name . ' (' . $assetType->short_name . ')');
 
         return redirect()->back()->with('success','Asset type updated successfully.');
     }
@@ -283,67 +291,140 @@ class SettingController extends Controller
     } 
 
     // tag no
-    public function tagIndex(){
+    // public function tagIndex(){
+
+    //     // dd('Controller Hit');
+    //     $assetTags = AssetTag::latest()->get();
+    //     return view('settings.asset-tag.index', compact('assetTags'));
+    // }
+
+    // public function tagStore(Request $request){
+    //     // dd($request->all());
+    //     $request->validate([
+    //         'tag_no' => 'required|unique:asset_tags,tag_no'
+    //     ],[
+    //         'tag_no.required' => 'Asset Tag Number is required.',
+    //         'tag_no.unique'   => 'This Asset Tag Number already exists.',
+    //     ]);
+
+    //     AssetTag::create([
+    //         'tag_no' => $request->tag_no
+    //     ]);
+
+    //     eventLog('Create', 'Asset Tag', 'Create asset tag: '.$request->tag_no);
+
+    //     return redirect()->back()->with('success','Asset tag added successfully.');
+    // }
+
+    // public function tagEdit($id) {
+    //     $assetTag = AssetTag::findOrFail(decryptId($id));
+
+    //     return response()->json($assetTag);
+    // }
+
+    // public function tagUpdate(Request $request, $id){
+
+    //     $assetTag = AssetTag::findOrFail(decryptId($id));
+
+    //     $request->validate([
+    //         'tag_no' => 'required|unique:asset_tags,tag_no,'.$assetTag->id
+    //     ],[
+    //         'tag_no.required' => 'Asset Tag Number is required.',
+    //         'tag_no.unique'   => 'This Asset Tag Number already exists.',
+    //     ]);
+
+    //     $assetTag->update([
+    //         'tag_no'=>$request->tag_no
+    //     ]);
+
+    //     eventLog('Update', 'Asset tag', 'Updated asset tag: '.$assetTag->tag_no);
+
+    //     return redirect()->back()->with('success','Asset tag updated successfully.');
+    // }
+
+    // public function tagChangeStatus($id){
+        
+    //     $assetTag = AssetTag::findOrFail(decryptId($id));
+    //     $assetTag->status = !$assetTag->status;
+    //     $assetTag->save();
+
+    //     eventLog('Status Change', 'Asset type', $assetTag->status ? 'Activated asset tag: '.$assetTag->name : 'Deactivated asset tag: '.$assetTag->name);
+    //     return response()->json([
+    //         'success' => true,
+    //         'status'  => $assetTag->status
+    //     ]);
+    // } 
+
+    // location
+        public function locationIndex(){
 
         // dd('Controller Hit');
-        $assetTags = AssetTag::latest()->get();
-        return view('settings.asset-tag.index', compact('assetTags'));
+        $locations = Location::latest()->get();
+        return view('settings.location.index', compact('locations'));
     }
 
-    public function tagStore(Request $request){
+    public function locationStore(Request $request){
         // dd($request->all());
         $request->validate([
-            'tag_no' => 'required|unique:asset_tags,tag_no'
+            'name' => 'required|unique:locations,name',
+            'short_name' => 'required|unique:locations,short_name',
         ],[
-            'tag_no.required' => 'Asset Tag Number is required.',
-            'tag_no.unique'   => 'This Asset Tag Number already exists.',
+            'name.required' => 'Location name is required.',
+            'name.unique'   => 'This Location name already exists.',
+            'short_name.required' => 'Short name is required.',
+            'short_name.unique'   => 'This short name already exists.',
         ]);
 
-        AssetTag::create([
-            'tag_no' => $request->tag_no
+        $location = Location::create([
+            'name' => $request->name,
+            'short_name' => strtoupper($request->short_name),
         ]);
 
-        eventLog('Create', 'Asset Tag', 'Create asset tag: '.$request->tag_no);
+        eventLog('Create', 'Asset Type', 'Created asset type: '.$location->name.' ('.$location->short_name.')');
 
-        return redirect()->back()->with('success','Asset tag added successfully.');
+        return redirect()->back()->with('success','Location added successfully.');
     }
 
-    public function tagEdit($id) {
-        $assetTag = AssetTag::findOrFail(decryptId($id));
+    public function locationEdit($id) {
+        $location = Location::findOrFail(decryptId($id));
 
-        return response()->json($assetTag);
+        return response()->json(['name' => $location->name, 'short_name' => $location->short_name,]);
     }
 
-    public function tagUpdate(Request $request, $id){
+    public function locationUpdate(Request $request, $id){
 
-        $assetTag = AssetTag::findOrFail(decryptId($id));
+        $location = Location::findOrFail(decryptId($id));
 
         $request->validate([
-            'tag_no' => 'required|unique:asset_tags,tag_no,'.$assetTag->id
+            'name' => 'required|unique:locations,name,'.$location->id,
+            'short_name' => 'required|unique:locations,short_name,'.$location->id,
         ],[
-            'tag_no.required' => 'Asset Tag Number is required.',
-            'tag_no.unique'   => 'This Asset Tag Number already exists.',
+            'name.required' => 'Location name is required.',
+            'name.unique'   => 'This Location name already exists.',
+            'short_name.required' => 'Short name is required.',
+            'short_name.unique'   => 'This short name already exists.',
         ]);
 
-        $assetTag->update([
-            'tag_no'=>$request->tag_no
+        $location->update([
+            'name'=>$request->name,
+            'short_name'=>strtoupper($request->short_name),
         ]);
 
-        eventLog('Update', 'Asset tag', 'Updated asset tag: '.$assetTag->tag_no);
+        eventLog('Update', 'Location', 'Updated location: ' . $location->name . ' (' . $location->short_name . ')');
 
-        return redirect()->back()->with('success','Asset tag updated successfully.');
+        return redirect()->back()->with('success','Location updated successfully.');
     }
 
-    public function tagChangeStatus($id){
+    public function locationChangeStatus($id){
         
-        $assetTag = AssetTag::findOrFail(decryptId($id));
-        $assetTag->status = !$assetTag->status;
-        $assetTag->save();
+        $location = Location::findOrFail(decryptId($id));
+        $location->status = !$location->status;
+        $location->save();
 
-        eventLog('Status Change', 'Asset type', $assetTag->status ? 'Activated asset tag: '.$assetTag->name : 'Deactivated asset tag: '.$assetTag->name);
+        eventLog('Status Change', 'Location', $location->status ? 'Activated location: '.$location->name : 'Deactivated location: '.$location->name);
         return response()->json([
             'success' => true,
-            'status'  => $assetTag->status
+            'status'  => $location->status
         ]);
-    } 
+    }  
 }

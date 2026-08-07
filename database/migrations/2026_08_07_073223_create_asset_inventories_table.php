@@ -13,19 +13,34 @@ return new class extends Migration
     {
         Schema::create('asset_inventories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('asset_tag_id')
-                ->constrained('asset_tags')
-                ->cascadeOnDelete();
 
+            // Auto-generated tag number
+            $table->string('tag_no')->unique();
+
+            // Asset Model
             $table->foreignId('asset_model_id')
                 ->constrained('asset_models')
                 ->cascadeOnDelete();
 
+            // Location
+            $table->foreignId('location_id')
+                ->constrained('locations')
+                ->cascadeOnDelete();
+
+            // Purchase Details
+            $table->string('po_number');
+
+            // Unique Serial Number
             $table->string('serial_no')->nullable();
 
-            $table->date('purchase_date')->nullable();
-            $table->date('warranty_end')->nullable();
+            // Installation Details
+            $table->date('installation_date');
 
+            // Warranty
+            $table->unsignedTinyInteger('warranty_year');
+            $table->date('warranty_end');
+
+            // Asset Status
             $table->enum('asset_status', [
                 'Available',
                 'Assigned',
@@ -33,7 +48,16 @@ return new class extends Migration
                 'Scrapped'
             ])->default('Available');
 
+            // Remarks
             $table->text('remarks')->nullable();
+
+            // Created By
+            $table->foreignId('created_by')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->boolean('status')->default(true);   
+                 
             $table->timestamps();
         });
     }

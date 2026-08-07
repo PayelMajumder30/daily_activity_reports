@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Asset Type')
+@section('title', 'Location')
 
 @section('content')
 
@@ -9,11 +9,11 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <h2 class="fw-bold">
-                <i class="bi bi-box"></i>
-                Asset type
+                <i class="bi bi-geo-alt"></i>
+                Location
             </h2>
             <p class="text-muted">
-                Manage all Asset types. 
+                Manage all Locations. 
             </p>
         </div>
 
@@ -26,11 +26,11 @@
 
     <div class="row">
 
-        <!-- Asset type List -->
+        <!-- Location List -->
         <div class="col-lg-8 mb-4">
             <div class="card shadow border-0 h-100">
                 <div class="card-header">
-                    <h5 class="mb-0">Asset type List</h5>
+                    <h5 class="mb-0">Location List</h5>
                 </div>
 
                 <div class="card-body">
@@ -46,22 +46,22 @@
                         </thead>
 
                         <tbody>
-                            @forelse($assetTypes as $assetType)
+                            @forelse($locations as $location)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
 
-                                <td>{{ ucwords($assetType->name) }}</td>
-                                <td>{{ $assetType->short_name }}</td>
+                                <td>{{ ucwords($location->name) }}</td>
+                                <td>{{ $location->short_name }}</td>
 
                                 <td class="text-center">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input assetType-status" type="checkbox"                                       
-                                            data-id="{{ encryptId($assetType->id) }}" {{ $assetType->status ? 'checked' : '' }}>                                       
+                                        <input class="form-check-input location-status" type="checkbox"                                       
+                                            data-id="{{ encryptId($location->id) }}" {{ $location->status ? 'checked' : '' }}>                                       
                                     </div>
                                 </td>
 
                                 <td>
-                                    <button type="button" class="btn btn-warning btn-sm editAssetType" data-id="{{ encryptId($assetType->id) }}">     
+                                    <button type="button" class="btn btn-warning btn-sm editLocation" data-id="{{ encryptId($location->id) }}">     
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
                                 </td>
@@ -69,7 +69,7 @@
                             @empty
                             <tr>
                                 <td colspan="3" class="text-center text-muted">
-                                    No Asset Type Found
+                                    No Location Found
                                 </td>
                             </tr>
                             @endforelse
@@ -87,13 +87,13 @@
 
                 <div class="card-header">
                     <h5 id="formTitle" class="mb-0">
-                        Add Asset Type
+                        Add Location
                     </h5>
                 </div>
 
                 <div class="card-body">
 
-                    <form id="assetTypeForm" action="{{ route('asset-type.store') }}" method="POST">
+                    <form id="locationForm" action="{{ route('location.store') }}" method="POST">
                         @csrf
 
                         <div id="methodField"></div>
@@ -101,7 +101,7 @@
                         <div class="mb-3">
 
                             <label class="form-label">
-                                Asset type name
+                                Location name
                             </label>
 
                             <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" id="name">
@@ -112,7 +112,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">
-                                Asset type short name
+                                Location short name
                             </label>
                             <input type="text" class="form-control @error('short_name') is-invalid @enderror" name="short_name" id="short_name">
                             @error('short_name')
@@ -122,7 +122,7 @@
 
                         <button class="btn btn-primary" id="submitBtn">
                             <i class="bi bi-check-circle"></i>
-                            Save Asset type
+                            Save Location
                         </button>
 
                         <button type="button" class="btn btn-secondary d-none" id="cancelBtn">      
@@ -159,11 +159,11 @@
                 $('#short_name').val('');
             }
             // Route templates
-            const editUrl = "{{ route('asset-type.edit', ':id') }}";
-            const updateUrl = "{{ route('asset-type.update', ':id') }}";
-            const storeUrl = "{{ route('asset-type.store') }}";
+            const editUrl = "{{ route('location.edit', ':id') }}";
+            const updateUrl = "{{ route('location.update', ':id') }}";
+            const storeUrl = "{{ route('location.store') }}";
 
-            $(document).on('click', '.editAssetType', function () {
+            $(document).on('click', '.editLocation', function () {
 
                 clearFormErrors();
                 let id = $(this).data('id');
@@ -173,7 +173,7 @@
 
                     success: function (res) {
 
-                        $('#formTitle').text('Update Asset Type');
+                        $('#formTitle').text('Update Location');
 
                         $('#name').val(res.name);
                         $('#short_name').val(res.short_name);
@@ -181,11 +181,11 @@
                         $('#submitBtn')
                             .removeClass('btn-primary')
                             .addClass('btn-warning')
-                            .html('<i class="bi bi-pencil-square"></i> Update Asset Type');
+                            .html('<i class="bi bi-pencil-square"></i> Update Location');
 
                         $('#cancelBtn').removeClass('d-none');
 
-                        $('#assetTypeForm')
+                        $('#locationForm')
                             .attr('action', updateUrl.replace(':id', id));
 
                         $('#methodField').html('@method("PUT")');
@@ -197,15 +197,15 @@
 
                 clearFormErrors();
 
-                $('#assetTypeForm').attr('action', storeUrl);
+                $('#locationForm').attr('action', storeUrl);
                 $('#methodField').html('');
                 $('#name').val('');
                 $('#short_name').val('');
-                $('#formTitle').text('Add Asset type');
+                $('#formTitle').text('Add Location');
                 $('#submitBtn')
                     .removeClass('btn-warning')
                     .addClass('btn-primary')
-                    .html('<i class="bi bi-check-circle"></i> Save Asset Type');
+                    .html('<i class="bi bi-check-circle"></i> Save Location');
 
                 $(this).addClass('d-none');
 
@@ -213,11 +213,11 @@
         });
 
 
-        $(document).on('change', '.assetType-status', function () {
+        $(document).on('change', '.location-status', function () {
             let checkbox = $(this);
             $.ajax({
 
-                url: "{{ route('asset-type.changeStatus', ':id') }}"
+                url: "{{ route('location.changeStatus', ':id') }}"
                         .replace(':id', checkbox.data('id')),
 
                 type: "POST",
@@ -230,8 +230,8 @@
                         icon: 'success',
                         title: 'Updated',
                         text: res.status
-                                ? 'Asset Type Activated'
-                                : 'Asset Type Deactivated',
+                                ? 'Location Activated'
+                                : 'Location Deactivated',
                         timer: 1200,
                         showConfirmButton: false
                     });

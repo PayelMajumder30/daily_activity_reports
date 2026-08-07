@@ -3,7 +3,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController, EventLogController,
-                            SettingController};
+                            SettingController, AssetInventoryController};
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -115,6 +115,25 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/edit/{id}', [SettingController::class,'tagEdit'])->name('edit');
         Route::put('/update/{id}', [SettingController::class,'tagUpdate'])->name('update');
         Route::post('/status/{id}', [SettingController::class,'tagChangeStatus'])->name('changeStatus');
+    });
+
+    // setting/location
+    Route::prefix('setting/location')->name('location.')->group(function () {   
+        Route::get('/', [SettingController::class,'locationIndex'])->name('index');
+        Route::post('/store', [SettingController::class,'locationStore'])->name('store');
+        Route::get('/edit/{id}', [SettingController::class,'locationEdit'])->name('edit');
+        Route::put('/update/{id}', [SettingController::class,'locationUpdate'])->name('update');
+        Route::post('/status/{id}', [SettingController::class,'locationChangeStatus'])->name('changeStatus');
+    });
+
+    // asset inventory
+    Route::prefix('asset-inventory')->name('asset-inventory.')->group(function() {
+        Route::get('/', [AssetInventoryController::class, 'index'])->name('index');
+        Route::get('/create', [AssetInventoryController::class, 'create'])->name('create');
+        Route::get('/generate-preview', [AssetInventoryController::class, 'generatePreview'])->name('generatePreview');
+        Route::get('/store', [AssetInventoryController::class, 'store'])->name('store');
+        Route::get('/get-models/{type}', [AssetInventoryController::class,'getModels'])->name('getModels');
+            
     });
 });
 

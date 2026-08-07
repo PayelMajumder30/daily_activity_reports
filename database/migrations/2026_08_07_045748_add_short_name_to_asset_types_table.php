@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('asset_inventories', function (Blueprint $table) {
+        Schema::table('asset_types', function (Blueprint $table) {
             //
-            $table->tinyInteger('status')->default(1)->after('remarks');
+            $table->string('short_name')->after('name');
         });
     }
 
@@ -22,9 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('asset_inventories', function (Blueprint $table) {
+        Schema::table('asset_types', function (Blueprint $table) {
             //
-            $table->dropColumn('status');
+            $table->dropColumn('short_name');
         });
     }
 };

@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class AssetType extends Model
+class Location extends Model
 {
     //
-    public $table = 'asset_types';
+    public $table = 'locations';
     protected $fillable = ['name','short_name', 'status'];
 
-    public function assetModel(): HasMany
+    public function assetInventory(): Hasmany
     {
-        return $this->hasMany(AssetModel::class);
+        return $this->hasMany(AssetInventory::class);
     }
 }
