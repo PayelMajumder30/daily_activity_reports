@@ -36,8 +36,9 @@
                         <th>Serial No.</th>
                         <th>Location</th>
                         <th>Installation</th>
+                        <th>Warranty Year</th>
                         <th>Warranty end</th>
-                        <th>Status</th>
+                        <!-- <th>Status</th> -->
                     </tr>
                 </thead>
 
@@ -47,15 +48,16 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $item->tag_no }}</td>
                         <td>{{ $item->po_number }}</td>
-                        <td>{{ $item->assetType->name }}</td>
+                        <td>{{ ucwords($item->assetModel->assetType->name ?? 'N/A')}}</td>
                         <td>{{ $item->assetModel->model_name }}</td>
                         <td>{{ $item->serial_no }}</td>
                         <td>{{ $item->location->name }}</td>
-                        <td>{{ $item->installation_date }}</td>
-                        <td>{{ $item->warranty_end }}</td>
-                        <td>
+                        <td>{{ $item->installation_date ? date('d-m-Y', strtotime($item->installation_date)) : 'N/A'}}</td>
+                        <td>{{ $item->warranty_year }}</td>
+                        <td>{{ $item->warranty_end ? date('d-m-Y', strtotime($item->warranty_end)) : 'N/A'}}</td>
+                        <!-- <td>
                             <span class="badge bg-success">{{ $item->asset_status }}</span>
-                        </td>
+                        </td> -->
                     </tr>                       
                     @empty
                     <tr>

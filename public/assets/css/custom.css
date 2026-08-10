@@ -1,0 +1,15 @@
+.activity-details {
+    width: 500px;
+    max-width: 500px;
+    white-space: normal;
+    word-wrap: break-word;
+}
+
+#complaintTable th:nth-child(4),
+#complaintTable td:nth-child(4) {
+    width: 90px !important;
+    max-width: 90px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

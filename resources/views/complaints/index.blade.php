@@ -4,6 +4,7 @@
 
 @section('content')
 
+
 <div class="container-fluid py-4">
 
    <div class="row mb-4">
@@ -33,6 +34,7 @@
             </h5>
         </div>
 
+        
         <div class="card-body">
             <form id="uploadForm" action="{{ route('upload.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -168,15 +170,14 @@
         </div>
 
         <div class="card-body">
-            <table class="table table-bordered table-hover"
-                   id="complaintTable">
+            <table class="table table-bordered table-hover" id="complaintTable">                  
                 <thead class="table-dark">
 
                     <tr>
                         <th>SL</th>
                         <th>Activity Details</th>
                         <th>Type of Activity</th>
-                        <th>Asset Tag No</th>
+                        <th class="asset-tag-column">Asset Tag No</th>
                         <th>Engineer</th>
                         <th>Status</th>
                         <th>Activity Duration</th>
@@ -195,7 +196,7 @@
 
                                 <td>{{ !empty($row->type_of_activity) ? $row->type_of_activity : 'NA' }}</td>
 
-                                <td>{{ !empty($row->asset_tag_no) ? $row->asset_tag_no : 'NA'}}</td>
+                                <td class="asset-tag-column">{{ !empty($row->asset_tag_no) ? $row->asset_tag_no : 'NA'}}</td>
 
                                 <td>{{ $row->engineer_name }}</td>
 
@@ -231,6 +232,8 @@
 <script>
     $(document).ready(function(){
 
+
+    
         $('#uploadBtn').prop('disabled', true);
 
         function checkFields(){

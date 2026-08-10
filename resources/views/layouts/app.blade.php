@@ -22,6 +22,9 @@
     <!-- SweetAlert -->
     <link rel="stylesheet" href="{{ asset('assets/css/sweetalert2.min.css') }}">
 
+    <!-- custom css -->
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+
     @stack('styles')
 
 </head>

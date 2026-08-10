@@ -130,8 +130,9 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
     Route::prefix('asset-inventory')->name('asset-inventory.')->group(function() {
         Route::get('/', [AssetInventoryController::class, 'index'])->name('index');
         Route::get('/create', [AssetInventoryController::class, 'create'])->name('create');
+        Route::post('/store', [AssetInventoryController::class, 'store'])->name('store');
         Route::get('/generate-preview', [AssetInventoryController::class, 'generatePreview'])->name('generatePreview');
-        Route::get('/store', [AssetInventoryController::class, 'store'])->name('store');
+        Route::get('/generate-tags/{location}/{assetType}/{quantity}',[AssetInventoryController::class, 'generateTags'])->name('generateTags');
         Route::get('/get-models/{type}', [AssetInventoryController::class,'getModels'])->name('getModels');
             
     });

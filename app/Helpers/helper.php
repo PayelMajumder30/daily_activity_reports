@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Crypt;
-use App\Models\EventLog;
+use App\Models\{EventLog, AssetType, AssetInventory, Location};
 
 if (!function_exists('encryptId')) {
     function encryptId($id)
@@ -17,6 +17,7 @@ if (!function_exists('decryptId')) {
     }
 }
 
+// for enventlog
 if(!function_exists('eventLog')) {
     function eventLog($action, $module, $description = null) {
         EventLog::create([
@@ -30,20 +31,54 @@ if(!function_exists('eventLog')) {
     }
 }
 
-function generateAssetTag($locationId,$assetTypeId)
-{
-    $location = Location::findOrFail($locationId);
-    $assetType = AssetType::findOrFail($assetTypeId);
-    $prefix = $location->short_name.'/IT/'.now()->format('my').'/'.strtoupper($assetType->short_name);
+// for tag generate
+// if(!function_exists('generateAssetTag')){
+//     function generateAssetTag($locationId, $assetTypeId){
+//         $location = Location::findOrFail($locationId);
+//         $assetType = AssetType::findOrFail($assetTypeId);
 
-    $last = AssetInventory::where('tag_no','like',$prefix.'/%')->latest('id')->first();
+//         $prefix = strtoupper($location->short_name) . '/IT/' . now()->format('my') . '/' . strtoupper($assetType->short_name);
+//         $last = AssetInventory::where('tag_no', 'like', $prefix . '/%')->orderByDesc('id')->first();
 
-    if($last){
-        $running = (int)substr($last->tag_no,-4)+1;
-            
-    }else{
-        $running=0;
+//         if($last){
+//             $lastNumber = (int) substr($last->tag_no, -4);
+//             $runningNumber = $lastNumber + 1;
+//         } else{
+//             $runningNumber = 0;
+//         }
+
+//         return $prefix . '/' . str_pad($runningNumber, 4, '0', STR_PAD_LEFT);
+//     }
+// }
+
+if (!function_exists('generateAssetTag')) {
+
+    function generateAssetTag($locationId, $assetTypeId, $running = null)
+    {
+        $location = Location::findOrFail($locationId);
+        $assetType = AssetType::findOrFail($assetTypeId);
+
+        $prefix = strtoupper($location->short_name)
+            . '/IT/'
+            . now()->format('my')
+            . '/'
+            . strtoupper($assetType->short_name);
+
+        if ($running === null) {
+
+            $last = AssetInventory::where(
+                'tag_no',
+                'like',
+                $prefix . '/%'
+            )->latest('id')->first();
+
+            if ($last) {
+                $running = (int) substr($last->tag_no, -4) + 1;
+            } else {
+                $running = 1;
+            }
+        }
+
+        return $prefix . '/' . str_pad($running, 4, '0', STR_PAD_LEFT);
     }
-
-    return $prefix.'/'.str_pad($running,4,'0',STR_PAD_LEFT);
 }

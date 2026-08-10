@@ -11,7 +11,7 @@ class AssetInventory extends Model
     //
     public $table = 'asset_inventories';
     protected $fillable = ['tag_no', 'asset_model_id', 'location_id', 'po_number', 'serial_no', 'installation_date', 'warranty_year',
-     'warranty_end', 'asset_status', 'remarks', 'created_by	', 'status'];
+     'warranty_end', 'asset_status', 'remarks', 'created_by', 'status'];
 
     public function assetModel(): BelongsTo {
         return $this->belongsTo(AssetModel::class);

@@ -309,7 +309,7 @@
                 html += `
                     <tr>
                         <td>${sl}</td>
-                        <td>${row.complaint_title}</td>
+                        <td class="activity-details">${row.complaint_title}</td>
                         <td>${row.engineer_name}</td>
                         <td>${row.asset_tag_no}</td>
                         <td>${row.status}</td>

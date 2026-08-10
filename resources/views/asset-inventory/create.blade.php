@@ -51,7 +51,7 @@
                                 <option value="">Select</option>
                                 @foreach($assetTypes as $type)
                                 <option value="{{ $type->id }}">
-                                    {{ $type->name }}
+                                    {{ ucwords($type->name) }}
                                 </option>
                                 @endforeach
                             </select>
@@ -75,7 +75,7 @@
                                 <option value="">Select</option>
                                 @foreach($locations as $location)
                                     <option value="{{ $location->id }}">
-                                        {{ ($location->name)}}
+                                        {{ ucwords($location->name)}}
                                     </option>
                                 @endforeach
                             </select>
@@ -179,262 +179,649 @@
         // ==========================
         // Generate Preview Table
         // ==========================
+       
+        $(document).ready(function () {
 
-        $('#generateRows').click(function(){
+            // ==========================
+            // Asset Type -> Asset Model
+            // ==========================
 
-            clearErrors();
+            $('#asset_type_id').change(function () {
 
-            let valid=true;
+                let type = $(this).val();
 
-            function error(id,msg){
+                $('#asset_model_id').html('<option value="">Loading...</option>');
 
-                $('#'+id+'_error').text(msg);
+                if (type == '') {
 
-                valid=false;
+                    $('#asset_model_id').html(
+                        '<option value="">Select Type First</option>'
+                    );
 
-            }
+                    return;
+                }
 
-            if($('#po_number').val()=='')
-                error('po_number','PO Number is required.');
+                $.ajax({
 
-            if($('#quantity').val()=='' || $('#quantity').val()<=0)
-                error('quantity','Quantity is required.');
+                    url: "{{ route('asset-inventory.getModels', ':id') }}"
+                        .replace(':id', type),
 
-            if($('#asset_type_id').val()=='')
-                error('asset_type','Asset Type is required.');
+                    type: "GET",
 
-            if($('#asset_model_id').val()=='' ||
-            $('#asset_model_id option:selected').text()=='No Model Available')
-                error('asset_model','Asset Model is required.');
+                    success: function (res) {
 
-            if($('#location_id').val()=='')
-                error('location','Location is required.');
+                        let option = '';
 
-            if($('#installation_date').val()=='')
-                error('installation_date','Installation Date is required.');
+                        if (res.length == 0) {
 
-            if($('#warranty_years').val()=='')
-                error('warranty_years','Warranty Year is required.');
+                            option =
+                                '<option value="">No Model Available</option>';
 
-            if(!valid)
-                return;
+                        } else {
 
-            //---------------------------------------
-            // Warranty Calculation
-            //---------------------------------------
+                            option =
+                                '<option value="">Select Model</option>';
 
-            let install=new Date(
-                $('#installation_date').val()
-            );
+                            $.each(res, function (index, item) {
 
-            let warranty=new Date(install);
+                                option += `
+                                    <option value="${item.id}"
+                                        data-short="${item.short_name ?? ''}">
+                                        ${item.model_name}
+                                    </option>
+                                `;
 
-            warranty.setFullYear(
+                            });
 
-                warranty.getFullYear()
-                +
-                parseInt($('#warranty_years').val())
-            );
+                        }
 
-            warranty.setDate(
-                warranty.getDate()-1
-            );
+                        $('#asset_model_id').html(option);
 
-            let warrantyDate=
-                warranty.toISOString().split('T')[0];
+                    },
 
-            //---------------------------------------
-            // Values
-            //---------------------------------------
+                    error: function () {
 
-            let qty=parseInt($('#quantity').val());
+                        $('#asset_model_id').html(
+                            '<option value="">Unable to load models</option>'
+                        );
 
-            let assetType=
-                $('#asset_type_id option:selected').text();
+                    }
 
-            let assetModel=
-                $('#asset_model_id option:selected').text();
+                });
 
-            let po=
-                $('#po_number').val();
-
-            let installDate=
-                $('#installation_date').val();
-
-            let location=
-                $('#location_id option:selected').text();
+            });
 
 
+            $('#generateRows').click(function () {
 
-            //---------------------------------------
-            // Preview Table
-            //---------------------------------------
+                clearErrors();
 
-            let html='';
+                let valid = true;
 
-            html+=`
-            <div class="card shadow mt-4">
+                function error(id, msg) {
 
-                <div class="card-header d-flex justify-content-between">
+                    $('#' + id + '_error').text(msg);
 
-                    <h5 class="mb-0">
-                        Inventory Preview
-                    </h5>
+                    valid = false;
+                }
 
-                </div>
 
-                <div class="card-body">
+                // ==========================
+                // Validation
+                // ==========================
 
-                <form id="inventoryStoreForm">
+                if ($('#po_number').val().trim() == '') {
 
-                @csrf
+                    error(
+                        'po_number',
+                        'PO Number is required.'
+                    );
+                }
 
-                <table class="table table-bordered table-striped">
 
-                    <thead class="table-dark">
+                if (
+                    $('#quantity').val() == '' ||
+                    parseInt($('#quantity').val()) <= 0
+                ) {
+
+                    error(
+                        'quantity',
+                        'Quantity is required.'
+                    );
+                }
+
+
+                if ($('#asset_type_id').val() == '') {
+
+                    error(
+                        'asset_type',
+                        'Asset Type is required.'
+                    );
+                }
+
+
+                if (
+                    $('#asset_model_id').val() == '' ||
+                    $('#asset_model_id option:selected')
+                        .text()
+                        .trim() == 'No Model Available'
+                ) {
+
+                    error(
+                        'asset_model',
+                        'Asset Model is required.'
+                    );
+                }
+
+
+                if ($('#location_id').val() == '') {
+
+                    error(
+                        'location',
+                        'Location is required.'
+                    );
+                }
+
+
+                if ($('#installation_date').val() == '') {
+
+                    error(
+                        'installation_date',
+                        'Installation Date is required.'
+                    );
+                }
+
+
+                if (
+                    $('#warranty_years').val() == '' ||
+                    parseInt($('#warranty_years').val()) < 0
+                ) {
+
+                    error(
+                        'warranty_years',
+                        'Warranty Year is required.'
+                    );
+                }
+
+                if (!valid) {
+                    return;
+                }
+
+                // ==========================
+                // Get Values
+                // ==========================
+
+                let qty = parseInt(
+                    $('#quantity').val()
+                );
+
+                let locationId = $('#location_id').val();
+                    
+                let assetTypeId = $('#asset_type_id').val();                    
+
+                // ==========================
+                // Generate Asset Tags
+                // ==========================
+
+                $.ajax({
+
+                    url: "{{ route('asset-inventory.generateTags', [
+                        'location' => ':location',
+                        'assetType' => ':assetType',
+                        'quantity' => ':quantity'
+                    ]) }}"
+                    .replace(':location', locationId)
+                    .replace(':assetType', assetTypeId)
+                    .replace(':quantity', qty),
+
+                    type: "GET",
+
+                    beforeSend: function () {
+
+                        $('#generateRows')
+                            .prop('disabled', true)
+                            .html(
+                                '<span class="spinner-border spinner-border-sm"></span> Generating...'
+                            );
+                    },
+
+                    success: function (res) {
+
+                        if (!res.success) {
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: res.message ||
+                                    'Unable to generate asset tags.'
+                            });
+
+                            return;
+                        }
+
+                        // Generate preview table
+                        generatePreviewTable(res.tags);
+                    },
+
+                    error: function (xhr) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Unable to generate asset tags.'
+                        });
+
+                        console.log(xhr.responseText);
+                    },
+
+                    complete: function () {
+
+                        $('#generateRows')
+                            .prop('disabled', false)
+                            .html(
+                                'Generate Inventory Rows'
+                            );
+                    }
+
+                });
+
+            });
+
+
+            // ==========================
+            // Generate Preview Table
+            // ==========================
+
+            function generatePreviewTable(tags) {
+
+                let qty = parseInt(
+                    $('#quantity').val()
+                );
+
+                let assetTypeId = $('#asset_type_id').val();                   
+                let assetModelId = $('#asset_model_id').val();                    
+                let locationId = $('#location_id').val();                    
+                let assetType =
+                    $('#asset_type_id option:selected').text().trim();
+                                                
+                let assetModel =
+                    $('#asset_model_id option:selected').text().trim();
+                                               
+                let location =
+                    $('#location_id option:selected').text().trim();
+                                               
+                let po = $('#po_number').val();
+                    
+                let installationDateDb = $('#installation_date').val();
+                    
+                let warrantyYears = parseInt($('#warranty_years').val());
+                    
+                // ==========================
+                // Installation Date Display
+                // YYYY-MM-DD -> DD-MM-YYYY
+                // ==========================
+
+                let installParts = installationDateDb.split('-');
+                    
+                let installationDate =  `${installParts[2]}-${installParts[1]}-${installParts[0]}`;
+                   
+                // ==========================
+                // Warranty End Date
+                // ==========================
+
+                let install =
+                    new Date(
+                        installationDateDb + 'T00:00:00'
+                    );
+
+                let warranty = new Date(install);
+                    
+                warranty.setFullYear(
+                    warranty.getFullYear() + warrantyYears
+                );
+
+                warranty.setDate(
+                    warranty.getDate() - 1
+                );
+
+                // Display format: DD-MM-YYYY
+
+                let warrantyDay = String(warranty.getDate()).padStart(2, '0');                                           
+                let warrantyMonth = String(warranty.getMonth() + 1).padStart(2, '0');                                           
+                let warrantyYear = warranty.getFullYear();                   
+                let warrantyDate = `${warrantyDay}-${warrantyMonth}-${warrantyYear}`;
+                let warrantyEndDb = `${warrantyYear}-${warrantyMonth}-${warrantyDay}`;
+                    
+                // ==========================
+                // Preview Table
+                // ==========================
+
+                let html = `
+
+                <div class="card shadow mt-4">
+
+                    <div class="card-header">
+
+                        <h5 class="mb-0">
+                            Inventory Preview
+                        </h5>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <form id="inventoryStoreForm">
+
+                            @csrf
+
+                            <input type="hidden" name="asset_type_id" value="${assetTypeId}">
+                                                               
+                            <input type="hidden" name="asset_model_id" value="${assetModelId}">                                                               
+
+                            <input type="hidden" name="po_number" value="${po}">
+                                                               
+                            <input type="hidden" name="location_id" value="${locationId}">
+                                
+                            <input type="hidden" name="installation_date" value="${installationDateDb}">
+
+                            <input type="hidden" name="warranty_year" value="${warrantyYears}">
+                                                               
+                            <input type="hidden" name="warranty_end" value="${warrantyEndDb}">
+                                                               
+                            <table class="table table-bordered table-striped">
+
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>SL</th>
+                                        <th>Asset Type</th>
+                                        <th>Asset Model</th>
+                                        <th>PO Number</th>
+                                        <th>Installation Date</th>
+                                        <th>Tag No</th>
+                                        <th width="180">
+                                            Serial No
+                                        </th>
+
+                                        <th>Warranty End</th>
+
+                                        <th>Location</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+                `;
+
+
+                // ==========================
+                // Create Rows
+                // ==========================
+
+                for (let i = 0; i < qty; i++) {
+
+                    html += `
 
                         <tr>
 
-                            <th>SL</th>
+                            <td>
+                                ${i + 1}
+                            </td>
 
-                            <th>Asset Type</th>
+                            <td>
+                                ${assetType}
+                            </td>
 
-                            <th>Asset Model</th>
+                            <td>
+                                ${assetModel}
+                            </td>
 
-                            <th>PO Number</th>
+                            <td>
+                                ${po}
+                            </td>
 
-                            <th>Installation Date</th>
+                            <td>
+                                ${installationDate}
+                            </td>
 
-                            <th>Tag No</th>
+                            <td>
 
-                            <th width="180">
-                                Serial No
-                            </th>
+                                <span class="badge bg-success">
+                                    ${tags[i]}
+                                </span>
 
-                            <th>Warranty End</th>
+                                <input type="hidden" name="tag_no[]" value="${tags[i]}">
+                            </td>
 
-                            <th>Location</th>
+                            <td>
+
+                                <input type="text" class="form-control serial-no" name="serial_no[]" placeholder="Enter Serial No" required>
+                            </td>
+
+                            <td>
+                                ${warrantyDate}
+                            </td>
+
+                            <td>
+                                ${location}
+                            </td>
 
                         </tr>
 
-                    </thead>
+                    `;
 
-                    <tbody>
-            `;
+                }
 
+                html += `
 
-            for(let i=1;i<=qty;i++){
+                                </tbody>
 
-                html+=`
+                            </table>
 
-                <tr>
+                            <div class="text-end">
 
-                    <td>${i}</td>
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary">
 
-                    <td>
+                                    <i class="bi bi-check-circle"></i>
+                                    Final Submit
 
-                        ${assetType}
+                                </button>
 
-                        <input type="hidden"
-                            name="asset_type_id"
-                            value="${$('#asset_type_id').val()}">
+                            </div>
 
-                    </td>
+                        </form>
 
-                    <td>
+                    </div>
 
-                        ${assetModel}
-
-                        <input type="hidden"
-                            name="asset_model_id"
-                            value="${$('#asset_model_id').val()}">
-
-                    </td>
-
-                    <td>
-
-                        ${po}
-
-                        <input type="hidden"
-                            name="po_number"
-                            value="${po}">
-
-                    </td>
-
-                    <td>
-
-                        ${installDate}
-
-                        <input type="hidden" name="installation_date" value="${installDate}">
-c
-                    </td>
-
-                    <td>
-
-                        <span class="badge bg-secondary">
-                            Auto Generate
-                        </span>
-
-                    </td>
-
-                    <td>
-                        <input type="text" class="form-control" name="serial_no[]" placeholder="Enter Serial No">     
-                    </td>
-
-                    <td>
-
-                        ${warrantyDate}
-
-                        <input type="hidden"
-                            name="warranty_end"
-                            value="${warrantyDate}">
-
-                    </td>
-
-                    <td>
-
-                        ${location}
-
-                        <input type="hidden"
-                            name="location_id"
-                            value="${ $('#location_id').val() }">
-
-                    </td>
-
-                </tr>
+                </div>
 
                 `;
 
+
+                $('#previewArea').html(html);
+
             }
 
+            // ========================================
+            // Excel Column Paste → Serial No. Inputs
+            // ========================================
 
-            html+=`
+            $(document).on('paste', 'input.serial-no', function(e) {
+                e.preventDefault();
+                let pastedText = (e.originalEvent || e).clipboardData.getData('text');
 
-                    </tbody>
+                // Split Excel copied column into separate values
+                let serialNumbers = pastedText.split(/\r?\n/).map(value => value.trim()).filter(value => value !== '');
 
-                </table>
+                // Get all serial number input boxes
+                let inputs = $('input.serial-no');
 
-                <div class="text-end">
+                //Find the input where user pasted
+                let startIndex =  inputs.index(this);
 
-                    <button
-                        type="submit"
-                        class="btn btn-primary">
+                // Put each serial number into the following inputs
+                serialNumbers.forEach(function(serial, index){
+                    let targetIndex = startIndex + index;
+                    if(targetIndex < inputs.length) {
+                        $(inputs[targetIndex]).val(serial);
+                        // Remove invalid style if previously added
+                        $(inputs[targetIndex]).removeClass('is-invalid');
+                    }
+                });
+            });
 
-                        Final Submit
+            // ==========================
+            // Final Submit
+            // ==========================
 
-                    </button>
+            $(document).on(
+                'submit',
+                '#inventoryStoreForm',
+                function (e) {
 
-                </div>
+                    e.preventDefault();
 
-                </form>
+                    let form = this;
 
-                </div>
-
-            </div>
-            `;
+                    let valid = true;
 
 
-            $('#previewArea').html(html);
+                    // Check Serial Numbers
+                    // $(form).find('.serial-no')
+                        
+                    //     .each(function () {
+
+                    //         if ($(this).val().trim() == '') {
+
+                    //             $(this).addClass('is-invalid');
+
+                    //             valid = false;
+
+                    //         } else {
+
+                    //             $(this).removeClass('is-invalid');
+
+                    //         }
+
+                    //     });
+                    $(form).find('.serial-no').each(function () {
+                        
+                        let value = $(this).val().trim();
+
+                        if (value === '') {
+
+                            $(this).addClass('is-invalid');
+
+                            valid = false;
+
+                        } else {
+
+                            $(this).removeClass('is-invalid');
+                        }
+
+                    });
+
+                    // ==========================
+                    // Stop if invalid
+                    // ==========================
+
+                    if (!valid) {
+
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Required',
+                            text: 'Please enter Serial Number for all inventories.'
+                        });
+
+                        return;
+                    }
+
+
+                    $.ajax({
+
+                        url: "{{ route('asset-inventory.store') }}",
+
+                        type: "POST",
+
+                        data: $(form).serialize(),
+
+                        beforeSend: function () {
+
+                            $(form)
+                                .find('button[type="submit"]')
+                                .prop('disabled', true)
+                                .html(
+                                    '<span class="spinner-border spinner-border-sm"></span> Saving...'
+                                );
+                        },
+
+                        success: function (res) {
+
+                            if (res.success) {
+
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success',
+                                    text: res.message 
+                                }).then(function () {
+
+                                    window.location.href =
+                                        "{{ route('asset-inventory.index') }}";
+
+                                });
+
+                            }
+
+                        },
+
+                        error: function (xhr) {
+                            console.log(xhr.responseText);
+                            let message =
+                                'Unable to save asset inventory.';
+                            if (
+                                xhr.responseJSON &&
+                                xhr.responseJSON.message
+                            ) {
+                                message = xhr.responseJSON.message;
+                            }
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: message
+                            });
+                        },
+
+                        complete: function () {
+
+                            $(form)
+                                .find('button[type="submit"]')
+                                .prop('disabled', false)
+                                .html(
+                                    '<i class="bi bi-check-circle"></i> Final Submit'
+                                );
+
+                        }
+
+                    });
+
+                }
+            );
+
+
+            // ==========================
+            // Clear Errors
+            // ==========================
+
+            function clearErrors() {
+
+                $('.text-danger').text('');
+
+                $('.form-control, .form-select')
+                    .removeClass('is-invalid');
+
+            }
 
         });
 
@@ -444,11 +831,11 @@ c
 
         function clearErrors(){
 
-            $('.text-danger').text('');
+                $('.text-danger').text('');
 
-        }
+            }
 
-    });
+        });
 </script>
 @endpush
 
