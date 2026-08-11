@@ -10,11 +10,11 @@
         <div class="col-md-8">
             <h2 class="fw-bold">
                 <i class="bi bi-diagram-3"></i>
-                Discipline
+                Department
             </h2>
             <p class="text-muted">
-                Manage all disciplines. 
-            </p>
+                Manage all departments. 
+            </p>    
         </div>
 
         <div class="col-md-4 text-end">
@@ -30,15 +30,16 @@
         <div class="col-lg-8 mb-4">
             <div class="card shadow border-0 h-100">
                 <div class="card-header">
-                    <h5 class="mb-0">Discipline List</h5>
+                    <h5 class="mb-0">Department List</h5>
                 </div>
 
                 <div class="card-body">
-                    <table class="table table-bordered table-hover mb-0">
+                    <table class="table table-bordered table-hover mb-0" id="disciplineTable">
                         <thead class="table-dark">
                             <tr>
                                 <th width="70">SL</th>
                                 <th>Name</th>
+                                <th>Section</th>
                                 <th>Status</th>
                                 <th width="120">Action</th>
                             </tr>
@@ -50,6 +51,12 @@
                                 <td>{{ $loop->iteration }}</td>
 
                                 <td>{{ ucwords($discipline->name) }}</td>
+                                <td>
+                                    <a href="{{ route('discipline.sections.index', encryptId($discipline->id)) }}" class="btn btn-info btn-sm" title="section">                                        
+                                        <i class="bi bi-list-ul"></i>
+                                       
+                                    </a>
+                                </td>
 
                                 <td class="text-center">
                                     <div class="form-check form-switch">
@@ -66,8 +73,8 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="3" class="text-center text-muted">
-                                    No Discipline Found
+                                <td colspan="4" class="text-center text-muted">
+                                    No Department Found
                                 </td>
                             </tr>
                             @endforelse
@@ -85,7 +92,7 @@
 
                 <div class="card-header">
                     <h5 id="formTitle" class="mb-0">
-                        Add Discipline
+                        Add Department
                     </h5>
                 </div>
 
@@ -99,7 +106,7 @@
                         <div class="mb-3">
 
                             <label class="form-label">
-                                Discipline name
+                                Department name
                             </label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" id="name">
                             @error('name')
@@ -109,7 +116,7 @@
 
                         <button class="btn btn-primary" id="submitBtn">
                             <i class="bi bi-check-circle"></i>
-                            Save Discipline
+                            Save Department
                         </button>
 
                         <button type="button" class="btn btn-secondary d-none" id="cancelBtn">      
@@ -138,6 +145,19 @@
     <script>
         $(document).ready(function () {
 
+
+            $('#disciplineTable').DataTable({
+                pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, 'All']
+                ],
+                ordering: true,
+                searching: false,
+                responsive: true,
+                
+            });
+
             function clearFormErrors() {
                 $('.text-danger').text('');
                 $('.form-control').removeClass('is-invalid');
@@ -158,14 +178,14 @@
 
                     success: function (res) {
 
-                        $('#formTitle').text('Update Discipline');
+                        $('#formTitle').text('Update Department');
 
                         $('#name').val(res.name);
 
                         $('#submitBtn')
                             .removeClass('btn-primary')
                             .addClass('btn-warning')
-                            .text('Update Discipline');
+                            .text('Update Department');
 
                         $('#cancelBtn').removeClass('d-none');
 
@@ -186,42 +206,18 @@
 
                 $('#name').val('');
 
-                $('#formTitle').text('Add Discipline');
+                $('#formTitle').text('Add Department');
 
                 $('#submitBtn')
                     .removeClass('btn-warning')
                     .addClass('btn-primary')
-                    .text('Save Discipline');
+                    .text('Save Department');
 
                 $(this).addClass('d-none');
 
             });
 
         });
-
-        // $(document).on('submit', '.delete-form', function(e){
-
-        //     e.preventDefault();
-
-        //     let form = this;
-
-        //     Swal.fire({
-        //         title: 'Delete Activity?',
-        //         text: "This record will be permanently deleted.",
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonColor: '#d33',
-        //         cancelButtonColor: '#6c757d',
-        //         confirmButtonText: 'Yes, Delete',
-        //         cancelButtonText: 'Cancel'
-        //     }).then((result)=>{
-
-        //         if(result.isConfirmed){
-        //             form.submit();
-        //         }
-
-        //     });
-        // });
 
         $(document).on('change', '.discipline-status', function () {
             let checkbox = $(this);
@@ -240,8 +236,8 @@
                         icon: 'success',
                         title: 'Updated',
                         text: res.status
-                                ? 'Discipline Activated'
-                                : 'Discipline Deactivated',
+                                ? 'Department Activated'
+                                : 'Department Deactivated',
                         timer: 1200,
                         showConfirmButton: false
                     });

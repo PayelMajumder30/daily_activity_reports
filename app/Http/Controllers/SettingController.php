@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Designation, Discipline, AssetType, AssetModel, AssetTag, Location};
+use Illuminate\Validation\Rule;
+use App\Models\{Designation, Discipline, AssetType, AssetModel, AssetTag, Location, DeptSection};
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -72,7 +73,7 @@ class SettingController extends Controller
         ]);
     }  
 
-    //Discipline
+    //Discipline(department)
     public function discIndex(){
 
         // dd('Controller Hit');
@@ -136,6 +137,130 @@ class SettingController extends Controller
             'status'  => $discipline->status
         ]);
     }  
+
+     //Discipline(department)/section
+    public function sectionIndex($id){
+
+        $departmentId = decryptId($id);
+        $department = Discipline::findOrFail($departmentId);
+        $sections = DeptSection::where('discipline_id', $departmentId)->latest()->get();
+
+        return view('settings.discipline.section', compact('department', 'sections'));
+    }
+
+    public function sectionStore(Request $request, $id) {
+        $discipline = Discipline::findOrFail(decryptId($id));
+
+        $request->validate([
+            'section_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('dept_sections', 'section_name')
+                    ->where(function ($query) use ($discipline) {
+                        return $query->where(
+                            'discipline_id',
+                            $discipline->id
+                        );
+                    }),
+            ],
+        ], [
+            'section_name.required' => 'Section name is required.',
+            'section_name.unique'   => 'This section already exists under this department.',
+        ]);
+
+        DeptSection::create([
+            'discipline_id' => $discipline->id,
+            'section_name'  => $request->section_name,
+            'status'        => 1,
+        ]);
+
+        eventLog(
+            'Create',
+            'Department Section',
+            'Created section: ' . $request->section_name .
+            ' under department: ' . $discipline->name
+        );
+
+        return redirect()
+            ->route(
+                'discipline.sections.index',
+                encryptId($discipline->id)
+            )
+            ->with('success', 'Section added successfully.');
+    }
+
+    public function sectionEdit($id) {
+        $section = DeptSection::findOrFail(decryptId($id));
+
+        return response()->json([
+            'id'            => encryptId($section->id),
+            'section_name'  => $section->section_name,
+            'discipline_id' => encryptId($section->discipline_id),
+        ]);
+    }
+
+    public function sectionUpdate(Request $request, $id){
+        $section = DeptSection::findOrFail(decryptId($id));
+
+        $request->validate([
+            'section_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('dept_sections', 'section_name')
+                    ->where(function ($query) use ($section) {
+                        return $query->where(
+                            'discipline_id',
+                            $section->discipline_id
+                        );
+                    })
+                    ->ignore($section->id),
+            ],
+        ], [
+            'section_name.required' => 'Section name is required.',
+            'section_name.unique'   => 'This section already exists under this department.',
+        ]);
+
+        $oldName = $section->section_name;
+
+        $section->update([
+            'section_name' => $request->section_name,
+        ]);
+
+        eventLog(
+            'Update',
+            'Department Section',
+            'Updated section from "' .
+            $oldName .
+            '" to "' .
+            $section->section_name .
+            '"'
+        );
+
+        return redirect()->route('discipline.sections.index',encryptId($section->discipline_id))->with('success', 'Section updated successfully.');
+    }
+
+    public function sectionStatus($id)
+    {
+        $section = DeptSection::findOrFail(decryptId($id));
+
+        $section->status = !$section->status;
+        $section->save();
+
+        eventLog(
+            'Status Change',
+            'Department Section',
+            $section->status
+                ? 'Activated section: ' . $section->section_name
+                : 'Deactivated section: ' . $section->section_name
+        );
+
+        return response()->json([
+            'success' => true,
+            'status'  => $section->status
+        ]);
+    }
 
     // asset type
     public function assetIndex(){

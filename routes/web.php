@@ -81,13 +81,20 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('/status/{id}', [SettingController::class,'desChangeStatus'])->name('changeStatus');
     });
 
-        // setting/Discipline
-    Route::prefix('setting/discipline')->name('discipline.')->group(function () {   
+    // setting/Discipline(department)
+    Route::prefix('setting/department')->name('discipline.')->group(function () {   
         Route::get('/', [SettingController::class,'discIndex'])->name('index');
         Route::post('/store', [SettingController::class,'discStore'])->name('store');
         Route::get('/edit/{id}', [SettingController::class,'discEdit'])->name('edit');
         Route::put('/update/{id}', [SettingController::class,'discUpdate'])->name('update');
         Route::post('/status/{id}', [SettingController::class,'discChangeStatus'])->name('changeStatus');
+
+        // section
+        Route::get('/sections/{id}', [SettingController::class, 'sectionIndex'])->name('sections.index');
+        Route::post('/sections/store/{id}', [SettingController::class, 'sectionStore'])->name('sections.store');
+        Route::get('/sections/edit/{id}', [SettingController::class, 'sectionEdit'])->name('sections.edit');
+        Route::put('/sections/update/{id}', [SettingController::class, 'sectionUpdate'])->name('sections.update');       
+        Route::post('/sections/status/{id}', [SettingController::class, 'sectionStatus'])->name('sections.status');
     });
 
     // setting/Asset Type

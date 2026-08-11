@@ -32,7 +32,7 @@ class EventLogController extends Controller
             $query->whereDate('created_at', '<=', $request->to_date);
         }
 
-        $logs = $query->latest()->paginate(20);
+        $logs = $query->latest()->get();
         $users = User::orderBy('name')->get();
 
         $modules = EventLog::select('module')->distinct()->orderBy('module')->pluck('module');

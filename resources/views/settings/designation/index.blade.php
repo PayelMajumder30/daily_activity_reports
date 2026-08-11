@@ -34,7 +34,7 @@
                 </div>
 
                 <div class="card-body">
-                    <table class="table table-bordered table-hover mb-0">
+                    <table class="table table-bordered table-hover mb-0" id="designationTable">
                         <thead class="table-dark">
                             <tr>
                                 <th width="70">SL</th>
@@ -66,7 +66,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="3" class="text-center text-muted">
+                                <td colspan="4" class="text-center text-muted">
                                     No Designation Found
                                 </td>
                             </tr>
@@ -138,6 +138,17 @@
 
     <script>
         $(document).ready(function () {
+            $('#designationTable').DataTable({
+                pageLength: 10,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, 'All']
+                ],
+                ordering: true,
+                searching: false,
+                responsive: true,
+                
+            });
 
             function clearFormErrors() {
                 $('.text-danger').text('');

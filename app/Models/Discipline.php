@@ -12,6 +12,11 @@ class Discipline extends Model
     public $table = 'disciplines';
     protected $fillable = ['name','status'];
 
+    public function deptSection(): HasMany
+    {
+        return $this->hasMany(DeptSection::class, 'discipline_id');
+    }
+
     public function custodian(): HasMany
     {
         return $this->hasMany(Custodian::class);

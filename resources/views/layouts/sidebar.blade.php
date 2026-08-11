@@ -143,7 +143,7 @@
                             <a href="{{route('discipline.index')}}"
                                 class="nav-link text-white {{ request()->routeIs('discipline.*') ? 'active bg-primary' : '' }}">
                                 <i class="bi bi-diagram-3"></i>
-                                Discipline
+                                Department
                             </a>
                         </li>
 

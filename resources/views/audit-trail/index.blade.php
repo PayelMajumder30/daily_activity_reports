@@ -51,7 +51,7 @@
 
                                 <option value="{{ $user->id }}"
                                     {{ request('user')==$user->id?'selected':'' }}>
-                                    {{ $user->name }}
+                                    {{ ucwords($user->name) }}
                                 </option>
                             @endforeach
 
@@ -131,7 +131,7 @@
             </h5>
 
             <span class="badge bg-primary">
-                Total Logs : {{ $logs->total() }}
+                Total Logs : {{ $logs->count() }}
             </span>
 
         </div>
@@ -139,7 +139,7 @@
         <!-- table -->
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
+                <table class="table table-bordered table-hover align-middle" id="auditTable">
                     <thead class="table-dark">
                         <tr>
                             <th width="60">SL</th>
@@ -155,7 +155,7 @@
                     @forelse($logs as $key=>$log)
                         <tr>
                             <td>
-                                {{ $logs->firstItem()+$key }}
+                                {{ $key + 1 }}
                             </td>
 
                             <td>
@@ -197,12 +197,6 @@
 
         </div>
 
-        <div class="card-footer">
-
-            {{ $logs->withQueryString()->links('pagination::bootstrap-5') }}
-
-        </div>
-
     </div>
 
 </div>
@@ -210,7 +204,18 @@
 
 @push('scripts')
 <script>
-
+    $(document).ready(function(){
+        $('#auditTable').DataTable({
+            pageLength: 10,
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [10, 25, 50, 100, 'All']
+            ],
+            ordering: true,
+            searching: false,
+            responsive: true
+        });
+    });
 </script>
 @endpush
 @endsection
