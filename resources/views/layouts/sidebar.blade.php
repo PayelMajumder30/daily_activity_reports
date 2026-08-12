@@ -187,13 +187,6 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
-                            <a href="#"
-                                class="nav-link text-white {{ request()->routeIs('asset-assignment.*') ? 'active bg-primary' : '' }}">
-                                <i class="bi bi-arrow-left-right"></i>
-                                Asset Assignment
-                            </a>
-                        </li>
                     </ul>
                 </div>
             </li>
@@ -204,6 +197,13 @@
                 <a href="{{ route('asset-inventory.index') }}" class="nav-link text-white {{ request()->routeIs('asset-inventory') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-box-seam"></i>
                     Asset Inventory
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('issue-register.index')}}" class="nav-link text-white {{ request()->routeIs('issue-register.*') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-person-workspace"></i>
+                    Issue Register
                 </a>
             </li>
         @endif

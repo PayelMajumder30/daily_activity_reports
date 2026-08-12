@@ -16,6 +16,11 @@
             <p class="text-muted">
                 Manage all inventory assets.
             </p>
+
+             <a href="{{ route('asset-inventory.create') }}" class="btn btn-primary">           
+                <i class="bi bi-plus-circle"></i>
+                Add Inventory
+            </a>
         </div>
 
     </div>
@@ -75,17 +80,17 @@
 
                     {{-- Location --}}
                     <div class="col-md-2">
-                        <label>Location</label>
+                        <label>Asset Model</label>
 
-                        <select name="location" class="form-select">                           
+                        <select name="asset_model" class="form-select">                           
                             <option value="">
-                                All Locations
+                                All Asset Models
                             </option>
 
-                            @foreach($locations as $location)
-                                <option value="{{ $location->id }}"
-                                    {{ request('location') == $location->id ? 'selected' : '' }}>
-                                    {{ ucwords($location->name) }}
+                            @foreach($assetModels as $assetModel)
+                                <option value="{{ $assetModel->id }}"
+                                    {{ request('assetModel') == $assetModel->id ? 'selected' : '' }}>
+                                    {{ ucwords($assetModel->model_name) }}
                                 </option>
                             @endforeach
                         </select>
@@ -127,12 +132,6 @@
             <h5 class="mb-0">
                 Asset Inventory Details
             </h5>
-
-            <a href="{{ route('asset-inventory.create') }}" class="btn btn-primary">           
-                <i class="bi bi-plus-circle"></i>
-                Add Inventory
-
-            </a>
 
         </div>
 
@@ -222,6 +221,7 @@ $(document).ready(function () {
         ],
         order: [[0, 'asc']],
         pageLength: 10,
+        searching: false,
 
         language: {
             emptyTable: "No Inventory Found"

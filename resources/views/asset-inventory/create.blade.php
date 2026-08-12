@@ -30,75 +30,78 @@
         </div>
    
         <div class="card-body">
-                <form id="previewForm">
-                    @csrf
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label>PO Number</label>
-                            <input type="text" class="form-control" name="po_number" id="po_number">
-                            <small class="text-danger" id="po_number_error"></small>
-                        </div>
+            <form id="previewForm">
+                @csrf
+                <div class="row">
+                    <div class="col-md-3">
+                        <label>PO Number</label> <span class="text-danger">*</span>
+                        <input type="text" class="form-control" name="po_number" id="po_number">
+                        <small class="text-danger" id="po_number_error"></small>
+                    </div>
 
-                        <div class="col-md-2">
-                            <label>Quantity</label>
-                            <input type="number" class="form-control" name="quantity" id="quantity" min="1">
-                            <small class="text-danger" id="quantity_error"></small>
-                        </div>
+                    <div class="col-md-2">
+                        <label>Quantity</label> <span class="text-danger">*</span>
+                        <input type="number" class="form-control" name="quantity" id="quantity" min="1">
+                        <small class="text-danger" id="quantity_error"></small>
+                    </div>
 
-                        <div class="col-md-3">
-                            <label>Asset Type</label>
-                            <select name="asset_type_id" id="asset_type_id" class="form-select">
-                                <option value="">Select</option>
-                                @foreach($assetTypes as $type)
-                                <option value="{{ $type->id }}">
-                                    {{ ucwords($type->name) }}
+                    <div class="col-md-3">
+                        <label>Asset Type</label> <span class="text-danger">*</span>
+                        <select name="asset_type_id" id="asset_type_id" class="form-select">
+                            <option value="">Select</option>
+                            @foreach($assetTypes as $type)
+                            <option value="{{ $type->id }}">
+                                {{ ucwords($type->name) }}
+                            </option>
+                            @endforeach
+                        </select>
+                        <small class="text-danger" id="asset_type_error"></small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Asset Model</label> <span class="text-danger">*</span>
+                        <select name="asset_model_id" id="asset_model_id" class="form-select">
+                            <option>Select Type First</option>
+                        </select>
+                        <small class="text-danger" id="asset_model_error"></small>
+                    </div>
+                </div>
+
+                <br>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label>Location</label> <span class="text-danger">*</span>
+                        <select name="location_id" id="location_id" class="form-select">
+                            <option value="">Select</option>
+                            @foreach($locations as $location)
+                                <option value="{{ $location->id }}">
+                                    {{ ucwords($location->name)}}
                                 </option>
-                                @endforeach
-                            </select>
-                            <small class="text-danger" id="asset_type_error"></small>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label>Asset Model</label>
-                            <select name="asset_model_id" id="asset_model_id" class="form-select">
-                                <option>Select Type First</option>
-                            </select>
-                            <small class="text-danger" id="asset_model_error"></small>
-                        </div>
+                            @endforeach
+                        </select>
+                        <small class="text-danger" id="location_error"></small>
                     </div>
 
-                    <br>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label>Location</label>
-                            <select name="location_id" id="location_id" class="form-select">
-                                <option value="">Select</option>
-                                @foreach($locations as $location)
-                                    <option value="{{ $location->id }}">
-                                        {{ ucwords($location->name)}}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <small class="text-danger" id="location_error"></small>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label>Installation Date</label>
-                            <input type="date" name="installation_date" id="installation_date" class="form-control">
-                            <small class="text-danger" id="installation_date_error"></small>
-                        </div>
-
-                        <div class="col-md-2">
-                            <label>Warranty (Years)</label>
-                            <input type="number" name="warranty_years" id="warranty_years" class="form-control">
-                            <small class="text-danger" id="warranty_years_error"></small>
-                        </div>
-
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="button" class="btn btn-success" id="generateRows"> Generate Inventory Rows</button>
-                        </div>
+                    <div class="col-md-3">
+                        <label>Installation Date</label> <span class="text-danger">*</span>
+                        <input type="date" name="installation_date" id="installation_date" class="form-control">
+                        <small class="text-danger" id="installation_date_error"></small>
                     </div>
-                </form>
+
+                    <div class="col-md-2">
+                        <label>Warranty (Years)</label> <span class="text-danger">*</span>
+                        <input type="number" name="warranty_years" id="warranty_years" class="form-control">
+                        <small class="text-danger" id="warranty_years_error"></small>
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end mb-0 gap-2">
+                        <button type="button" class="btn btn-success" id="generateRows"> Generate Inventory Rows</button>
+                        <a href="{{ route('asset-inventory.index') }}" class="btn btn-secondary">                                  
+                            Back
+                        </a>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 

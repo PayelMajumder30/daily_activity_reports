@@ -15,4 +15,9 @@ class DeptSection extends Model
     public function discipline(): BelongsTo {
         return $this->belongsTo(Discipline::class, 'discipline_id');
     }
+
+    public function issueRegister(): HasMany
+    {
+        return $this->hasMany(IssueRegister::class);
+    }
 }

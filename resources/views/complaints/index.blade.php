@@ -231,8 +231,6 @@
 @push('scripts')
 <script>
     $(document).ready(function(){
-
-
     
         $('#uploadBtn').prop('disabled', true);
 

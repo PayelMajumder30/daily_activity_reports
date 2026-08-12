@@ -31,4 +31,9 @@ class AssetInventory extends Model
     {
         return $this->hasMany(AssetAssigned::class);
     }
+
+    public function issueRegister(): HasMany
+    {
+        return $this->hasMany(IssueRegister::class);
+    }
 }

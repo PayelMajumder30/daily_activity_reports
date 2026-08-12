@@ -49,6 +49,11 @@ class AssetInventoryController extends Controller
             $query->where('location_id', $request->location);
         }
 
+        // Asset Model
+        if ($request->filled('asset_model')) {
+            $query->where('asset_model_id', $request->asset_model);
+        }
+
         // Installation Date
         if ($request->filled('installation_date')) {
             $query->whereDate('installation_date', $request->installation_date);
@@ -58,11 +63,11 @@ class AssetInventoryController extends Controller
             
         // Asset Type dropdown
         $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();
+
+        // Asset model dropdown
+        $assetModels = AssetModel::where('status', 1)->orderBy('model_name')->get();
             
-        // Location dropdown
-        $locations = Location::where('status', 1)->orderBy('name')->get();
-            
-        return view('asset-inventory.index', compact('inventories', 'assetTypes', 'locations'));
+        return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels'));
     }
 
     public function create() {
@@ -117,7 +122,6 @@ class AssetInventoryController extends Controller
             */
 
             foreach ($tags as $index => $tagNo) {
-
                 /*
                 |--------------------------------------------------------------------------
                 | Prevent duplicate tag
@@ -125,9 +129,7 @@ class AssetInventoryController extends Controller
                 */
 
                 if (AssetInventory::where('tag_no', $tagNo)->exists()) {
-
                     DB::rollBack();
-
                     return response()->json([
                         'success' => false,
                         'message' => "Asset tag {$tagNo} already exists."
@@ -135,7 +137,6 @@ class AssetInventoryController extends Controller
                 }
 
                 AssetInventory::create([
-
                     'tag_no'            => $tagNo,
                     'asset_model_id'    => $request->asset_model_id,
                     'location_id'       => $request->location_id,
@@ -157,16 +158,13 @@ class AssetInventoryController extends Controller
             );
 
             DB::commit();
-
             return response()->json([
                 'success' => true,
                 'message' => count($tags) . ' asset inventory record(s) created successfully.'
             ]);
 
         } catch (\Throwable $e) {
-
             DB::rollBack();
-
             return response()->json([
                 'success' => false,
                 'message' => 'Unable to save asset inventory.',
@@ -214,7 +212,6 @@ class AssetInventoryController extends Controller
     }
 
     
-
     public function getModels($type){
 
         $models = AssetModel::where('asset_type_id', $type)->where('status',1)->orderBy('model_name')->get();

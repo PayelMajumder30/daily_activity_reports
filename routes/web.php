@@ -3,7 +3,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController, EventLogController,
-                            SettingController, AssetInventoryController};
+                            SettingController, AssetInventoryController, IssueRegController};
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -142,6 +142,14 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/generate-tags/{location}/{assetType}/{quantity}',[AssetInventoryController::class, 'generateTags'])->name('generateTags');
         Route::get('/get-models/{type}', [AssetInventoryController::class,'getModels'])->name('getModels');
             
+    });
+
+    // asset register
+    Route::prefix('issue-register')->name('issue-register.')->group(function() {
+        Route::get('/', [IssueRegController::class, 'index'])->name('index');
+        Route::get('/create', [IssueRegController::class, 'create'])->name('create');
+        Route::post('/store', [IssueRegController::class, 'store'])->name('store');
+        Route::get('/sections/{id}', [IssueRegController::class, 'getSections'])->name('sections');
     });
 });
 

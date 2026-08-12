@@ -33,10 +33,9 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
 
                     <h5 class="mb-0">
-                        Section List
+                        Section List ({{ucwords($department->name)}})
                     </h5>
-                    <a href="{{ route('discipline.index') }}" class="btn btn-secondary">           
-                        
+                    <a href="{{ route('discipline.index') }}" class="btn btn-secondary">                                  
                         Back
                     </a>
                 </div>
@@ -98,11 +97,9 @@
             <div class="card shadow border-0">
 
                 <div class="card-header">
-
                     <h5 class="mb-0" id="sectionFormTitle">
                         Add Section
                     </h5>
-
                 </div>
 
                 <div class="card-body">
@@ -110,22 +107,7 @@
                     <form id="sectionForm" action="{{ route('discipline.sections.store', encryptId($department->id)) }}" method="POST">
 
                         @csrf
-
                         <div id="sectionMethodField"></div>
-
-
-                        {{-- Department --}}
-
-                        <div class="mb-3">
-
-                            <label class="form-label">
-                                Department
-                            </label>
-
-                            <input type="text" class="form-control" value="{{ ucwords($department->name) }}" readonly>
-                        </div>
-
-
                         {{-- Section Name --}}
 
                         <div class="mb-3">
