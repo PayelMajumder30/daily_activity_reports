@@ -79,9 +79,7 @@
                                 <option
                                     value="{{ $designation->id }}"
                                     {{ old('designation_id') == $designation->id ? 'selected' : '' }}>
-
                                     {{ ucwords($designation->name) }}
-
                                 </option>
 
                             @endforeach
@@ -109,8 +107,8 @@
                             </option>
 
                             @foreach($departments as $department)
-
-                                <option value="{{ encryptId($department->id) }}" data-id="{{ $department->id }}" {{ old('discipline_id') == $department->id ? 'selected' : '' }}>                  
+                                <option value="{{ encryptId($department->id) }}" data-id="{{ $department->id }}" 
+                                    {{ old('discipline_id') == encryptId($department->id) ? 'selected' : '' }}>                  
                                     {{ ucwords($department->name) }}
                                 </option>
 
@@ -127,21 +125,34 @@
                     </div>
 
                     {{-- Section --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Section
-                            <span class="text-danger">*</span>
+                           
                         </label>
 
-                        <select name="section_id" id="section_id" class="form-select @error('section_id') is-invalid @enderror" disabled>
+                        <select name="section_id" id="section_id" class="form-select" disabled>
                             <option value="">
                                 Select Department First
                             </option>
 
                         </select>
 
-                        @error('section_id')
+                    </div>
+
+                    {{-- employee Id --}}
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+                            Employee id 
+                            <span class="text-danger">*</span>
+                        </label>
+
+                         <input type="number" name="emp_id" value="{{ old('emp_id') }}" class="form-control @error('emp_id') is-invalid @enderror"
+                            placeholder="Enter employee id">
+
+                        @error('emp_id')
                             <small class="text-danger">
                                 {{ $message }}
                             </small>
@@ -150,7 +161,7 @@
                     </div>
 
                     {{-- User Type --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             User Type
@@ -173,20 +184,37 @@
                     </div>
 
                     {{-- Operator Name --}}
-                    <div id="operatorField" class="col-md-4 mb-3">
-                        <label>Operator Name</label>
-                        <input type="text" name="operator_name" id="operator_name" class="form-control" placeholder="Enter operator name">  
-                    </div>
+                    <div id="operatorField" class="col-md-4 mb-3 d-none">
+    <label class="form-label">
+        Operator Name
+        <span class="text-danger">*</span>
+    </label>
+
+    <input
+        type="text"
+        name="operator_name"
+        id="operator_name"
+        value="{{ old('operator_name') }}"
+        class="form-control @error('operator_name') is-invalid @enderror"
+        placeholder="Enter operator name"
+    >
+
+    @error('operator_name')
+        <small class="text-danger">
+            {{ $message }}
+        </small>
+    @enderror
+</div>
 
                     {{-- Asset Tag --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Asset Tag
                             <span class="text-danger">*</span>
                         </label>
 
-                        <select name="asset_inventory_id" class="form-select @error('asset_inventory_id') is-invalid @enderror">
+                        <select name="asset_inventory_id" id="asset_inventory_id" class="form-select @error('asset_inventory_id') is-invalid @enderror">
                             <option value="">
                                 Select Asset Tag
                             </option>
@@ -208,6 +236,7 @@
                             </small>
                         @enderror
                     </div>
+                    
                 </div>
 
                 <div class="mt-3">
@@ -233,7 +262,16 @@
 <script>
 
     $(document).ready(function () {
-
+        /*
+        |--------------------------------------------------------------------------
+        | Asset Tag - Searchable Single Select
+        |--------------------------------------------------------------------------
+        */
+        $('#asset_inventory_id').select2({
+            placeholder: 'Select Asset Tag',
+            allowClear: true,
+            width: '100%'
+        });
         /*
         |--------------------------------------------------------------------------
         | Department -> Section
@@ -244,11 +282,16 @@
 
             let departmentId = $(this).val();
 
-            $('#section_id').html('<option value="">Loading...</option>').prop('disabled', true);
+            $('#section_id')
+                .html('<option value="">Loading...</option>')
+                .prop('disabled', true);
 
             if (!departmentId) {
 
-                $('#section_id').html('<option value="">Select Department First</option>').prop('disabled', true);                                      
+                $('#section_id')
+                    .html('<option value="">Select Department First</option>')
+                    .prop('disabled', true);
+
                 return;
             }
 
@@ -256,32 +299,47 @@
                 .replace(':id', departmentId);
 
             $.ajax({
+
                 url: url,
                 type: 'GET',
 
                 success: function (response) {
 
-                    let options = '<option value="">Select Section</option>';
-                        
                     if (response.length > 0) {
+
+                        let options =
+                            '<option value="">Select Section</option>';
+
                         $.each(response, function (index, section) {
+
                             options +=
                                 '<option value="' +
                                 section.id +
                                 '">' +
                                 section.section_name +
                                 '</option>';
+
                         });
 
-                    } else {
-                        options = '<option value="">No Section Found</option>';                           
-                    }
+                        $('#section_id')
+                            .html(options)
+                            .prop('disabled', false);
 
-                    $('#section_id').html(options).prop('disabled', false);                                        
+                    } else {
+
+                        /*
+                        | Department has no section
+                        */
+
+                        $('#section_id')
+                            .html('<option value="">No Section Available</option>')
+                            .prop('disabled', true);
+                    }
                 },
 
                 error: function () {
-                    $('#section_id').html('<option value="">Unable to load sections</option>').prop('disabled', true);                                                                                            
+                    $('#section_id')
+                        .html('<option value="">Unable to load sections</option>').prop('disabled', true);                     
                 }
             });
         });
@@ -294,16 +352,20 @@
         function toggleOperatorField() {
 
             let userType = $('#user_type').val();
-
             if (userType === 'operator') {
+                $('#operatorField')
+                    .removeClass('d-none')
+                    .hide()
+                    .slideDown();
 
-                $('#operatorField').slideDown();
-
-                $('#operator_name').prop('required', true);
+                $('#operator_name')
+                    .prop('required', true);
 
             } else {
-
-                $('#operatorField').slideUp();
+                $('#operatorField')
+                    .slideUp(function () {
+                        $(this).addClass('d-none');
+                    });
 
                 $('#operator_name')
                     .prop('required', false)
@@ -312,9 +374,13 @@
         }
 
         $('#user_type').on('change', function () {
-
             toggleOperatorField();
+        });
 
+        toggleOperatorField();
+
+        $('#user_type').on('change', function () {
+            toggleOperatorField();
         });
 
         // Check on page load

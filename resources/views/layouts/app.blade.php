@@ -22,6 +22,9 @@
     <!-- SweetAlert -->
     <link rel="stylesheet" href="{{ asset('assets/css/sweetalert2.min.css') }}">
 
+    <!-- Select2 -->
+    <link rel="stylesheet" href="{{ asset('assets/css/select2.min.css') }}">
+
     <!-- custom css -->
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
 
@@ -53,6 +56,9 @@
 
     <!-- SweetAlert -->
     <script src="{{ asset('assets/js/sweetalert2@11.min.js') }}"></script>
+
+    <!-- SweetAlert -->
+    <script src="{{ asset('assets/js/select2.min.js') }}"></script>
 
     <!-- Common JS -->
     <script src="{{ asset('assets/js/app.js') }}"></script>

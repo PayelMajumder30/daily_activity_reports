@@ -19,7 +19,7 @@ return new class extends Migration
                
             $table->foreignId('discipline_id')->constrained('disciplines')->cascadeOnDelete();
 
-            $table->foreignId('section_id')->constrained('dept_sections')->cascadeOnDelete();
+            $table->foreignId('section_id')->nullable()->constrained('dept_sections')->nullOnDelete();
 
             $table->string('user_type');
             $table->string('operator_name')->nullable();

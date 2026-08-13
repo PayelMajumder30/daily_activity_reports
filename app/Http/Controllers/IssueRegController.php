@@ -10,8 +10,29 @@ class IssueRegController extends Controller
 {
     //
 
-    public function index(){
-        $issueRegisters = IssueRegister::with(['designation', 'discipline', 'deptSection', 'assetInventory'])->latest()->get();
+    public function index(Request $request){
+
+        $query = IssueRegister::with(['designation', 'discipline', 'deptSection', 'assetInventory']);
+
+           // custodian name
+        if ($request->filled('custodian_name')) {
+            $query->where('custodian_name', 'LIKE','%' . $request->custodian_name . '%');
+        }
+
+        // Employee Id
+        if ($request->filled('emp_id')) {
+            $query->where('emp_id', 'LIKE', '%' . $request->emp_id . '%');
+        }
+
+        // tag no.
+        if ($request->filled('tag_no')) {
+            $query->whereHas('assetInventory', function ($q) use ($request) {
+                $q->where('tag_no', 'LIKE', '%'. $request->tag_no . '%');
+            });
+        }
+
+        // $issueRegisters = IssueRegister::with(['designation', 'discipline', 'deptSection', 'assetInventory'])->latest()->get();
+        $issueRegisters = $query->latest()->get();
 
         return view('issue-register.index', compact('issueRegisters'));
     }
@@ -24,61 +45,212 @@ class IssueRegController extends Controller
         return view('issue-register.create', compact('designations', 'departments', 'assets'));
     }
 
+
     public function store(Request $request)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Basic Validation
+        |--------------------------------------------------------------------------
+        */
+
         $request->validate([
-            'custodian_name' => 'required|string|max:255',
 
-            'designation_id' => 'required|exists:designations,id',
+            'custodian_name' => [
+                'required',
+                'string',
+                'max:255'
+            ],
 
-            'discipline_id' => 'required|exists:disciplines,id',
+            'designation_id' => [
+                'required',
+                'exists:designations,id'
+            ],
 
-            'section_id' => 'required|exists:dept_sections,id',
+            'discipline_id' => [
+                'required',
+                'string'
+            ],
 
-            'user_type' => 'required|string|max:255',
+            'user_type' => [
+                'required',
+                'string',
+                'in:self,multiuser,operator'
+            ],
 
-            'operator_name' => 'nullable|string|max:255',
+            'operator_name' => [
+                'nullable',
+                'string',
+                'max:255'
+            ],
 
-            'asset_inventory_id' =>
-                'required|exists:asset_inventories,id',
+            'emp_id' => [
+                'required',
+                'digits:8',
+            ],
+
+            'asset_inventory_id' => [
+                'required',
+                'exists:asset_inventories,id'
+            ],
+
         ], [
-            'custodian_name.required' => 'Custodian name is required.',
+
+            'custodian_name.required' =>  'Custodian name is required.',
+               
             'designation_id.required' => 'Designation is required.',
+                
+            'designation_id.exists' => 'Selected designation is invalid.',               
+
             'discipline_id.required' => 'Department is required.',
-            'section_id.required' => 'Section is required.',
+                
             'user_type.required' => 'User type is required.',
+                
+            'user_type.in' => 'Please select a valid user type.',               
+
+            'emp_id.required' => 'Employee ID is required.',               
+
+            'emp_id.digits' => 'Please enter an 8 digit employee ID.',
+
             'asset_inventory_id.required' => 'Asset tag is required.',
+                
+            'asset_inventory_id.exists' => 'Selected asset tag is invalid.',
+                
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Decrypt Department ID
+        |--------------------------------------------------------------------------
+        */
 
-        // Operator name is mandatory only for Operator
-        if ($request->user_type === 'operator' &&
-            empty($request->operator_name)) {
+        try {
 
-            return back()
-                ->withErrors([
-                    'operator_name' =>'Operator name is required.'                       
-                ])->withInput();                
-        }
+            $disciplineId = decryptId($request->discipline_id);
 
-
-        // Make sure selected section belongs
-        // to selected department
-        $sectionExists = DeptSection::where('id', $request->section_id)
-            ->where('discipline_id', $request->discipline_id)
-            ->exists();
-
-        if (!$sectionExists) {
+        } catch (\Throwable $e) {
 
             return back()
                 ->withErrors([
-                    'section_id' =>
-                        'Selected section does not belong to the selected department.'
+                    'discipline_id' =>
+                        'Invalid department selected.'
                 ])
                 ->withInput();
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Department Exists
+        |--------------------------------------------------------------------------
+        */
+
+        $discipline = Discipline::where('id', $disciplineId)
+            ->where('status', 1)
+            ->first();
+
+        if (!$discipline) {
+
+            return back()
+                ->withErrors([
+                    'discipline_id' =>
+                        'Invalid department selected.'
+                ])
+                ->withInput();
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Operator Name Validation
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->user_type === 'operator') {
+
+            if (!$request->filled('operator_name')) {
+
+                return back()
+                    ->withErrors([
+                        'operator_name' =>
+                            'Operator name is required.'
+                    ])
+                    ->withInput();
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Whether Department Has Sections
+        |--------------------------------------------------------------------------
+        */
+
+        $hasSections = DeptSection::where('discipline_id', $disciplineId)
+            ->where('status', 1)
+            ->exists();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Section Validation
+        |--------------------------------------------------------------------------
+        */
+
+        $sectionId = null;
+
+        if ($hasSections) {
+
+            /*
+            |----------------------------------------------------------------------
+            | Section is required
+            |----------------------------------------------------------------------
+            */
+
+            if (!$request->filled('section_id')) {
+
+                return back()
+                    ->withErrors([
+                        'section_id' =>
+                            'Section is required.'
+                    ])
+                    ->withInput();
+            }
+
+
+            /*
+            |----------------------------------------------------------------------
+            | Check Section Belongs To Department
+            |----------------------------------------------------------------------
+            */
+
+            $sectionExists = DeptSection::where('id', $request->section_id)
+                ->where('discipline_id', $disciplineId)
+                ->where('status', 1)
+                ->exists();
+
+            if (!$sectionExists) {
+
+                return back()
+                    ->withErrors([
+                        'section_id' =>
+                            'Selected section does not belong to the selected department.'
+                    ])
+                    ->withInput();
+            }
+
+            $sectionId = $request->section_id;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Store Issue Register
+        |--------------------------------------------------------------------------
+        */
+
         IssueRegister::create([
+
             'custodian_name' =>
                 $request->custodian_name,
 
@@ -86,10 +258,10 @@ class IssueRegController extends Controller
                 $request->designation_id,
 
             'discipline_id' =>
-                $request->discipline_id,
+                $disciplineId,
 
             'section_id' =>
-                $request->section_id,
+                $sectionId,
 
             'user_type' =>
                 $request->user_type,
@@ -99,14 +271,29 @@ class IssueRegController extends Controller
                     ? $request->operator_name
                     : null,
 
+            'emp_id' =>
+                $request->emp_id,
+
             'asset_inventory_id' =>
                 $request->asset_inventory_id,
 
-            'status' => 1,
+            'status' =>
+                1,
         ]);
 
 
-        return redirect()->route('issue-register.index')->with('success','Issue register added successfully.');
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
+
+        return redirect()
+            ->route('issue-register.index')
+            ->with(
+                'success',
+                'Issue register added successfully.'
+            );
     }
 
     public function getSections($id){

@@ -16,6 +16,59 @@
                 Manage all Asset issue registers.
             </p>
         </div>
+        
+    </div>
+
+    
+    {{-- ==========================
+        Search Card
+    ========================== --}}
+
+    <div class="card shadow border-0 mb-4">
+
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-search"></i>
+                Search Asset Inventory
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <form method="GET" action="{{ route('issue-register.index') }}">             
+                <div class="row g-3">
+                    {{-- Custodian Name --}}
+                    <div class="col-md-4">
+                        <label>Custodian Name</label>
+                        <input type="text" name="custodian_name" class="form-control" value="{{ request('custodian_name') }}"placeholder="Search Custodian name">      
+                    </div>
+
+                    {{-- Employee Id --}}
+                    <div class="col-md-4">
+                        <label>Employee Id</label>
+                        <input type="text" name="emp_id" class="form-control" value="{{ request('emp_id') }}" placeholder="Search Employee id">                               
+                    </div>
+
+                    {{-- tag no. --}}
+                    <div class="col-md-4">
+                        <label>Asset Tag</label>
+                        <input type="text" name="tag_no" class="form-control" value="{{ request('tag_no') }}" placeholder="Search Asset Tag">     
+                    </div>
+
+                  
+                </div>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">                        
+                        <i class="bi bi-search"></i>
+                        Search
+                    </button>
+
+                    <a href="{{ route('issue-register.index') }}" class="btn btn-secondary">                   
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
 
     </div>
 
@@ -39,17 +92,17 @@
                 <table class="table table-bordered table-hover" id="issueRegisterTable">
                     
                     <thead class="table-dark">
-
                         <tr>
                             <th>SL</th>
                             <th>Custodian</th>
                             <th>Designation</th>
                             <th>Department</th>
+                            <th>Employee Id</th>
                             <th>Section</th>
                             <th>User Type</th>
                             <th>Operator Name</th>
                             <th>Asset Tag</th>
-                            <th>Status</th>
+                            <!-- <th>Status</th> -->
                         </tr>
 
                     </thead>
@@ -74,6 +127,10 @@
                                 </td>
 
                                 <td>
+                                    {{ ucwords($row->emp_id ?? 'N/A') }}
+                                </td>
+
+                                <td>
                                     {{ ucwords($row->deptSection->section_name ?? 'N/A') }}
                                 </td>
 
@@ -86,11 +143,9 @@
                                         </span>
 
                                     @elseif($row->user_type === 'operator')
-
                                         <span class="badge bg-warning text-dark">
                                             Operator
                                         </span>
-
                                     @else
 
                                         <span class="badge bg-info">
@@ -109,7 +164,7 @@
                                     {{ $row->assetInventory->tag_no ?? 'N/A' }}
                                 </td>
 
-                                <td>
+                                <!-- <td>
 
                                     @if($row->status)
                                         <span class="badge bg-success">
@@ -123,7 +178,7 @@
 
                                     @endif
 
-                                </td>
+                                </td> -->
                             </tr>
 
                         @endforeach

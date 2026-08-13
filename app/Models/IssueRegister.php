@@ -10,7 +10,7 @@ class IssueRegister extends Model
 {
     //
     public $table = 'issue_registers';
-    protected $fillable = ['custodian_name', 'designation_id', 'discipline_id', 'section_id', 'user_type', 'operator_name', 'asset_inventory_id', 'status'];
+    protected $fillable = ['custodian_name', 'designation_id', 'discipline_id', 'section_id', 'user_type', 'operator_name', 'emp_id', 'asset_inventory_id', 'status'];
 
     public function designation(): BelongsTo
     {
