@@ -16,11 +16,6 @@
             <p class="text-muted">
                 Manage all inventory assets.
             </p>
-
-             <a href="{{ route('asset-inventory.create') }}" class="btn btn-primary">           
-                <i class="bi bi-plus-circle"></i>
-                Add Inventory
-            </a>
         </div>
 
     </div>
@@ -31,11 +26,16 @@
 
     <div class="card shadow border-0 mb-4">
 
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
                 <i class="bi bi-search"></i>
                 Search Asset Inventory
             </h5>
+
+            <a href="{{ route('asset-inventory.create') }}" class="btn btn-primary btn-sm">           
+                <i class="bi bi-plus-circle"></i>
+                Add Inventory
+            </a>
         </div>
 
         <div class="card-body">

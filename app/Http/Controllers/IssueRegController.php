@@ -96,24 +96,15 @@ class IssueRegController extends Controller
 
         ], [
 
-            'custodian_name.required' =>  'Custodian name is required.',
-               
-            'designation_id.required' => 'Designation is required.',
-                
+            'custodian_name.required' =>  'Custodian name is required.',               
+            'designation_id.required' => 'Designation is required.',                
             'designation_id.exists' => 'Selected designation is invalid.',               
-
-            'discipline_id.required' => 'Department is required.',
-                
-            'user_type.required' => 'User type is required.',
-                
+            'discipline_id.required' => 'Department is required.',                
+            'user_type.required' => 'User type is required.',                
             'user_type.in' => 'Please select a valid user type.',               
-
             'emp_id.required' => 'Employee ID is required.',               
-
             'emp_id.digits' => 'Please enter an 8 digit employee ID.',
-
-            'asset_inventory_id.required' => 'Asset tag is required.',
-                
+            'asset_inventory_id.required' => 'Asset tag is required.',               
             'asset_inventory_id.exists' => 'Selected asset tag is invalid.',
                 
         ]);
@@ -198,7 +189,6 @@ class IssueRegController extends Controller
         */
 
         $sectionId = null;
-
         if ($hasSections) {
 
             /*
@@ -216,7 +206,6 @@ class IssueRegController extends Controller
                     ])
                     ->withInput();
             }
-
 
             /*
             |----------------------------------------------------------------------
@@ -251,34 +240,19 @@ class IssueRegController extends Controller
 
         IssueRegister::create([
 
-            'custodian_name' =>
-                $request->custodian_name,
-
-            'designation_id' =>
-                $request->designation_id,
-
-            'discipline_id' =>
-                $disciplineId,
-
-            'section_id' =>
-                $sectionId,
-
-            'user_type' =>
-                $request->user_type,
-
+            'custodian_name' => $request->custodian_name,                
+            'designation_id' => $request->designation_id,                
+            'discipline_id' => $disciplineId,                
+            'section_id' => $sectionId,                
+            'user_type' => $request->user_type,               
             'operator_name' =>
                 $request->user_type === 'operator'
                     ? $request->operator_name
                     : null,
 
-            'emp_id' =>
-                $request->emp_id,
-
-            'asset_inventory_id' =>
-                $request->asset_inventory_id,
-
-            'status' =>
-                1,
+            'emp_id' => $request->emp_id,               
+            'asset_inventory_id' => $request->asset_inventory_id,                
+            'status' => 1,               
         ]);
 
 
@@ -288,17 +262,68 @@ class IssueRegController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        return redirect()
-            ->route('issue-register.index')
-            ->with(
-                'success',
-                'Issue register added successfully.'
-            );
+        return redirect()->route('issue-register.index')->with('success', 'Issue register added successfully.');
+           
     }
 
     public function getSections($id){
         $departmentId  = decryptId($id);
         $sections = DeptSection::where('discipline_id', $departmentId)->where('status', 1)->orderBy('section_name')->get(['id', 'section_name']);
         return response()->json($sections);
+    }
+
+    public function employeeAssets($empId)
+    {
+        $issueRegisters = IssueRegister::with([
+            'designation',
+            'discipline',
+            'deptSection',
+            'assetInventory.assetModel',
+            'assetInventory.location',
+        ])
+        ->where('emp_id', $empId)
+        ->where('status', 1)
+        ->get();
+
+        if ($issueRegisters->isEmpty()) {
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'No issued assets found.',
+            ]);
+        }
+
+        $first = $issueRegisters->first();
+        return response()->json([
+            'status' => true,
+            'employee' => [
+                'custodian_name'    => $first->custodian_name,                    
+                'emp_id'            => $first->emp_id,                    
+                'designation'       => $first->designation?->name,                    
+                'department'        => $first->discipline?->name,                    
+                'section'           => $first->deptSection?->section_name,                    
+                'user_type'         => ucfirst($first->user_type),                    
+                'operator_name'     => $first->operator_name,                   
+            ],
+
+            'assets' => $issueRegisters->map(function ($issue) {
+                $asset = $issue->assetInventory;
+
+                return [
+
+                    'tag_no'        => $asset?->tag_no,                        
+                    'asset_model'   => $asset?->assetModel?->model_name,                        
+                    'serial_no'     => $asset?->serial_no,                        
+                    'location'      => $asset?->location?->name,                       
+                    'po_number'     => $asset?->po_number,                       
+                    'installation_date' => $asset?->installation_date,                       
+                    'warranty_end'  => $asset?->warranty_end,                        
+                    'asset_status'  => $asset?->asset_status,                        
+                    'issued_date'   => $issue->created_at?->format('d M Y'),                       
+                ];
+
+            })->values(),
+
+        ]);
     }
 }

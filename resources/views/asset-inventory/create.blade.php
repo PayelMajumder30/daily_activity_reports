@@ -563,51 +563,24 @@
                 for (let i = 0; i < qty; i++) {
 
                     html += `
-
                         <tr>
-
+                            <td>${i + 1}</td>                                                            
+                            <td>${assetType}</td>                                                           
+                            <td>${assetModel}</td>                                                           
+                            <td>${po}</td>                                                            
+                            <td>${installationDate}</td>                                                            
                             <td>
-                                ${i + 1}
-                            </td>
-
-                            <td>
-                                ${assetType}
-                            </td>
-
-                            <td>
-                                ${assetModel}
-                            </td>
-
-                            <td>
-                                ${po}
-                            </td>
-
-                            <td>
-                                ${installationDate}
-                            </td>
-
-                            <td>
-
                                 <span class="badge bg-success">
                                     ${tags[i]}
                                 </span>
 
                                 <input type="hidden" name="tag_no[]" value="${tags[i]}">
                             </td>
-
                             <td>
-
                                 <input type="text" class="form-control serial-no" name="serial_no[]" placeholder="Enter Serial No" required>
                             </td>
-
-                            <td>
-                                ${warrantyDate}
-                            </td>
-
-                            <td>
-                                ${location}
-                            </td>
-
+                            <td>${warrantyDate}</td>                                                           
+                            <td>${location}</td>                                                            
                         </tr>
 
                     `;
@@ -644,6 +617,44 @@
 
                 $('#previewArea').html(html);
 
+                $(document).on('submit', '#inventoryStoreForm', function (e) {
+
+                    let isValid = true;
+                    let firstEmptyInput = null;
+
+                    $('.serial-no').each(function () {
+                        let serialNo = $(this).val().trim();
+                        if (serialNo === '') {
+                            isValid = false;
+                            $(this).addClass('is-invalid');
+                            if (!firstEmptyInput) {
+                                firstEmptyInput = this;
+                            }
+
+                        } else {
+
+                            $(this).removeClass('is-invalid');
+
+                        }
+
+                    });
+
+                    if (!isValid) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Serial Number Required',
+                            text: 'Please fill in the serial number for all assets before submitting.',
+                            confirmButtonText: 'OK'
+                        });
+
+                        firstEmptyInput.focus();
+
+                        return false;
+                    }
+
+                });
+
             }
 
             // ========================================
@@ -678,15 +689,9 @@
             // Final Submit
             // ==========================
 
-            $(document).on(
-                'submit',
-                '#inventoryStoreForm',
-                function (e) {
-
+            $(document).on('submit','#inventoryStoreForm',function (e) {
                     e.preventDefault();
-
                     let form = this;
-
                     let valid = true;
 
 
@@ -708,12 +713,10 @@
                     //         }
 
                     //     });
-                    $(form).find('.serial-no').each(function () {
-                        
+
+                    $(form).find('.serial-no').each(function () {                       
                         let value = $(this).val().trim();
-
                         if (value === '') {
-
                             $(this).addClass('is-invalid');
 
                             valid = false;
@@ -739,7 +742,6 @@
 
                         return;
                     }
-
 
                     $.ajax({
 
@@ -833,12 +835,9 @@
         //=====================
 
         function clearErrors(){
-
-                $('.text-danger').text('');
-
-            }
-
-        });
+            $('.text-danger').text('');
+        }
+    });
 </script>
 @endpush
 

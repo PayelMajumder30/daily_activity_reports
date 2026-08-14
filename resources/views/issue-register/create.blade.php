@@ -185,26 +185,20 @@
 
                     {{-- Operator Name --}}
                     <div id="operatorField" class="col-md-4 mb-3 d-none">
-    <label class="form-label">
-        Operator Name
-        <span class="text-danger">*</span>
-    </label>
+                        <label class="form-label">
+                            Operator Name
+                            <span class="text-danger">*</span>
+                        </label>
 
-    <input
-        type="text"
-        name="operator_name"
-        id="operator_name"
-        value="{{ old('operator_name') }}"
-        class="form-control @error('operator_name') is-invalid @enderror"
-        placeholder="Enter operator name"
-    >
+                        <input type="text" name="operator_name" id="operator_name" 
+                        value="{{ old('operator_name') }}" class="form-control @error('operator_name') is-invalid @enderror" placeholder="Enter operator name">
 
-    @error('operator_name')
-        <small class="text-danger">
-            {{ $message }}
-        </small>
-    @enderror
-</div>
+                        @error('operator_name')
+                            <small class="text-danger">
+                                {{ $message }}
+                            </small>
+                        @enderror
+                    </div>
 
                     {{-- Asset Tag --}}
                     <div class="col-md-3 mb-3">

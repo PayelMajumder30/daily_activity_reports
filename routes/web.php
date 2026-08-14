@@ -150,6 +150,7 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/create', [IssueRegController::class, 'create'])->name('create');
         Route::post('/store', [IssueRegController::class, 'store'])->name('store');
         Route::get('/sections/{id}', [IssueRegController::class, 'getSections'])->name('sections');
+        Route::get('/employee/{emp_id}/assets', [IssueRegController::class, 'employeeAssets'])->name('employee-assets');
     });
 });
 
