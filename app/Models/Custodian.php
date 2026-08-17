@@ -10,18 +10,28 @@ class Custodian extends Model
 {
     //
     public $table = 'custodians';
-    protected $fillable = ['id', 'custodian_name', 'designation_id', 'discipline_id', 'email', 'phone', 'status'];
+    protected $fillable = ['id', 'custodian_name', 'designation_id', 'discipline_id', 'section_id', 'emp_id', 'email', 'phone', 'status'];
 
     public function designation(): BelongsTo {
-        return $this->belongsTo(Designation::class);
+        return $this->belongsTo(Designation::class, 'designation_id');
     }
 
     public function discipline(): BelongsTo {
-        return $this->belongsTo(Discipline::class);
+        return $this->belongsTo(Discipline::class, 'discipline_id');
+    }
+
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(DeptSection::class, 'section_id');
     }
 
     public function assetAssigned(): Hasmany
     {
         return $this->hasMany(AssetAssigned::class);
+    }
+
+    public function issueRegisters(): HasMany
+    {
+        return $this->hasMany(IssueRegister::class);
     }
 }

@@ -20,4 +20,9 @@ class DeptSection extends Model
     {
         return $this->hasMany(IssueRegister::class);
     }
+
+    public function custodian(): HasMany
+    {
+        return $this->hasMany(Custodian::class);
+    }
 }

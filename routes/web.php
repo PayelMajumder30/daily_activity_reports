@@ -3,7 +3,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController, EventLogController,
-                            SettingController, AssetInventoryController, IssueRegController};
+                            SettingController, AssetInventoryController, IssueRegController, CustodianController};
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -133,6 +133,17 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('/status/{id}', [SettingController::class,'locationChangeStatus'])->name('changeStatus');
     });
 
+    // Custodian
+    Route::prefix('custodian')->name('custodian.')->group(function() {
+        Route::get('/', [CustodianController::class, 'index'])->name('index');
+        Route::get('/create', [CustodianController::class, 'create'])->name('create');
+        Route::post('/store', [CustodianController::class, 'store'])->name('store');  
+        Route::get('/edit/{id}', [CustodianController::class,'edit'])->name('edit');
+        Route::put('/update/{id}', [CustodianController::class,'update'])->name('update');
+        Route::get('/sections/{id}', [CustodianController::class, 'sections'])->name('sections');    
+        Route::post('/status/{id}', [CustodianController::class,'changeStatus'])->name('changeStatus');        
+    });
+
     // asset inventory
     Route::prefix('asset-inventory')->name('asset-inventory.')->group(function() {
         Route::get('/', [AssetInventoryController::class, 'index'])->name('index');
@@ -140,8 +151,7 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('/store', [AssetInventoryController::class, 'store'])->name('store');
         Route::get('/generate-preview', [AssetInventoryController::class, 'generatePreview'])->name('generatePreview');
         Route::get('/generate-tags/{location}/{assetType}/{quantity}',[AssetInventoryController::class, 'generateTags'])->name('generateTags');
-        Route::get('/get-models/{type}', [AssetInventoryController::class,'getModels'])->name('getModels');
-            
+        Route::get('/get-models/{type}', [AssetInventoryController::class,'getModels'])->name('getModels');            
     });
 
     // asset register

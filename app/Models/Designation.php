@@ -12,10 +12,10 @@ class Designation extends Model
     public $table = 'designations';
     protected $fillable = ['name','status'];
 
-    // public function custodian(): HasMany
-    // {
-    //     return $this->hasMany(Custodian::class);
-    // }
+    public function custodian(): HasMany
+    {
+        return $this->hasMany(Custodian::class);
+    }
 
     public function issueRegister(): HasMany
     {

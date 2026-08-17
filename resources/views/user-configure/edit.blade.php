@@ -13,7 +13,7 @@
                 Update Users
             </h2>
             <p class="text-muted">
-                Create a new user account by entering the user's details and selecting the appropriate access role.
+                Update a user account by entering the user's details and selecting the appropriate access role.
             </p>
         </div>
 

@@ -17,10 +17,10 @@ class Discipline extends Model
         return $this->hasMany(DeptSection::class, 'discipline_id');
     }
 
-    // public function custodian(): HasMany
-    // {
-    //     return $this->hasMany(Custodian::class);
-    // }
+    public function custodian(): HasMany
+    {
+        return $this->hasMany(Custodian::class);
+    }
 
     public function issueRegister(): HasMany
     {
