@@ -206,6 +206,13 @@
                     Issue Register
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="{{ route('asset-issue-register.index')}}" class="nav-link text-white {{ request()->routeIs('asset-issue-register.*') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-person-workspace"></i>
+                    Issue Register new
+                </a>
+            </li>
         @endif
     </ul>
 

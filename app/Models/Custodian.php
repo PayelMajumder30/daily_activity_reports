@@ -25,13 +25,13 @@ class Custodian extends Model
         return $this->belongsTo(DeptSection::class, 'section_id');
     }
 
-    public function assetAssigned(): Hasmany
+    public function issueHistory(): HasMany
     {
-        return $this->hasMany(AssetAssigned::class);
+        return $this->hasMany(AssetIssueRegister::class, 'custodian_id');
     }
 
-    public function issueRegisters(): HasMany
-    {
-        return $this->hasMany(IssueRegister::class);
-    }
+    // public function issueRegisters(): HasMany
+    // {
+    //     return $this->hasMany(IssueRegister::class);
+    // }
 }

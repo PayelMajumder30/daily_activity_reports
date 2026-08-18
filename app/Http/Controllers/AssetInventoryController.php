@@ -10,10 +10,6 @@ class AssetInventoryController extends Controller
 {
     //
 
-    // public function index(){
-    //     $inventories = AssetInventory::with(['assetModel.assetType','location'])->latest()->get();
-    //     return view('asset-inventory.index', compact('inventories'));
-    // }
 
     public function index(Request $request)
     {
@@ -213,7 +209,6 @@ class AssetInventoryController extends Controller
 
     
     public function getModels($type){
-
         $models = AssetModel::where('asset_type_id', $type)->where('status',1)->orderBy('model_name')->get();
         return response()->json($models);
     }

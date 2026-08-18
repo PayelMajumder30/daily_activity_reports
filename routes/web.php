@@ -3,7 +3,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController, EventLogController,
-                            SettingController, AssetInventoryController, IssueRegController, CustodianController};
+                            SettingController, AssetInventoryController, IssueRegController, CustodianController, AssetIssueRegisterController};
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -161,6 +161,17 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('/store', [IssueRegController::class, 'store'])->name('store');
         Route::get('/sections/{id}', [IssueRegController::class, 'getSections'])->name('sections');
         Route::get('/employee/{emp_id}/assets', [IssueRegController::class, 'employeeAssets'])->name('employee-assets');
+    });
+
+    // asset issue register
+    Route::prefix('asset-issue-register')->name('asset-issue-register.')->group(function() {
+        Route::get('/', [AssetIssueRegisterController::class, 'index'])->name('index');
+        Route::get('/create', [AssetIssueRegisterController::class, 'create'])->name('create');
+        Route::post('/store', [AssetIssueRegisterController::class, 'store'])->name('store');
+        Route::get('/edit/{id}', [AssetIssueRegisterController::class, 'edit'])->name('edit');
+        Route::put('/update/{id}', [AssetIssueRegisterController::class, 'update'])->name('update');
+        Route::post('/return/{id}', [AssetIssueRegisterController::class, 'returnAsset'])->name('return');
+        Route::get('/custodian-details/{id}', [AssetIssueRegisterController::class, 'custodianDetails'])->name('custodian-details');
     });
 });
 

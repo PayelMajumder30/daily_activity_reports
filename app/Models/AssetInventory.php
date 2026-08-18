@@ -27,13 +27,12 @@ class AssetInventory extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function assetAssigned(): Hasmany
+    public function issueHistory(): HasMany
     {
-        return $this->hasMany(AssetAssigned::class);
+        return $this->hasMany(AssetIssueRegister::class, 'asset_inventory_id');
     }
-
-    public function issueRegister(): HasMany
-    {
-        return $this->hasMany(IssueRegister::class);
-    }
+    // public function issueRegister(): HasMany
+    // {
+    //     return $this->hasMany(IssueRegister::class);
+    // }
 }
