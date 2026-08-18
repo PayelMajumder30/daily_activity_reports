@@ -222,8 +222,7 @@ class AssetIssueRegisterController extends Controller
                 'id'            => $asset->id,
                 'tag_no'        => $asset->tag_no,
                 'asset_type'    => $asset->assetModel?->assetType?->name,                  
-                'asset_model'   => $asset->assetModel?->model_name,
-                   
+                'asset_model'   => $asset->assetModel?->model_name,                  
             ];
 
         })->values();
