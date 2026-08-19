@@ -10,7 +10,7 @@ class Custodian extends Model
 {
     //
     public $table = 'custodians';
-    protected $fillable = ['id', 'custodian_name', 'designation_id', 'discipline_id', 'section_id', 'emp_id', 'email', 'phone', 'status'];
+    protected $fillable = ['id', 'custodian_name', 'designation_id', 'discipline_id', 'section_id', 'emp_id', 'location_id', 'email', 'phone', 'status'];
 
     public function designation(): BelongsTo {
         return $this->belongsTo(Designation::class, 'designation_id');
@@ -23,6 +23,11 @@ class Custodian extends Model
     public function section(): BelongsTo
     {
         return $this->belongsTo(DeptSection::class, 'section_id');
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'location_id');
     }
 
     public function issueHistory(): HasMany

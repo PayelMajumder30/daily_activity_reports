@@ -181,66 +181,42 @@
                     <thead class="table-dark">
 
                         <tr>
-
                             <th>SL</th>
-
                             <th>Custodian Name</th>
-
                             <th>Employee ID</th>
-
                             <th>Designation</th>
-
                             <th>Department</th>
-
+                            <th>Email</th>
                             <th>Section</th>
-
+                            <th>Location</th>
                             <th>Status</th>
-
                             <th width="120">Action</th>
-
                         </tr>
 
                     </thead>
 
-
                     <tbody>
-
                         @foreach($custodians as $custodian)
-
                             <tr>
-
-                                <td>
-                                    {{ $loop->iteration }}
-                                </td>
-
+                                <td>{{ $loop->iteration }}</td>
+                                    
                                 <td>
                                     <strong>
                                         {{ ucwords($custodian->custodian_name) }}
                                     </strong>
                                 </td>
 
-                                <td>
-                                    {{ $custodian->emp_id }}
-                                </td>
-
-                                <td>
-                                    {{ $custodian->designation ? ucwords($custodian->designation->name) : '-' }}                                                                              
-                                </td>
-
-                                <td>
-                                    {{ $custodian->discipline ? ucwords($custodian->discipline->name): '-' }}                                                                              
-                                </td>
-
-                                <td>
-                                    {{ $custodian->section ? ucwords($custodian->section->section_name): 'N/A' }}                                                                              
-                                </td>
-
+                                <td>{{ $custodian->emp_id }}</td>                                                                  
+                                <td>{{ $custodian->designation ? ucwords($custodian->designation->name) : '-' }}</td>                                                                                                                                              
+                                <td> {{ $custodian->discipline ? ucwords($custodian->discipline->name): '-' }}</td>   
+                                <td>{{ $custodian->email }}</td>                                                                                                                                              
+                                <td>{{ $custodian->section ? ucwords($custodian->section->section_name): 'N/A' }}</td>                                                                                                                                                 
+                                <td>{{ $custodian->location ? ucwords($custodian->location->name): 'N/A' }}</td>                                                                                                                                                 
                                 <td>
                                    <div class="form-check form-switch">
                                         <input class="form-check-input custodian-status" type="checkbox"                                       
                                             data-id="{{ encryptId($custodian->id) }}" {{ $custodian->status ? 'checked' : '' }}>                                       
                                     </div>
-
                                 </td>
 
                                 <td>                                  
@@ -248,7 +224,7 @@
                                         class="btn btn-warning btn-sm" title="Edit">                                       
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                  
+                                 
                                 </td>
 
                             </tr>

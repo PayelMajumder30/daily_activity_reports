@@ -80,7 +80,7 @@
 
                     {{-- Status --}}
 
-                    <div class="col-md-2">
+                    <!-- <div class="col-md-2">
 
                         <label class="form-label">
                             Status
@@ -110,7 +110,7 @@
 
                         </select>
 
-                    </div>
+                    </div> -->
 
 
                     <div class="col-md-3 d-flex align-items-end">
@@ -145,7 +145,6 @@
             </h5>
 
         </div>
-
 
         <div class="card-body">
             <div class="table-responsive">
@@ -182,54 +181,21 @@
                                     </strong>
                                 </td>
 
-
-                                <td>
-                                    {{ ucwords(
-                                        $issue->assetInventory
-                                            ->assetModel
-                                            ->assetType
-                                            ->name ?? 'N/A'
-                                    ) }}
-
-                                </td>
-
-                                <td>
-                                    {{ $issue->assetInventory
-                                        ->assetModel
-                                        ->model_name ?? 'N/A' }}
-
-                                </td>
-
-                                <td>
-                                    {{ ucwords(
-                                        $issue->custodian
-                                            ->custodian_name ?? 'N/A'
-                                    ) }}
-                                </td>
+                                <td> {{ ucwords($issue->assetInventory->assetModel->assetType->name ?? 'N/A') }} </td>
+                                
+                                <td> {{ $issue->assetInventory->assetModel->model_name ?? 'N/A' }}</td>
+                                    
+                                <td>{{ ucwords($issue->custodian->custodian_name ?? 'N/A') }}</td>
 
                                 <td>{{ $issue->custodian->emp_id ?? 'N/A' }} </td>
 
-                                <td>
-                                    {{ ucwords(
-                                        $issue->custodian
-                                            ->discipline
-                                            ->name ?? 'N/A'
-                                    ) }}
-                                </td>
-
+                                <td>{{ ucwords($issue->custodian->discipline->name ?? 'N/A') }}</td>
+                                    
                                 <td>{{ ucfirst($issue->user_type) }}</td>
                                                                   
-                                <td>
-                                    {{ $issue->issued_date
-                                        ? $issue->issued_date->format('d-m-Y')
-                                        : 'N/A' }}
-                                </td>
+                                <td>{{ $issue->issued_date? $issue->issued_date->format('d-m-Y'): 'N/A' }}</td>
 
-                                <td>
-                                    {{ $issue->returned_date
-                                        ? $issue->returned_date->format('d-m-Y')
-                                        : '-' }}
-                                </td>
+                                <td>{{ $issue->returned_date? $issue->returned_date->format('d-m-Y'): '-' }} </td>
 
                                 <td>
                                     @if($issue->issue_status === 'Issued')
@@ -237,19 +203,17 @@
                                             Issued
                                         </span>
                                     @else
-
                                         <span class="badge bg-secondary">
                                             Returned
                                         </span>
-
                                     @endif
 
                                 </td>
 
                                 <td>
-                                    <a href="{{ route('asset-issue-register.edit',encryptId($issue->id)) }}" class="btn btn-sm btn-warning" title="Edit">
+                                    <!-- <a href="{{ route('asset-issue-register.edit',encryptId($issue->id)) }}" class="btn btn-sm btn-warning" title="Edit">
                                         <i class="bi bi-pencil"></i>
-                                    </a>
+                                    </a> -->
 
                                     @if($issue->issue_status === 'Issued')
                                         <button type="button" class="btn btn-sm btn-success return-asset" data-id="{{ encryptId($issue->id) }}">                                                                                                                                
@@ -270,7 +234,17 @@
 
 </div>
 @push('scripts')
-
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: @json(session('success')),
+        timer: 2000,
+        showConfirmButton: false
+    });
+</script>
+@endif
 <script>
 
     $(document).on('click', '.return-asset', function () {

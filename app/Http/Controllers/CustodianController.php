@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\{AssetInventory, AssetType, AssetModel, Custodian, Designation, Discipline, DeptSection};
+use Illuminate\Validation\Rule;
+use App\Models\{AssetInventory, AssetType, AssetModel, Custodian, Designation, Discipline, DeptSection, Location};
 
 class CustodianController extends Controller
 {
@@ -49,7 +50,9 @@ class CustodianController extends Controller
 
         $departments = Discipline::where('status', 1)->orderBy('name')->get();
 
-        return view('custodian.create', compact('designations', 'departments'));
+        $locations = Location::where('status', 1)->orderBy('name')->get();
+
+        return view('custodian.create', compact('designations', 'departments', 'locations'));
     }
 
     public function store(Request $request)
@@ -61,7 +64,6 @@ class CustodianController extends Controller
         */
 
         $request->validate([
-
             'custodian_name' => [
                 'required',
                 'string',
@@ -75,7 +77,14 @@ class CustodianController extends Controller
 
             'discipline_id' => [
                 'required',
-                'exists:disciplines,id',
+                Rule::exists('locations', 'id')->where(function($query) {
+                    $query->where('status', 1);
+                })
+            ],
+
+            'location_id' => [
+                'required',
+                'exists:locations,id',
             ],
 
             'emp_id' => [
@@ -85,9 +94,10 @@ class CustodianController extends Controller
             ],
 
             'email' => [
-                'nullable',
+                'required',
                 'email',
                 'max:255',
+                'unique:custodians,email',
             ],
 
             'phone' => [
@@ -97,18 +107,20 @@ class CustodianController extends Controller
             ],
 
         ], [
-
-            'custodian_name.required' => 'Custodian name is required.',                
-            'designation_id.required' => 'Designation is required.',               
-            'designation_id.exists' => 'Selected designation is invalid.',                
-            'discipline_id.required' => 'Department is required.',                
-            'discipline_id.exists' => 'Selected department is invalid.',                
-            'emp_id.required' => 'Employee ID is required.',                
-            'emp_id.digits' => 'Please enter an 8 digit employee ID.',                
-            'emp_id.unique' => 'This Employee ID already exists.',                
-            'email.email' => 'Please enter a valid email address.',
-                
-
+            'custodian_name.required'   => 'Custodian name is required.',                              
+            'designation_id.required'   => 'Designation is required.',               
+            'designation_id.exists'     => 'Selected designation is invalid.', 
+            'location_id.required'      => 'Location is required.',               
+            'location_id.exists'        => 'Selected location is invalid.',                
+            'discipline_id.required'    => 'Department is required.',                
+            'discipline_id.exists'      => 'Selected department is invalid.',                
+            'emp_id.required'           => 'Employee ID is required.',                
+            'emp_id.digits'             => 'Please enter an 8 digit employee ID.',                
+            'emp_id.unique'             => 'This Employee ID already exists.',                
+            'email.required'            => 'Email is required.',
+            'email.email'               => 'Please enter a valid email address.',
+            'email.unique'              => 'This email address already exists.', 
+                         
         ]);
 
 
@@ -118,18 +130,10 @@ class CustodianController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $discipline = Discipline::where('id', $request->discipline_id)
-            ->where('status', 1)
-            ->first();
-
+        $discipline = Discipline::where('id', $request->discipline_id)->where('status', 1)->first();
+                      
         if (!$discipline) {
-
-            return back()
-                ->withErrors([
-                    'discipline_id' =>
-                        'Invalid department selected.'
-                ])
-                ->withInput();
+            return back()->withErrors(['discipline_id' =>'Invalid department selected.'])->withInput();     
         }
 
         /*
@@ -163,13 +167,7 @@ class CustodianController extends Controller
             */
 
             if (!$request->filled('section_id')) {
-
-                return back()
-                    ->withErrors([
-                        'section_id' =>
-                            'Section is required.'
-                    ])
-                    ->withInput();
+                return back()->withErrors(['section_id' =>'Section is required.'])->withInput();         
             }
 
             /*
@@ -182,15 +180,10 @@ class CustodianController extends Controller
                                             ->where('status', 1)
                                             ->exists();
 
-
             if (!$sectionExists) {
-                return back()
-                    ->withErrors([
-                        'section_id' =>
-                            'Selected section does not belong to the selected department.'
-                    ])
-                    ->withInput();
+                return back()->withErrors(['section_id' =>'Selected section does not belong to the selected department.'])->withInput();   
             }
+
             $sectionId = $request->section_id;
 
         } else {
@@ -211,15 +204,15 @@ class CustodianController extends Controller
         */
 
         Custodian::create([
-
-            'custodian_name' => $request->custodian_name,               
-            'designation_id' => $request->designation_id,               
-            'discipline_id' => $request->discipline_id,                
-            'section_id' => $sectionId,               
-            'emp_id' => $request->emp_id,               
-            'email' => $request->email,              
-            'phone' => $request->phone,               
-            'status' =>1,               
+            'custodian_name'    => $request->custodian_name,               
+            'designation_id'    => $request->designation_id,               
+            'discipline_id'     => $request->discipline_id,                
+            'section_id'        => $sectionId,    
+            'location_id'       => $request->location_id,           
+            'emp_id'            => $request->emp_id,               
+            'email'             => $request->email,              
+            'phone'             => $request->phone,               
+            'status'            => 1,               
         ]);
 
 
@@ -229,58 +222,95 @@ class CustodianController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        return redirect()
-            ->route('custodian.index')
-            ->with(
-                'success',
-                'Custodian added successfully.'
-            );
+        return redirect()->route('custodian.index')->with('success', 'Custodian added successfully.');                               
     }
 
       /**
      * Show the form for editing the specified resource.
      */
+    // public function edit(Request $request, $id)
+    // {
+    //     $request->session()->forget('success');
+    //     try {
+    //         $custodianId = decryptId($id);
+
+    //     } catch (\Throwable $e) {
+    //         return redirect()->route('custodian.index')->with('error', 'Invalid custodian selected.');                       
+    //     }
+
+    //     $custodian = Custodian::with([
+    //         'designation',
+    //         'discipline',
+    //     ])->findOrFail($custodianId);
+
+    //     $designations = Designation::where('status', 1)->orderBy('name')->get();                    
+    //     $departments = Discipline::where('status', 1)->orderBy('name')->get();
+    //     $locations = Location::where('status', 1)->orderBy('name')->get();
+                     
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Get sections of selected department
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     $sections = DeptSection::where('discipline_id', $custodian->discipline_id)->where('status', 1)->orderBy('section_name')->get();
+    //     return view('custodian.edit', compact('custodian', 'designations', 'departments', 'sections'));
+    // }
     public function edit(Request $request, $id)
-    {
-        $request->session()->forget('success');
+{
+    $request->session()->forget('success');
 
-        try {
+    try {
+        $custodianId = decryptId($id);
 
-            $custodianId = decryptId($id);
+    } catch (\Throwable $e) {
 
-        } catch (\Throwable $e) {
-
-            return redirect()
-                ->route('custodian.index')
-                ->with('error', 'Invalid custodian selected.');
-        }
-
-        $custodian = Custodian::with([
-            'designation',
-            'discipline',
-        ])->findOrFail($custodianId);
-
-        $designations = Designation::where('status', 1)
-            ->orderBy('name')
-            ->get();
-
-        $departments = Discipline::where('status', 1)
-            ->orderBy('name')
-            ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Get sections of selected department
-        |--------------------------------------------------------------------------
-        */
-
-        $sections = DeptSection::where(
-            'discipline_id',
-            $custodian->discipline_id
-        )->where('status', 1)->orderBy('section_name')->get();
-                      
-        return view('custodian.edit', compact('custodian', 'designations', 'departments', 'sections'));
+        return redirect()
+            ->route('custodian.index')
+            ->with('error', 'Invalid custodian selected.');
     }
+
+    $custodian = Custodian::with([
+        'designation',
+        'discipline',
+        'section',
+        'location',
+    ])->findOrFail($custodianId);
+
+    $designations = Designation::where('status', 1)
+        ->orderBy('name')
+        ->get();
+
+    $departments = Discipline::where('status', 1)
+        ->orderBy('name')
+        ->get();
+
+    $locations = Location::where('status', 1)
+        ->orderBy('name')
+        ->get();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Get sections of selected department
+    |--------------------------------------------------------------------------
+    */
+
+    $sections = DeptSection::where(
+        'discipline_id',
+        $custodian->discipline_id
+    )
+    ->where('status', 1)
+    ->orderBy('section_name')
+    ->get();
+
+    return view('custodian.edit', compact(
+        'custodian',
+        'designations',
+        'departments',
+        'locations',
+        'sections'
+    ));
+}
 
     /**
      * Update the specified resource in storage.
@@ -294,14 +324,9 @@ class CustodianController extends Controller
         */
 
         try {
-
             $custodianId = decryptId($id);
-
         } catch (\Throwable $e) {
-
-            return redirect()
-                ->route('custodian.index')
-                ->with('error', 'Invalid custodian selected.');
+            return redirect()->route('custodian.index')->with('error', 'Invalid custodian selected.');                             
         }
 
         /*
@@ -312,7 +337,6 @@ class CustodianController extends Controller
 
         $custodian = Custodian::findOrFail($custodianId);
 
-
         /*
         |--------------------------------------------------------------------------
         | Basic Validation
@@ -320,7 +344,6 @@ class CustodianController extends Controller
         */
 
         $request->validate([
-
             'custodian_name' => [
                 'required',
                 'string',
@@ -337,6 +360,11 @@ class CustodianController extends Controller
                 'exists:disciplines,id',
             ],
 
+            'location_id' => [
+                'required',
+                'exists:locations,id',
+            ],
+
             'emp_id' => [
                 'required',
                 'digits:8',
@@ -347,6 +375,7 @@ class CustodianController extends Controller
                 'nullable',
                 'email',
                 'max:255',
+                // 'unique:custodians,email,' . $custodian->email,
             ],
 
             'phone' => [
@@ -356,35 +385,17 @@ class CustodianController extends Controller
 
         ], [
 
-            'custodian_name.required' =>
-                'Custodian name is required.',
-
-            'designation_id.required' =>
-                'Designation is required.',
-
-            'designation_id.exists' =>
-                'Selected designation is invalid.',
-
-            'discipline_id.required' =>
-                'Department is required.',
-
-            'discipline_id.exists' =>
-                'Selected department is invalid.',
-
-            'emp_id.required' =>
-                'Employee ID is required.',
-
-            'emp_id.digits' =>
-                'Please enter an 8 digit employee ID.',
-
-            'emp_id.unique' =>
-                'This Employee ID already exists.',
-
-            'email.email' =>
-                'Please enter a valid email address.',
-
-            'phone.digits' =>
-                'Please enter a valid 10 digit phone number.',
+            'custodian_name.required'   => 'Custodian name is required.',               
+            'designation_id.required'   => 'Designation is required.',               
+            'designation_id.exists'     => 'Selected designation is invalid.',               
+            'discipline_id.required'    => 'Department is required.',               
+            'discipline_id.exists'      => 'Selected department is invalid.',              
+            'emp_id.required'           => 'Employee ID is required.',             
+            'emp_id.digits'             => 'Please enter an 8 digit employee ID.',              
+            'emp_id.unique'             => 'This Employee ID already exists.',              
+            'email.email'               => 'Please enter a valid email address.',             
+            'phone.digits'              => 'Please enter a valid 10 digit phone number.',             
+                                 
 
         ]);
 
@@ -400,13 +411,7 @@ class CustodianController extends Controller
             ->first();
 
         if (!$discipline) {
-
-            return back()
-                ->withErrors([
-                    'discipline_id' =>
-                        'Invalid department selected.'
-                ])
-                ->withInput();
+            return back()->withErrors(['discipline_id' => 'Invalid department selected.'])->withInput();      
         }
 
 
@@ -489,7 +494,6 @@ class CustodianController extends Controller
             $sectionId = null;
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Update Custodian
@@ -503,6 +507,10 @@ class CustodianController extends Controller
 
             'designation_id' =>
                 $request->designation_id,
+
+                
+            'location_id' =>
+                $request->location_id,
 
             'discipline_id' =>
                 $request->discipline_id,
@@ -538,11 +546,7 @@ class CustodianController extends Controller
 
     public function sections($id){
 
-        $sections = DeptSection::where(
-            'discipline_id',
-            $id
-        )->where('status', 1)->orderBy('section_name')->get(['id', 'section_name',]);
-
+        $sections = DeptSection::where('discipline_id', $id)->where('status', 1)->orderBy('section_name')->get(['id', 'section_name',]);                        
         return response()->json($sections);
     }
 

@@ -45,14 +45,13 @@
 
 
         <div class="card-body">
-
             <form action="{{ route('custodian.store') }}" method="POST">
                 @csrf
 
                 <div class="row">
 
                     {{-- Custodian Name --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Custodian Name
@@ -70,9 +69,8 @@
 
                     </div>
 
-
                     {{-- Employee ID --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Employee ID
@@ -90,9 +88,8 @@
                         @enderror
                     </div>
 
-
                     {{-- Designation --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Designation
@@ -105,26 +102,75 @@
                             </option>
 
                             @foreach($designations as $designation)
-
                                 <option value="{{ $designation->id }}" {{ old('designation_id') == $designation->id ? 'selected' : '' }}>
 
                                     {{ ucwords($designation->name) }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        @error('designation_id')
+                            <small class="text-danger">
+                                {{ $message }}
+                            </small>
+                        @enderror
+                    </div>
+
+                     {{-- Email --}}
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+                            Email <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" placeholder="Enter email address">
+
+                        @error('email')
+                            <small class="text-danger">
+                                {{ $message }}
+                            </small>
+                        @enderror
+
+                    </div>
+
+                    {{-- Location--}}
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Location
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select
+                            name="location_id"
+                            id="location_id"
+                            class="form-select @error('location_id') is-invalid @enderror">
+
+                            <option value="">
+                                Select Location
+                            </option>
+
+                            @foreach($locations as $location)
+
+                                <option
+                                    value="{{ $location->id }}"
+                                    {{ old('location_id') == $location->id ? 'selected' : '' }}>
+
+                                    {{ ucwords($location->name) }}
+
                                 </option>
 
                             @endforeach
 
                         </select>
 
-                        @error('designation_id')
-
+                        @error('location_id')
                             <small class="text-danger">
                                 {{ $message }}
                             </small>
-
                         @enderror
 
                     </div>
-
 
                     {{-- Department --}}
                     <div class="col-md-4 mb-3">
@@ -158,7 +204,6 @@
 
                     </div>
 
-
                     {{-- Section --}}
                     <div class="col-md-4 mb-3">
 
@@ -167,7 +212,6 @@
                         </label>
 
                         <select name="section_id" id="section_id" class="form-select @error('section_id') is-invalid @enderror" disabled>
-
                             <option value="">
                                 Select Department First
                             </option>
@@ -179,49 +223,9 @@
                             <small class="text-danger">
                                 {{ $message }}
                             </small>
-
                         @enderror
+                    </div>                  
 
-                    </div>
-
-
-                    {{-- Email --}}
-                    <!-- <div class="col-md-4 mb-3">
-
-                        <label class="form-label">
-                            Email
-                        </label>
-
-                        <input type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" placeholder="Enter email address">
-
-                        @error('email')
-
-                            <small class="text-danger">
-                                {{ $message }}
-                            </small>
-
-                        @enderror
-
-                    </div> -->
-
-
-                    {{-- Phone --}}
-                    <!-- <div class="col-md-4 mb-3">
-
-                        <label class="form-label">
-                            Phone
-                        </label>
-
-                        <input type="text" name="phone" value="{{ old('phone') }}" class="form-control @error('phone') is-invalid @enderror" placeholder="Enter phone number">
-
-                        @error('phone')
-
-                            <small class="text-danger">
-                                {{ $message }}
-                            </small>
-
-                        @enderror
-                    </div> -->
                 </div>
 
 
@@ -261,9 +265,7 @@ $(document).ready(function () {
     */
 
     $('#discipline_id').on('change', function () {
-
         let departmentId = $(this).val();
-
 
         /*
         |--------------------------------------------------------------------------
@@ -271,10 +273,7 @@ $(document).ready(function () {
         |--------------------------------------------------------------------------
         */
 
-        $('#section_id')
-            .html('<option value="">Loading...</option>')
-            .prop('disabled', true);
-
+        $('#section_id').html('<option value="">Loading...</option>').prop('disabled', true);                 
 
         /*
         |--------------------------------------------------------------------------
@@ -293,7 +292,6 @@ $(document).ready(function () {
             return;
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | AJAX URL
@@ -311,18 +309,12 @@ $(document).ready(function () {
         */
 
         $.ajax({
-
             url: url,
-
             type: 'GET',
-
             success: function (response) {
-
                 if (response.length > 0) {
-
                     let options =
                         '<option value="">Select Section</option>';
-
 
                     $.each(
                         response,
@@ -338,11 +330,7 @@ $(document).ready(function () {
                         }
                     );
 
-
-                    $('#section_id')
-                        .html(options)
-                        .prop('disabled', false);
-
+                    $('#section_id').html(options).prop('disabled', false);                                            
 
                     /*
                     |--------------------------------------------------------------------------
@@ -350,13 +338,10 @@ $(document).ready(function () {
                     |--------------------------------------------------------------------------
                     */
 
-                    let oldSection =
-                        "{{ old('section_id') }}";
-
+                    let oldSection = "{{ old('section_id') }}";
+                        
                     if (oldSection) {
-
-                        $('#section_id')
-                            .val(oldSection);
+                        $('#section_id').val(oldSection);                           
                     }
 
                 } else {
@@ -367,11 +352,8 @@ $(document).ready(function () {
                     |--------------------------------------------------------------------------
                     */
 
-                    $('#section_id')
-                        .html(
-                            '<option value="">No Section Available</option>'
-                        )
-                        .prop('disabled', true);
+                    $('#section_id').html('<option value="">No Section Available</option>').prop('disabled', true);
+                                                                                                  
                 }
 
             },
@@ -400,7 +382,6 @@ $(document).ready(function () {
         "{{ old('discipline_id') }}";
 
     if (oldDepartment) {
-
         $('#discipline_id').trigger('change');
     }
 

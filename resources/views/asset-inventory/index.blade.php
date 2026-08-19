@@ -151,6 +151,7 @@
                         <th>Installation Date</th>
                         <th>Warranty (Yrs)</th>
                         <th>Warranty End Date</th>
+                        <th>Asset Status</th>
                     </tr>
 
                 </thead>
@@ -192,6 +193,7 @@
                                     : 'N/A'
                                 }}
                             </td>
+                            <td>{{ $item->asset_status}}</td>
 
                         </tr>
 
