@@ -105,7 +105,7 @@
             </li>
         @endif
 
-        @if(auth()->user()->role == 0 || auth()->user()->role == 1)
+        @if(auth()->user()->role == 0)
             <li class="nav-item mb-2">
                 <a class="nav-link text-white d-flex justify-content-between align-items-center
                     {{ request()->routeIs('designation.*')|| request()->routeIs('discipline.*')|| request()->routeIs('asset-type.*')|| request()->routeIs('asset-model.*')
@@ -191,10 +191,10 @@
             </li>
         @endif
 
-        @if(auth()->user()->role == 0 || auth()->user()->role == 1)     
+        @if(auth()->user()->role == 0 )     
                 
             <li class="nav-item">
-                <a href="{{ route('asset-inventory.index') }}" class="nav-link text-white {{ request()->routeIs('asset-inventory') ? 'active bg-primary' : '' }}">
+                <a href="{{ route('asset-inventory.index') }}" class="nav-link text-white {{ request()->routeIs('asset-inventory.*') ? 'active bg-primary' : '' }}">
                     <i class="bi bi-box-seam"></i>
                     Asset Inventory
                 </a>

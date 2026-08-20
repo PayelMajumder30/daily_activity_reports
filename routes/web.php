@@ -172,6 +172,8 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::put('/update/{id}', [AssetIssueRegisterController::class, 'update'])->name('update');
         Route::post('/return/{id}', [AssetIssueRegisterController::class, 'returnAsset'])->name('return');
         Route::get('/custodian-details/{id}', [AssetIssueRegisterController::class, 'custodianDetails'])->name('custodian-details');
+        Route::get('/custodian-asset-details/{id}', [AssetIssueRegisterController::class, 'custodianAssetDetails'])->name('custodian-asset-details');
+        Route::get('/custodian-export/{id}', [AssetIssueRegisterController::class, 'custodianExport'])->name('custodian-export');
     });
 });
 

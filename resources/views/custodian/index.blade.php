@@ -184,9 +184,9 @@
                             <th>SL</th>
                             <th>Custodian Name</th>
                             <th>Employee ID</th>
-                            <th>Designation</th>
-                            <th>Department</th>
                             <th>Email</th>
+                            <th>Designation</th>
+                            <th>Department</th>                           
                             <th>Section</th>
                             <th>Location</th>
                             <th>Status</th>
@@ -206,10 +206,10 @@
                                     </strong>
                                 </td>
 
-                                <td>{{ $custodian->emp_id }}</td>                                                                  
-                                <td>{{ $custodian->designation ? ucwords($custodian->designation->name) : '-' }}</td>                                                                                                                                              
-                                <td> {{ $custodian->discipline ? ucwords($custodian->discipline->name): '-' }}</td>   
-                                <td>{{ $custodian->email }}</td>                                                                                                                                              
+                                <td>{{ $custodian->emp_id }}</td> 
+                                <td>{{ $custodian->email }}</td>                                                                 
+                                <td>{{ $custodian->designation ? ucwords($custodian->designation->name) : '-' }}</td>                                                                                                                                                                              
+                                <td> {{ $custodian->discipline ? ucwords($custodian->discipline->name): '-' }}</td>                                                                                                                                                                             
                                 <td>{{ $custodian->section ? ucwords($custodian->section->section_name): 'N/A' }}</td>                                                                                                                                                 
                                 <td>{{ $custodian->location ? ucwords($custodian->location->name): 'N/A' }}</td>                                                                                                                                                 
                                 <td>
