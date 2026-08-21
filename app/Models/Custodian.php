@@ -35,8 +35,19 @@ class Custodian extends Model
         return $this->hasMany(AssetIssueRegister::class, 'custodian_id');
     }
 
-    // public function issueRegisters(): HasMany
-    // {
-    //     return $this->hasMany(IssueRegister::class);
-    // }
+    public function outgoingTransfers(): HasMany
+    {
+        return $this->hasMany(
+            AssetTransfer::class,
+            'from_custodian_id'
+        );
+    }
+
+    public function incomingTransfers(): HasMany
+    {
+        return $this->hasMany(
+            AssetTransfer::class,
+            'to_custodian_id'
+        );
+    }
 }

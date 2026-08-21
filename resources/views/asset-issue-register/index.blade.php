@@ -99,9 +99,7 @@
                             @endforeach
 
                         </select>
-
                     </div>
-
 
                     <div class="col-md-3 d-flex align-items-end">
 
@@ -212,11 +210,18 @@
 
                                     {{-- Return Asset --}}
                                     @if($issue->issue_status === 'Issued')
-                                        <button type="button" class="btn btn-sm btn-success return-asset" data-id="{{ encryptId($issue->id) }}">                                                                                                                                
+                                        <button type="button" class="btn btn-sm btn-success return-asset" data-id="{{ encryptId($issue->id) }}" title="Return Asset">                                                                                                                                
                                             <i class="bi bi-arrow-return-left"></i>
                                         </button>
+
+                                    {{-- Transfer Asset --}}
+                                    <button type="button" class="btn btn-sm btn-warning transfer-asset" data-id="{{ encryptId($issue->id)}}" 
+                                    data-custodian-id="{{ encryptId($issue->custodian_id) }}" title="Transfer Asset">
+                                        <i class="bi bi-arrow-left-right"></i>
+                                    </button>
                                     @endif
 
+                                   
                                 </td>
                             </tr>
                         @endforeach
@@ -280,6 +285,300 @@
                     </div>
 
                 </div>
+
+               {{-- ==========================================================
+                    Transfer Asset Modal
+                ========================================================== --}}
+
+                <div
+                    class="modal fade"
+                    id="transferAssetModal"
+                    tabindex="-1"
+                    aria-labelledby="transferAssetModalLabel"
+                    aria-hidden="true">
+
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+                        <div class="modal-content">
+
+                            {{-- Modal Header --}}
+                            <div class="modal-header">
+
+                                <h5 class="modal-title" id="transferAssetModalLabel">
+
+                                    <i class="bi bi-arrow-left-right"></i>
+
+                                    Transfer Asset
+
+                                </h5>
+
+                                <button
+                                    type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close">
+                                </button>
+
+                            </div>
+
+
+                            {{-- Modal Body --}}
+                            <div class="modal-body">
+
+                                <form id="transferAssetForm">
+
+                                    @csrf
+
+                                    <input
+                                        type="hidden"
+                                        id="transfer_issue_id"
+                                        name="issue_id">
+
+
+                                    {{-- Current Custodian --}}
+                                    <div class="card border mb-3">
+
+                                        <div class="card-header">
+
+                                            <strong>
+                                                Current Custodian
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="card-body">
+
+                                            <div class="row">
+
+                                                <div class="col-md-6 mb-3">
+
+                                                    <label class="form-label">
+                                                        Custodian Name
+                                                    </label>
+
+                                                    <input
+                                                        type="text"
+                                                        id="current_custodian_name"
+                                                        class="form-control"
+                                                        readonly>
+
+                                                </div>
+
+
+                                                <div class="col-md-3 mb-3">
+
+                                                    <label class="form-label">
+                                                        Employee ID
+                                                    </label>
+
+                                                    <input
+                                                        type="text"
+                                                        id="current_custodian_emp_id"
+                                                        class="form-control"
+                                                        readonly>
+
+                                                </div>
+
+
+                                                <div class="col-md-3 mb-3">
+
+                                                    <label class="form-label">
+                                                        Asset Tag
+                                                    </label>
+
+                                                    <input
+                                                        type="text"
+                                                        id="transfer_asset_tag"
+                                                        class="form-control"
+                                                        readonly>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {{-- New Custodian --}}
+                                    <div class="card border">
+
+                                        <div class="card-header">
+
+                                            <strong>
+                                                Transfer To
+                                            </strong>
+
+                                        </div>
+
+                                        <div class="card-body">
+
+                                            <div class="row">
+
+                                                {{-- Custodian --}}
+                                                <div class="col-md-6 mb-3">
+
+                                                    <label class="form-label">
+
+                                                        New Custodian
+
+                                                        <span class="text-danger">
+                                                            *
+                                                        </span>
+
+                                                    </label>
+
+                                                    <select
+                                                        name="to_custodian_id"
+                                                        id="transfer_to_custodian_id"
+                                                        class="form-select">
+
+                                                        <option value="">
+                                                            Select Custodian
+                                                        </option>
+
+                                                        @foreach($custodians as $custodian)
+
+                                                            <option
+                                                                value="{{ $custodian->id }}">
+
+                                                                {{ ucwords($custodian->custodian_name) }}
+                                                                -
+                                                                {{ $custodian->emp_id }}
+
+                                                            </option>
+
+                                                        @endforeach
+
+                                                    </select>
+
+                                                </div>
+
+
+                                                {{-- Employee ID --}}
+                                                <div class="col-md-3 mb-3">
+
+                                                    <label class="form-label">
+                                                        Employee ID
+                                                    </label>
+
+                                                    <input
+                                                        type="text"
+                                                        id="transfer_emp_id"
+                                                        class="form-control"
+                                                        readonly>
+
+                                                </div>
+
+
+                                                {{-- Designation --}}
+                                                <div class="col-md-3 mb-3">
+
+                                                    <label class="form-label">
+                                                        Designation
+                                                    </label>
+
+                                                    <input
+                                                        type="text"
+                                                        id="transfer_designation"
+                                                        class="form-control"
+                                                        readonly>
+
+                                                </div>
+
+
+                                                {{-- Department --}}
+                                                <div class="col-md-6 mb-3">
+
+                                                    <label class="form-label">
+                                                        Department
+                                                    </label>
+
+                                                    <input
+                                                        type="text"
+                                                        id="transfer_department"
+                                                        class="form-control"
+                                                        readonly>
+
+                                                </div>
+
+
+                                                {{-- Section --}}
+                                                <div class="col-md-6 mb-3">
+
+                                                    <label class="form-label">
+                                                        Section
+                                                    </label>
+
+                                                    <input
+                                                        type="text"
+                                                        id="transfer_section"
+                                                        class="form-control"
+                                                        readonly>
+
+                                                </div>
+
+
+                                                {{-- Transfer Date --}}
+                                                <div class="col-md-6 mb-3">
+
+                                                    <label class="form-label">
+
+                                                        Transfer Date
+
+                                                        <span class="text-danger">
+                                                            *
+                                                        </span>
+
+                                                    </label>
+
+                                                    <input type="date" name="transfer_date" id="transfer_date" class="form-control" value="{{ date('Y-m-d') }}">
+                                                </div>
+
+
+                                                {{-- Remarks --}}
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">
+                                                        Remarks
+                                                    </label>
+
+                                                    <textarea name="remarks" id="transfer_remarks" class="form-control" rows="2" placeholder="Enter transfer remarks"></textarea>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </form>
+
+                            </div>
+
+
+                            {{-- Modal Footer --}}
+                            <div class="modal-footer">
+
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">                                                                                             
+                                    <i class="bi bi-x-circle"></i>
+                                    Cancel
+                                </button>
+
+
+                                <button type="button" class="btn btn-warning" id="confirmTransferBtn">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                    Transfer Asset
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
         </div>
@@ -931,23 +1230,825 @@
         let id = $(this).data('id');
 
         if (!id) {
-
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
                 text: 'Custodian information is not available.'
             });
-
             return;
         }
 
-        let url = "{{ route('asset-issue-register.custodian-export', ':id') }}"
-            .replace(':id', id);
-
+        let url = "{{ route('asset-issue-register.custodian-export', ':id') }}".replace(':id', id);
+            
         window.location.href = url;
 
     });
 
+    $('#transfer_to_custodian').select2({
+        placeholder: 'Select Custodian',
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('#transferAssetModal')
+    });
+
+    /* ==============================================================
+    OPEN TRANSFER MODAL
+    ============================================================== */
+
+    $(document).on('click', '.transfer-asset', function () {
+
+        let issueId = $(this).data('id');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Current Custodian
+        |--------------------------------------------------------------------------
+        |
+        | This is the custodian FROM whom the asset is being transferred.
+        |
+        */
+
+        let currentCustodianId =
+            String($(this).data('custodian-id'));
+
+
+        if (!issueId) {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Invalid issue selected.'
+            });
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Store Issue ID
+        |--------------------------------------------------------------------------
+        */
+
+        $('#transfer_issue_id').val(issueId);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reset Fields
+        |--------------------------------------------------------------------------
+        */
+
+        $('#transfer_asset_tag').val('');
+        $('#transfer_asset_type').val('');
+        $('#transfer_asset_model').val('');
+
+        $('#transfer_from_custodian').val('');
+        $('#transfer_from_emp_id').val('');
+
+        $('#transfer_to_custodian')
+            .val('')
+            .trigger('change');
+
+        $('#transfer_to_emp_id').val('');
+        $('#transfer_to_designation').val('');
+        $('#transfer_to_department').val('');
+        $('#transfer_to_section').val('');
+        $('#transfer_to_location').val('');
+
+        $('#transfer_remarks').val('');
+
+        $('#transfer_date').val(
+            new Date().toISOString().split('T')[0]
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Populate New Custodian Dropdown
+        |--------------------------------------------------------------------------
+        |
+        | Remove the CURRENT custodian from the destination list.
+        |
+        */
+
+        let transferSelect = $('#transfer_to_custodian');
+            
+        transferSelect.empty();
+
+        transferSelect.append(`
+            <option value="">
+                Select New Custodian
+            </option>
+        `);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Add all custodians except current custodian
+        |--------------------------------------------------------------------------
+        */
+
+        $('#custodianOptionSource option').each(function () {
+            let option = $(this);
+
+            // Skip empty option
+            if (!option.val()) {
+                return;
+            }
+            /*
+            | Do not show current custodian
+            */
+
+            if (
+                String(option.val()) ===
+                currentCustodianId
+            ) {
+                return;
+            }
+
+            transferSelect.append(
+                option.clone()
+            );
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reset Select2
+        |--------------------------------------------------------------------------
+        */
+
+        transferSelect
+            .val('')
+            .trigger('change');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Show Modal
+        |--------------------------------------------------------------------------
+        */
+
+        let modalElement =
+            document.getElementById('transferAssetModal');
+
+        let modal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
+
+        modal.show();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Transfer Details
+        |--------------------------------------------------------------------------
+        */
+
+        let url =
+            "{{ route('asset-issue-register.transfer-details', ':id') }}"
+                .replace(':id', issueId);
+
+
+        $.ajax({
+
+            url: url,
+
+            type: 'GET',
+
+            dataType: 'json',
+
+            success: function (response) {
+
+                if (!response.status) {
+
+                    Swal.fire({
+
+                        icon: 'error',
+
+                        title: 'Error',
+
+                        text:
+                            response.message ||
+                            'Unable to load asset details.'
+
+                    });
+
+                    return;
+                }
+
+
+                let issue =
+                    response.issue;
+
+
+                /*
+                |--------------------------------------------------------------
+                | Current Asset
+                |--------------------------------------------------------------
+                */
+
+                $('#transfer_asset_tag')
+                    .val(issue.asset_tag);
+
+                $('#transfer_asset_type')
+                    .val(issue.asset_type);
+
+                $('#transfer_asset_model')
+                    .val(issue.asset_model);
+
+
+                /*
+                |--------------------------------------------------------------
+                | Current Custodian
+                |--------------------------------------------------------------
+                */
+
+                $('#transfer_from_custodian')
+                    .val(issue.custodian_name);
+
+                $('#transfer_from_emp_id')
+                    .val(issue.emp_id);
+
+            },
+
+
+            error: function (xhr) {
+
+                Swal.fire({
+
+                    icon: 'error',
+
+                    title: 'Error',
+
+                    text:
+                        xhr.responseJSON?.message ||
+                        'Unable to load transfer details.'
+
+                });
+
+            }
+
+        });
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Initialize Transfer Custodian Select2
+    |--------------------------------------------------------------------------
+    */
+
+    $('#transfer_to_custodian_id').select2({
+        placeholder: 'Select New Custodian',
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('#transferAssetModal')
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Open Transfer Modal
+    |--------------------------------------------------------------------------
+    */
+
+    $(document).on(
+        'click',
+        '.transfer-asset',
+        function () {
+            let issueId = $(this).data('id');
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Reset modal
+            |--------------------------------------------------------------------------
+            */
+
+            $('#transferAssetForm')[0].reset();
+            $('#transfer_issue_id').val(issueId);
+            $('#transfer_to_custodian_id').val('').trigger('change');               
+            $('#current_custodian_name').val('');
+            $('#current_custodian_emp_id').val('');
+            $('#transfer_asset_tag').val('');
+            $('#transfer_emp_id').val('');
+            $('#transfer_designation').val('');
+            $('#transfer_department').val('');
+            $('#transfer_section').val('');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Default transfer date
+            |--------------------------------------------------------------------------
+            */
+
+            $('#transfer_date').val(
+                new Date().toISOString().split('T')[0]
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Show loading
+            |--------------------------------------------------------------------------
+            */
+
+            Swal.fire({
+                title: 'Loading',
+                text: 'Loading transfer details...',
+                allowOutsideClick: false,
+                didOpen: function () {
+                    Swal.showLoading();
+                }
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Get current issue details
+            |--------------------------------------------------------------------------
+            */
+
+            let url = "{{ route('asset-issue-register.transfer-details', ':id') }}".replace(':id', issueId);
+                        
+            $.ajax({
+                url: url,
+                type: 'GET',
+
+                success: function (response) {
+                    Swal.close();
+
+                    if (!response.status) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text:
+                                response.message ||
+                                'Unable to load transfer details.'
+                        });
+
+                        return;
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Current custodian
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $('#current_custodian_name').val(
+                        response.issue.custodian_name || '-'
+                    );
+
+
+                    $('#current_custodian_emp_id').val(
+                        response.issue.emp_id || '-'
+                    );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Asset tag
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $('#transfer_asset_tag').val(
+                        response.issue.asset_tag || '-'
+                    );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Store issue ID
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $('#transfer_issue_id').val(
+                        response.issue.issue_id
+                    );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Open modal
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $('#transferAssetModal').modal('show');
+
+                },
+
+
+                error: function (xhr) {
+
+                    Swal.close();
+
+
+                    Swal.fire({
+
+                        icon: 'error',
+
+                        title: 'Error',
+
+                        text:
+                            xhr.responseJSON?.message ||
+                            'Unable to load transfer details.'
+
+                    });
+
+                }
+
+            });
+
+        }
+    );
+
+    /* ==============================================================
+    NEW CUSTODIAN CHANGE
+    ============================================================== */
+
+    $('#transfer_to_custodian_id').on(
+        'change',
+        function () {
+
+            let custodianId = $(this).val();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Clear details
+            |--------------------------------------------------------------------------
+            */
+
+            $('#transfer_emp_id').val('');
+
+            $('#transfer_designation').val('');
+
+            $('#transfer_department').val('');
+
+            $('#transfer_section').val('');
+
+
+            if (!custodianId) {
+
+                return;
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Prevent transferring to same custodian
+            |--------------------------------------------------------------------------
+            */
+
+            let currentEmpId =
+                $('#current_custodian_emp_id').val();
+
+
+            let selectedText =
+                $('#transfer_to_custodian_id option:selected')
+                .text();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Get custodian details
+            |--------------------------------------------------------------------------
+            */
+
+            let url =
+                "{{ route('asset-issue-register.custodian-details', ':id') }}"
+                .replace(':id', custodianId);
+
+
+            $.ajax({
+
+                url: url,
+
+                type: 'GET',
+
+
+                success: function (response) {
+
+                    if (!response.status) {
+
+                        Swal.fire({
+
+                            icon: 'error',
+
+                            title: 'Error',
+
+                            text:
+                                response.message ||
+                                'Unable to load custodian details.'
+
+                        });
+
+                        return;
+                    }
+
+
+                    let custodian =
+                        response.custodian;
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Check same employee
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        String(custodian.emp_id) ===
+                        String(currentEmpId)
+                    ) {
+
+                        Swal.fire({
+
+                            icon: 'warning',
+
+                            title: 'Invalid Custodian',
+
+                            text:
+                                'You cannot transfer the asset to the current custodian.'
+
+                        });
+
+
+                        $('#transfer_to_custodian_id')
+                            .val('')
+                            .trigger('change');
+
+                        return;
+
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Display details
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $('#transfer_emp_id').val(
+                        custodian.emp_id || '-'
+                    );
+
+
+                    $('#transfer_designation').val(
+                        custodian.designation || '-'
+                    );
+
+
+                    $('#transfer_department').val(
+                        custodian.department || '-'
+                    );
+
+
+                    $('#transfer_section').val(
+                        custodian.section || '-'
+                    );
+
+                },
+
+
+                error: function () {
+
+                    Swal.fire({
+
+                        icon: 'error',
+
+                        title: 'Error',
+
+                        text:
+                            'Unable to load custodian details.'
+
+                    });
+
+                }
+
+            });
+
+        }
+    );
+
+    /* ==============================================================
+    CONFIRM TRANSFER
+    ============================================================== */
+
+    $('#confirmTransferBtn').on(
+        'click',
+        function () {
+
+            let issueId =
+                $('#transfer_issue_id').val();
+
+            let toCustodianId =
+                $('#transfer_to_custodian_id').val();
+
+            let transferDate =
+                $('#transfer_date').val();
+
+            let remarks =
+                $('#transfer_remarks').val();
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validation
+            |--------------------------------------------------------------------------
+            */
+
+            if (!toCustodianId) {
+
+                Swal.fire({
+
+                    icon: 'warning',
+
+                    title: 'Custodian Required',
+
+                    text:
+                        'Please select the new custodian.'
+
+                });
+
+                return;
+
+            }
+
+
+            if (!transferDate) {
+
+                Swal.fire({
+
+                    icon: 'warning',
+
+                    title: 'Transfer Date Required',
+
+                    text:
+                        'Please select the transfer date.'
+
+                });
+
+                return;
+
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Confirmation
+            |--------------------------------------------------------------------------
+            */
+
+            Swal.fire({
+
+                title: 'Transfer Asset?',
+
+                text:
+                    'This asset will be returned from the current custodian and issued to the new custodian.',
+
+                icon: 'question',
+
+                showCancelButton: true,
+
+                confirmButtonText:
+                    'Yes, Transfer',
+
+                cancelButtonText:
+                    'Cancel'
+
+            }).then(function (result) {
+
+                if (!result.isConfirmed) {
+
+                    return;
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Disable button
+                |--------------------------------------------------------------------------
+                */
+
+                $('#confirmTransferBtn')
+                    .prop('disabled', true);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | AJAX
+                |--------------------------------------------------------------------------
+                */
+
+                $.ajax({
+
+                    url:
+                        "{{ route('asset-issue-register.transfer') }}",
+
+                    type: 'POST',
+
+                    data: {
+
+                        _token:
+                            "{{ csrf_token() }}",
+
+                        issue_id:
+                            issueId,
+
+                        to_custodian_id:
+                            toCustodianId,
+
+                        transfer_date:
+                            transferDate,
+
+                        remarks:
+                            remarks
+
+                    },
+
+
+                    success: function (response) {
+
+                        $('#confirmTransferBtn')
+                            .prop('disabled', false);
+
+
+                        $('#transferAssetModal')
+                            .modal('hide');
+
+
+                        Swal.fire({
+
+                            icon: 'success',
+
+                            title: 'Transferred',
+
+                            text:
+                                response.message ||
+                                'Asset transferred successfully.',
+
+                            timer: 2000,
+
+                            showConfirmButton: false
+
+                        }).then(function () {
+
+                            location.reload();
+
+                        });
+
+                    },
+
+
+                    error: function (xhr) {
+
+                        $('#confirmTransferBtn')
+                            .prop('disabled', false);
+
+
+                        let message =
+                            'Unable to transfer asset.';
+
+
+                        if (
+                            xhr.responseJSON &&
+                            xhr.responseJSON.message
+                        ) {
+
+                            message =
+                                xhr.responseJSON.message;
+
+                        }
+
+
+                        Swal.fire({
+
+                            icon: 'error',
+
+                            title: 'Transfer Failed',
+
+                            text: message
+
+                        });
+
+                    }
+
+                });
+
+            });
+
+        }
+    );
 </script>
 
 @endpush

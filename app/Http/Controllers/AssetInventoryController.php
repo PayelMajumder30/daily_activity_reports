@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exports\AssetInventoryExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\{AssetInventory, AssetType, AssetModel, Location};
 
 class AssetInventoryController extends Controller
@@ -206,10 +208,57 @@ class AssetInventoryController extends Controller
             'tags' => $tags
         ]);
     }
-
-    
+  
     public function getModels($type){
         $models = AssetModel::where('asset_type_id', $type)->where('status',1)->orderBy('model_name')->get();
         return response()->json($models);
+    }
+
+    public function export(Request $request)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Get current search filters
+        |--------------------------------------------------------------------------
+        */
+
+        $filters = $request->only([
+            'tag_no',
+            'po_number',
+            'serial_no',
+            'asset_type',
+            'asset_model',
+            'installation_date',
+        ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Event Log
+        |--------------------------------------------------------------------------
+        */
+
+        eventLog(
+            'Download',
+            'Asset Inventory',
+            'Asset inventory Excel downloaded with filters: ' .
+            json_encode(
+                array_filter($filters, function ($value) {
+                    return $value !== null && $value !== '';
+                })
+            )
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Download Excel
+        |--------------------------------------------------------------------------
+        */
+
+        return Excel::download(
+            new AssetInventoryExport($filters),
+            'Asset_Inventory_' . now()->format('d-m-Y_H-i-s') . '.xlsx'
+        );
     }
 }

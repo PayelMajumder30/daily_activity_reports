@@ -106,22 +106,15 @@
                             Designation
                         </label>
 
-                        <input
-                            type="text"
-                            id="custodian_designation"
-                            class="form-control"
-                            readonly>
-
+                        <input type="text" id="custodian_designation" class="form-control" readonly>
                     </div>
 
 
                     {{-- Department --}}
                     <div class="col-md-3 mb-3">
-
                         <label class="form-label">
                             Department
                         </label>
-
                         <input type="text" id="custodian_department" class="form-control" readonly>
                     </div>
 
@@ -477,7 +470,7 @@ $(document).ready(function () {
                 );
 
                 $('#custodian_designation').val(
-                    response.custodian.designation || '-'
+                    response.custodian.designation ? response.custodian.designation.toLowerCase().replace(/\b\w/g, char => char.toUpperCase()) : '-'
                 );
 
                 $('#custodian_department').val(
@@ -1230,19 +1223,12 @@ $(document).ready(function () {
 
             if (rows.length === 1) {
 
-                let row =
-                    $(this).closest('.asset-row');
+                let row = $(this).closest('.asset-row');                   
 
-
-                row.find('.modal-asset-tag')
-                    .val('')
-                    .trigger('change');
-
-
-                row.find('.modal-asset-type')
-                    .val('');
-
-
+                row.find('.modal-asset-tag').val('').trigger('change');
+                                       
+                row.find('.modal-asset-type').val('');
+                    
                 row.find('.modal-asset-model')
                     .val('');
 
@@ -1259,21 +1245,14 @@ $(document).ready(function () {
             */
 
             let select =
-                $(this)
-                    .closest('.asset-row')
-                    .find('.modal-asset-tag');
-
-
+                $(this).closest('.asset-row').find('.modal-asset-tag');
             if (
                 select.hasClass(
                     'select2-hidden-accessible'
                 )
             ) {
-
                 select.select2('destroy');
-
             }
-
 
             /*
             |----------------------------------------------------------
@@ -1281,11 +1260,8 @@ $(document).ready(function () {
             |----------------------------------------------------------
             */
 
-            $(this)
-                .closest('.asset-row')
-                .remove();
-
-
+            $(this).closest('.asset-row').remove();
+                
             /*
             |----------------------------------------------------------
             | Refresh available assets
@@ -1727,26 +1703,17 @@ $(document).ready(function () {
             let assets =
                 $('input[name="asset_inventory_ids[]"]');
 
-
             if (assets.length === 0) {
 
                 e.preventDefault();
-
-
                 Swal.fire({
-
                     icon: 'warning',
-
                     title: 'No Asset Selected',
-
-                    text:
-                        'Please add at least one asset before issuing.'
+                    text: 'Please add at least one asset before issuing.'                       
 
                 });
 
-
                 return false;
-
             }
 
 
@@ -1760,21 +1727,14 @@ $(document).ready(function () {
 
                 e.preventDefault();
 
-
                 Swal.fire({
-
                     icon: 'warning',
-
                     title: 'Custodian Required',
-
-                    text:
-                        'Please select a custodian.'
+                    text: 'Please select a custodian.'                      
 
                 });
 
-
                 return false;
-
             }
 
 
@@ -1788,21 +1748,12 @@ $(document).ready(function () {
 
                 e.preventDefault();
 
-
                 Swal.fire({
-
                     icon: 'warning',
-
                     title: 'User Type Required',
-
-                    text:
-                        'Please select a user type.'
-
+                    text: 'Please select a user type.'                       
                 });
-
-
                 return false;
-
             }
 
 
@@ -1821,25 +1772,14 @@ $(document).ready(function () {
 
 
                 Swal.fire({
-
                     icon: 'warning',
-
                     title: 'Operator Required',
-
-                    text:
-                        'Please enter the operator name.'
-
+                    text: 'Please enter the operator name.'                      
                 });
 
-
-                $('#operator_name')
-                    .focus();
-
-
+                $('#operator_name').focus();                   
                 return false;
-
             }
-
 
             /*
             |----------------------------------------------------------
@@ -1852,19 +1792,11 @@ $(document).ready(function () {
             ) {
 
                 e.preventDefault();
-
-
                 Swal.fire({
-
                     icon: 'warning',
-
                     title: 'Issue Date Required',
-
-                    text:
-                        'Please select the issue date.'
-
+                    text: 'Please select the issue date.'                       
                 });
-
 
                 return false;
 
@@ -1879,7 +1811,6 @@ $(document).ready(function () {
     ============================================================== */
 
     resetAssetModal();
-
 
 });
 

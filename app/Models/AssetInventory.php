@@ -13,6 +13,11 @@ class AssetInventory extends Model
     protected $fillable = ['tag_no', 'asset_model_id', 'location_id', 'po_number', 'serial_no', 'installation_date', 'warranty_year',
      'warranty_end', 'asset_status', 'remarks', 'created_by', 'status'];
 
+    protected $casts = [
+        'installation_date' => 'date',
+        'warranty_end'      => 'date',
+    ];
+
     public function assetModel(): BelongsTo {
         return $this->belongsTo(AssetModel::class);
     }
@@ -31,8 +36,10 @@ class AssetInventory extends Model
     {
         return $this->hasMany(AssetIssueRegister::class, 'asset_inventory_id');
     }
-    // public function issueRegister(): HasMany
-    // {
-    //     return $this->hasMany(IssueRegister::class);
-    // }
+
+    public function assetTransfers(): HasMany
+    {
+        return $this->hasMany(AssetTransfer::class, 'asset_inventory_id');
+    }
+   
 }

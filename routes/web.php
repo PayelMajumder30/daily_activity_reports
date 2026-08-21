@@ -151,7 +151,8 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('/store', [AssetInventoryController::class, 'store'])->name('store');
         Route::get('/generate-preview', [AssetInventoryController::class, 'generatePreview'])->name('generatePreview');
         Route::get('/generate-tags/{location}/{assetType}/{quantity}',[AssetInventoryController::class, 'generateTags'])->name('generateTags');
-        Route::get('/get-models/{type}', [AssetInventoryController::class,'getModels'])->name('getModels');            
+        Route::get('/get-models/{type}', [AssetInventoryController::class,'getModels'])->name('getModels');   
+        Route::get('/export', [AssetInventoryController::class, 'export'])->name('export');    
     });
 
     // asset register
@@ -174,6 +175,10 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/custodian-details/{id}', [AssetIssueRegisterController::class, 'custodianDetails'])->name('custodian-details');
         Route::get('/custodian-asset-details/{id}', [AssetIssueRegisterController::class, 'custodianAssetDetails'])->name('custodian-asset-details');
         Route::get('/custodian-export/{id}', [AssetIssueRegisterController::class, 'custodianExport'])->name('custodian-export');
+
+        // asset transfer
+        Route::get('/transfer-details/{id}', [AssetIssueRegisterController::class, 'transferDetails'])->name('transfer-details');
+        Route::post('/transfer', [AssetIssueRegisterController::class, 'transferAsset'] )->name('transfer');      
     });
 });
 

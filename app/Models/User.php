@@ -68,4 +68,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(AssetAssigned::class, 'created_by');
     }
+
+    public function assetTransfers(): HasMany
+    {
+        return $this->hasMany(AssetTransfer::class, 'created_by');
+    }
 }

@@ -32,24 +32,6 @@ if(!function_exists('eventLog')) {
 }
 
 // for tag generate
-// if(!function_exists('generateAssetTag')){
-//     function generateAssetTag($locationId, $assetTypeId){
-//         $location = Location::findOrFail($locationId);
-//         $assetType = AssetType::findOrFail($assetTypeId);
-
-//         $prefix = strtoupper($location->short_name) . '/IT/' . now()->format('my') . '/' . strtoupper($assetType->short_name);
-//         $last = AssetInventory::where('tag_no', 'like', $prefix . '/%')->orderByDesc('id')->first();
-
-//         if($last){
-//             $lastNumber = (int) substr($last->tag_no, -4);
-//             $runningNumber = $lastNumber + 1;
-//         } else{
-//             $runningNumber = 0;
-//         }
-
-//         return $prefix . '/' . str_pad($runningNumber, 4, '0', STR_PAD_LEFT);
-//     }
-// }
 
 if (!function_exists('generateAssetTag')) {
 

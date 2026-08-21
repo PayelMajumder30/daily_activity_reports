@@ -32,10 +32,19 @@
                 Search Asset Inventory
             </h5>
 
-            <a href="{{ route('asset-inventory.create') }}" class="btn btn-primary btn-sm">           
-                <i class="bi bi-plus-circle"></i>
-                Add Inventory
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('asset-inventory.create') }}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle"></i>
+                    Add Inventory
+                </a>
+
+                <a href="{{ route('asset-inventory.export', request()->query()) }}"
+                class="btn btn-success btn-sm">
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Export Excel
+                </a>
+            </div>
+           
         </div>
 
         <div class="card-body">
