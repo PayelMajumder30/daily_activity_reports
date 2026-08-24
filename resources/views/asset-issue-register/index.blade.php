@@ -34,11 +34,18 @@
                 Search Issued Assets
             </h5>
 
-            <a href="{{ route('asset-issue-register.create') }}" class="btn btn-primary btn-sm">               
-                <i class="bi bi-plus-circle"></i>
-                Issue Asset
-            </a>
-
+            <div class="d-flex gap-2">
+                <a href="{{ route('asset-issue-register.create') }}" class="btn btn-primary btn-sm">               
+                    <i class="bi bi-plus-circle"></i>
+                    Issue Asset
+                </a>
+                {{-- Export Excel --}}
+                <a href="{{ route('asset-issue-register.export', request()->query()) }}" class="btn btn-success btn-sm">
+                
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Export Excel
+                </a>
+            </div>
         </div>
 
         <div class="card-body">
@@ -69,44 +76,55 @@
                     {{-- Tag --}}
 
                     <div class="col-md-2">
-
                         <label class="form-label">
                             Asset Tag
                         </label>
-
                         <input type="text" name="tag_no" value="{{ request('tag_no') }}" class="form-control" placeholder="Tag No">
                     </div>
 
+                     {{-- Asset Type --}}
+                    <div class="col-md-2">
+                        <label class="form-label">
+                            Asset Type
+                        </label>
+
+                        <select name="asset_type" class="form-select">                     
+                            <option value="">
+                                All Asset Types
+                            </option>
+
+                            @foreach($assetTypes as $type)
+
+                                <option value="{{ $type->id }}" {{ request('asset_type') == $type->id ? 'selected' : '' }}>                                 
+                                    {{ ucwords($type->name) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
                     {{-- Issue Status --}}
 
                     <div class="col-md-2">
-
                         <label class="form-label">
                             Status
                         </label>
 
                         <select name="issue_status" class="form-select">                                                      
-
                             <option value="">
                                 All
                             </option>
-
                             @foreach($issueStatuses as $status)
-                                <option value="Issued" {{ request('issue_status') == $status ? 'selected' : '' }}>                                                              
+                                <option value="{{ $status }}" {{ request('issue_status') == $status ? 'selected' : '' }}>                                                              
                                     {{ ucwords($status)}}
                                 </option>
                             @endforeach
-
                         </select>
                     </div>
 
                     <div class="col-md-3 d-flex align-items-end">
-
                         <button type="submit" class="btn btn-primary">                                                     
                             <i class="bi bi-search"></i>
                             Search
-
                         </button>
 
                         <a href="{{ route('asset-issue-register.index') }}" class="btn btn-secondary ms-2">                                                      
@@ -114,11 +132,8 @@
                         </a>
 
                     </div>
-
                 </div>
-
             </form>
-
         </div>
 
     </div>
@@ -136,10 +151,8 @@
 
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="assetIssueTable">
-                                     
+                <table class="table table-bordered table-hover" id="assetIssueTable">                                   
                     <thead class="table-dark">
-
                         <tr>
                             <th>SL</th>
                             <th>Tag No.</th>
@@ -151,51 +164,49 @@
                             <th>User Type</th>
                             <th>Issued Date</th>
                             <th>Returned Date</th>
+                            <!-- <th>Asset History</th> -->
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
-
                     </thead>
 
 
                     <tbody>
                         @foreach($issueRegisters as $issue)
                             <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                                                   
+                                <td>{{ $loop->iteration }}</td>                                                                   
                                 <td>
                                     <strong>
                                         {{ $issue->assetInventory->tag_no ?? 'N/A' }}
                                     </strong>
                                 </td>
 
-                                <td> {{ ucwords($issue->assetInventory->assetModel->assetType->name ?? 'N/A') }} </td>
-                                
-                                <td> {{ $issue->assetInventory->assetModel->model_name ?? 'N/A' }}</td>
-                                    
+                                <td> {{ ucwords($issue->assetInventory->assetModel->assetType->name ?? 'N/A') }} </td>                                
+                                <td> {{ $issue->assetInventory->assetModel->model_name ?? 'N/A' }}</td>                                    
                                 <td>{{ ucwords($issue->custodian->custodian_name ?? 'N/A') }}</td>
-
                                 <td>{{ $issue->custodian->emp_id ?? 'N/A' }} </td>
-
-                                <td>{{ ucwords($issue->custodian->discipline->name ?? 'N/A') }}</td>
-                                    
-                                <td>{{ ucfirst($issue->user_type) }}</td>
-                                                                  
+                                <td>{{ ucwords($issue->custodian->discipline->name ?? 'N/A') }}</td>                                 
+                                <td>{{ ucfirst($issue->user_type) }}</td>                                                                 
                                 <td>{{ $issue->issued_date? $issue->issued_date->format('d-m-Y'): 'N/A' }}</td>
-
                                 <td>{{ $issue->returned_date? $issue->returned_date->format('d-m-Y'): '-' }} </td>
-
+  
+                                <!-- <td></td> -->
                                 <td>
-                                    @if($issue->issue_status === 'Issued')
+                                   @if($issue->issue_status === 'Issued')
                                         <span class="badge bg-success">
                                             Issued
                                         </span>
-                                    @else
+
+                                    @elseif($issue->issue_status === 'Transferred')
+                                        <span class="badge bg-warning text-dark">
+                                            Transferred
+                                        </span>
+
+                                    @elseif($issue->issue_status === 'Returned')
                                         <span class="badge bg-secondary">
                                             Returned
                                         </span>
                                     @endif
-
                                 </td>
 
                                 <td>
@@ -220,7 +231,6 @@
                                         <i class="bi bi-arrow-left-right"></i>
                                     </button>
                                     @endif
-
                                    
                                 </td>
                             </tr>
@@ -290,33 +300,20 @@
                     Transfer Asset Modal
                 ========================================================== --}}
 
-                <div
-                    class="modal fade"
-                    id="transferAssetModal"
-                    tabindex="-1"
-                    aria-labelledby="transferAssetModalLabel"
-                    aria-hidden="true">
-
+                <div class="modal fade" id="transferAssetModal" tabindex="-1" aria-labelledby="transferAssetModalLabel" aria-hidden="true">
+                     
                     <div class="modal-dialog modal-lg modal-dialog-centered">
-
                         <div class="modal-content">
 
                             {{-- Modal Header --}}
                             <div class="modal-header">
 
                                 <h5 class="modal-title" id="transferAssetModalLabel">
-
                                     <i class="bi bi-arrow-left-right"></i>
-
                                     Transfer Asset
-
                                 </h5>
 
-                                <button
-                                    type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close">
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">    
                                 </button>
 
                             </div>
@@ -329,39 +326,25 @@
 
                                     @csrf
 
-                                    <input
-                                        type="hidden"
-                                        id="transfer_issue_id"
-                                        name="issue_id">
-
-
+                                    <input type="hidden" id="transfer_issue_id" name="issue_id">
                                     {{-- Current Custodian --}}
                                     <div class="card border mb-3">
-
                                         <div class="card-header">
-
                                             <strong>
                                                 Current Custodian
                                             </strong>
-
                                         </div>
 
                                         <div class="card-body">
 
                                             <div class="row">
-
                                                 <div class="col-md-6 mb-3">
-
                                                     <label class="form-label">
                                                         Custodian Name
                                                     </label>
 
-                                                    <input
-                                                        type="text"
-                                                        id="current_custodian_name"
-                                                        class="form-control"
-                                                        readonly>
-
+                                                    <input type="text" id="current_custodian_name" class="form-control" readonly>                                                                                                                                                                    
+                                                        
                                                 </div>
 
 
@@ -371,12 +354,7 @@
                                                         Employee ID
                                                     </label>
 
-                                                    <input
-                                                        type="text"
-                                                        id="current_custodian_emp_id"
-                                                        class="form-control"
-                                                        readonly>
-
+                                                    <input type="text" id="current_custodian_emp_id" class="form-control" readonly>
                                                 </div>
 
 
@@ -386,12 +364,7 @@
                                                         Asset Tag
                                                     </label>
 
-                                                    <input
-                                                        type="text"
-                                                        id="transfer_asset_tag"
-                                                        class="form-control"
-                                                        readonly>
-
+                                                    <input type="text" id="transfer_asset_tag" class="form-control" readonly>
                                                 </div>
 
                                             </div>
@@ -403,7 +376,6 @@
 
                                     {{-- New Custodian --}}
                                     <div class="card border">
-
                                         <div class="card-header">
 
                                             <strong>
@@ -420,20 +392,14 @@
                                                 <div class="col-md-6 mb-3">
 
                                                     <label class="form-label">
-
                                                         New Custodian
-
                                                         <span class="text-danger">
                                                             *
                                                         </span>
 
                                                     </label>
 
-                                                    <select
-                                                        name="to_custodian_id"
-                                                        id="transfer_to_custodian_id"
-                                                        class="form-select">
-
+                                                    <select name="to_custodian_id" id="transfer_to_custodian_id" class="form-select">
                                                         <option value="">
                                                             Select Custodian
                                                         </option>
@@ -463,12 +429,7 @@
                                                         Employee ID
                                                     </label>
 
-                                                    <input
-                                                        type="text"
-                                                        id="transfer_emp_id"
-                                                        class="form-control"
-                                                        readonly>
-
+                                                    <input type="text" id="transfer_emp_id" class="form-control" readonly>
                                                 </div>
 
 
@@ -902,13 +863,9 @@
                     <div class="card border mb-4">
 
                         <div class="card-header bg-light">
-
                             <h6 class="mb-0">
-
                                 <i class="bi bi-person"></i>
-
                                 Custodian Details
-
                             </h6>
 
                         </div>
@@ -917,7 +874,6 @@
                         <div class="card-body">
 
                             <div class="row">
-
 
                                 {{-- Custodian Name --}}
 
@@ -1414,32 +1370,21 @@
 
 
         $.ajax({
-
             url: url,
-
             type: 'GET',
-
             dataType: 'json',
-
             success: function (response) {
-
                 if (!response.status) {
-
                     Swal.fire({
-
                         icon: 'error',
-
                         title: 'Error',
-
                         text:
                             response.message ||
                             'Unable to load asset details.'
-
                     });
 
                     return;
                 }
-
 
                 let issue =
                     response.issue;
@@ -1451,15 +1396,10 @@
                 |--------------------------------------------------------------
                 */
 
-                $('#transfer_asset_tag')
-                    .val(issue.asset_tag);
-
-                $('#transfer_asset_type')
-                    .val(issue.asset_type);
-
-                $('#transfer_asset_model')
-                    .val(issue.asset_model);
-
+                $('#transfer_asset_tag').val(issue.asset_tag);                 
+                $('#transfer_asset_type').val(issue.asset_type);                   
+                $('#transfer_asset_model').val(issue.asset_model);
+                    
 
                 /*
                 |--------------------------------------------------------------
@@ -1467,11 +1407,8 @@
                 |--------------------------------------------------------------
                 */
 
-                $('#transfer_from_custodian')
-                    .val(issue.custodian_name);
-
-                $('#transfer_from_emp_id')
-                    .val(issue.emp_id);
+                $('#transfer_from_custodian').val(issue.custodian_name);                   
+                $('#transfer_from_emp_id').val(issue.emp_id);                  
 
             },
 
@@ -1479,15 +1416,9 @@
             error: function (xhr) {
 
                 Swal.fire({
-
                     icon: 'error',
-
                     title: 'Error',
-
-                    text:
-                        xhr.responseJSON?.message ||
-                        'Unable to load transfer details.'
-
+                    text: xhr.responseJSON?.message || 'Unable to load transfer details.'                                            
                 });
 
             }
@@ -1606,7 +1537,6 @@
                         response.issue.custodian_name || '-'
                     );
 
-
                     $('#current_custodian_emp_id').val(
                         response.issue.emp_id || '-'
                     );
@@ -1651,11 +1581,8 @@
 
 
                     Swal.fire({
-
                         icon: 'error',
-
                         title: 'Error',
-
                         text:
                             xhr.responseJSON?.message ||
                             'Unable to load transfer details.'
@@ -1679,7 +1606,6 @@
 
             let custodianId = $(this).val();
 
-
             /*
             |--------------------------------------------------------------------------
             | Clear details
@@ -1687,20 +1613,13 @@
             */
 
             $('#transfer_emp_id').val('');
-
             $('#transfer_designation').val('');
-
             $('#transfer_department').val('');
-
             $('#transfer_section').val('');
 
-
             if (!custodianId) {
-
                 return;
-
             }
-
 
             /*
             |--------------------------------------------------------------------------
@@ -1708,14 +1627,9 @@
             |--------------------------------------------------------------------------
             */
 
-            let currentEmpId =
-                $('#current_custodian_emp_id').val();
-
-
-            let selectedText =
-                $('#transfer_to_custodian_id option:selected')
-                .text();
-
+            let currentEmpId = $('#current_custodian_emp_id').val();             
+            let selectedText = $('#transfer_to_custodian_id option:selected').text();
+                           
 
             /*
             |--------------------------------------------------------------------------
@@ -1731,33 +1645,19 @@
             $.ajax({
 
                 url: url,
-
                 type: 'GET',
-
-
                 success: function (response) {
 
                     if (!response.status) {
-
                         Swal.fire({
-
                             icon: 'error',
-
                             title: 'Error',
-
-                            text:
-                                response.message ||
-                                'Unable to load custodian details.'
-
+                            text: response.message || 'Unable to load custodian details.'                                                            
                         });
-
                         return;
                     }
 
-
-                    let custodian =
-                        response.custodian;
-
+                    let custodian = response.custodian;                     
 
                     /*
                     |--------------------------------------------------------------------------
@@ -1771,21 +1671,13 @@
                     ) {
 
                         Swal.fire({
-
                             icon: 'warning',
-
                             title: 'Invalid Custodian',
-
-                            text:
-                                'You cannot transfer the asset to the current custodian.'
-
+                            text: 'You cannot transfer the asset to the current custodian.'                              
                         });
 
 
-                        $('#transfer_to_custodian_id')
-                            .val('')
-                            .trigger('change');
-
+                        $('#transfer_to_custodian_id').val('').trigger('change');                                                  
                         return;
 
                     }
@@ -1803,7 +1695,7 @@
 
 
                     $('#transfer_designation').val(
-                        custodian.designation || '-'
+                        response.custodian.designation ? response.custodian.designation.toLowerCase().replace(/\b\w/g, char => char.toUpperCase()) : '-'                  
                     );
 
 
@@ -1820,16 +1712,10 @@
 
 
                 error: function () {
-
                     Swal.fire({
-
                         icon: 'error',
-
                         title: 'Error',
-
-                        text:
-                            'Unable to load custodian details.'
-
+                        text: 'Unable to load custodian details.'                        
                     });
 
                 }
@@ -1859,7 +1745,6 @@
             let remarks =
                 $('#transfer_remarks').val();
 
-
             /*
             |--------------------------------------------------------------------------
             | Validation
@@ -1869,16 +1754,10 @@
             if (!toCustodianId) {
 
                 Swal.fire({
-
                     icon: 'warning',
-
                     title: 'Custodian Required',
-
-                    text:
-                        'Please select the new custodian.'
-
+                    text: 'Please select the new custodian.'                        
                 });
-
                 return;
 
             }
@@ -1887,18 +1766,12 @@
             if (!transferDate) {
 
                 Swal.fire({
-
                     icon: 'warning',
-
                     title: 'Transfer Date Required',
-
-                    text:
-                        'Please select the transfer date.'
-
+                    text: 'Please select the transfer date.'                      
                 });
 
                 return;
-
             }
 
 
@@ -1909,28 +1782,19 @@
             */
 
             Swal.fire({
-
                 title: 'Transfer Asset?',
-
                 text:
                     'This asset will be returned from the current custodian and issued to the new custodian.',
 
                 icon: 'question',
-
                 showCancelButton: true,
-
-                confirmButtonText:
-                    'Yes, Transfer',
-
-                cancelButtonText:
-                    'Cancel'
+                confirmButtonText: 'Yes, Transfer',                 
+                cancelButtonText: 'Cancel'                 
 
             }).then(function (result) {
 
                 if (!result.isConfirmed) {
-
                     return;
-
                 }
 
 
@@ -1943,7 +1807,6 @@
                 $('#confirmTransferBtn')
                     .prop('disabled', true);
 
-
                 /*
                 |--------------------------------------------------------------------------
                 | AJAX
@@ -1952,93 +1815,59 @@
 
                 $.ajax({
 
-                    url:
-                        "{{ route('asset-issue-register.transfer') }}",
-
+                    url: "{{ route('asset-issue-register.transfer') }}",                      
                     type: 'POST',
-
                     data: {
 
-                        _token:
-                            "{{ csrf_token() }}",
-
-                        issue_id:
-                            issueId,
-
-                        to_custodian_id:
-                            toCustodianId,
-
-                        transfer_date:
-                            transferDate,
-
-                        remarks:
-                            remarks
-
+                        _token: "{{ csrf_token() }}",                            
+                        issue_id: issueId,                           
+                        to_custodian_id: toCustodianId,                           
+                        transfer_date: transferDate,                           
+                        remarks:  remarks                           
                     },
 
 
                     success: function (response) {
-
                         $('#confirmTransferBtn')
                             .prop('disabled', false);
-
 
                         $('#transferAssetModal')
                             .modal('hide');
 
-
                         Swal.fire({
-
                             icon: 'success',
-
                             title: 'Transferred',
-
                             text:
                                 response.message ||
                                 'Asset transferred successfully.',
 
                             timer: 2000,
-
                             showConfirmButton: false
 
                         }).then(function () {
-
                             location.reload();
-
                         });
-
                     },
 
 
                     error: function (xhr) {
 
-                        $('#confirmTransferBtn')
-                            .prop('disabled', false);
-
-
+                        $('#confirmTransferBtn').prop('disabled', false);                         
                         let message =
                             'Unable to transfer asset.';
-
 
                         if (
                             xhr.responseJSON &&
                             xhr.responseJSON.message
                         ) {
-
-                            message =
-                                xhr.responseJSON.message;
+                            message = xhr.responseJSON.message;                               
 
                         }
 
-
                         Swal.fire({
-
                             icon: 'error',
-
                             title: 'Transfer Failed',
-
                             text: message
-
                         });
 
                     }

@@ -178,7 +178,11 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
 
         // asset transfer
         Route::get('/transfer-details/{id}', [AssetIssueRegisterController::class, 'transferDetails'])->name('transfer-details');
-        Route::post('/transfer', [AssetIssueRegisterController::class, 'transferAsset'] )->name('transfer');      
+        Route::post('/transfer', [AssetIssueRegisterController::class, 'transferAsset'] )->name('transfer');     
+        
+        Route::get('/export', [AssetIssueRegisterController::class, 'export'])->name('export');
+    
+
     });
 });
 

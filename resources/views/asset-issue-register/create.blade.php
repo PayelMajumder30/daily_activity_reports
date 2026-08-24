@@ -1435,14 +1435,10 @@ $(document).ready(function () {
             if (duplicateFound) {
 
                 Swal.fire({
-
                     icon: 'warning',
-
                     title: 'Duplicate Asset',
-
                     text:
                         'The same asset cannot be added more than once.'
-
                 });
 
                 return;
@@ -1463,11 +1459,8 @@ $(document).ready(function () {
                 Swal.fire({
 
                     icon: 'warning',
-
                     title: 'No Asset Selected',
-
-                    text:
-                        'Please select at least one asset.'
+                    text: 'Please select at least one asset.'                       
 
                 });
 
@@ -1518,9 +1511,7 @@ $(document).ready(function () {
                     */
 
                     let rowNumber =
-                        $('#selectedAssetsBody tr[data-asset-id]')
-                            .length + 1;
-
+                        $('#selectedAssetsBody tr[data-asset-id]').length + 1;                           
 
                     /*
                     |--------------------------------------------------
@@ -1536,25 +1527,17 @@ $(document).ready(function () {
                                 ${rowNumber}
                             </td>
 
-
                             <td>
-
                                 <strong>
                                     ${selected.tag_no}
                                 </strong>
 
-                                <input
-                                    type="hidden"
-                                    name="asset_inventory_ids[]"
-                                    value="${selected.id}">
-
+                                <input type="hidden" name="asset_inventory_ids[]" value="${selected.id}">                                                                                                       
                             </td>
-
 
                             <td>
                                 ${selected.asset_type}
                             </td>
-
 
                             <td>
                                 ${selected.asset_model}
@@ -1563,13 +1546,8 @@ $(document).ready(function () {
 
                             <td>
 
-                                <button
-                                    type="button"
-                                    class="btn btn-sm btn-danger remove-asset"
-                                    title="Remove Asset">
-
+                                <button type="button" class="btn btn-sm btn-danger remove-asset" title="Remove Asset">                                                                                                       
                                     <i class="bi bi-trash"></i>
-
                                 </button>
 
                             </td>
@@ -1585,8 +1563,7 @@ $(document).ready(function () {
                     |--------------------------------------------------
                     */
 
-                    $('#selectedAssetsBody')
-                        .append(html);
+                    $('#selectedAssetsBody').append(html);                      
 
                 }
             );
@@ -1598,9 +1575,7 @@ $(document).ready(function () {
             |----------------------------------------------------------
             */
 
-            $('#addAssetModal')
-                .modal('hide');
-
+            $('#addAssetModal').modal('hide');              
 
             /*
             |----------------------------------------------------------
@@ -1623,9 +1598,7 @@ $(document).ready(function () {
         '.remove-asset',
         function () {
 
-            let row =
-                $(this).closest('tr');
-
+            let row = $(this).closest('tr');            
 
             /*
             |----------------------------------------------------------
@@ -1667,13 +1640,9 @@ $(document).ready(function () {
                     .html(`
 
                         <tr id="noAssetRow">
-
-                            <td
-                                colspan="5"
-                                class="text-center text-muted">
-
+ 
+                            <td colspan="5"  class="text-center text-muted">                                           
                                 No assets selected.
-
                             </td>
 
                         </tr>
@@ -1690,9 +1659,7 @@ $(document).ready(function () {
        FORM SUBMIT VALIDATION
     ============================================================== */
 
-    $('#assetIssueForm').on(
-        'submit',
-        function (e) {
+    $('#assetIssueForm').on('submit', function (e) {        
 
             /*
             |----------------------------------------------------------
@@ -1724,9 +1691,7 @@ $(document).ready(function () {
             */
 
             if (!$('#custodian_id').val()) {
-
                 e.preventDefault();
-
                 Swal.fire({
                     icon: 'warning',
                     title: 'Custodian Required',
@@ -1770,7 +1735,6 @@ $(document).ready(function () {
 
                 e.preventDefault();
 
-
                 Swal.fire({
                     icon: 'warning',
                     title: 'Operator Required',
@@ -1804,7 +1768,6 @@ $(document).ready(function () {
 
         }
     );
-
 
     /* ==============================================================
        INITIAL MODAL SETUP

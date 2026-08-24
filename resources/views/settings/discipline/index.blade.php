@@ -167,11 +167,40 @@
             const updateUrl = "{{ route('discipline.update', ':id') }}";
             const storeUrl = "{{ route('discipline.store') }}";
 
-            $('.editDiscipline').on('click', function () {
+            // $('.editDiscipline').on('click', function () {
 
+            //     clearFormErrors();
+            //     let id = $(this).data('id');
+
+            //     $.ajax({
+            //         url: editUrl.replace(':id', id),
+            //         type: 'GET',
+
+            //         success: function (res) {
+
+            //             $('#formTitle').text('Update Department');
+
+            //             $('#name').val(res.name);
+
+            //             $('#submitBtn')
+            //                 .removeClass('btn-primary')
+            //                 .addClass('btn-warning')
+            //                 .text('Update Department');
+
+            //             $('#cancelBtn').removeClass('d-none');
+
+            //             $('#disciplineForm')
+            //                 .attr('action', updateUrl.replace(':id', id));
+
+            //             $('#methodField').html('@method("PUT")');
+            //         }
+            //     });
+
+            // });
+
+            $(document).on('click', '.editDiscipline', function () {
                 clearFormErrors();
                 let id = $(this).data('id');
-
                 $.ajax({
                     url: editUrl.replace(':id', id),
                     type: 'GET',
@@ -193,6 +222,16 @@
                             .attr('action', updateUrl.replace(':id', id));
 
                         $('#methodField').html('@method("PUT")');
+                    },
+
+                    error: function (xhr) {
+                        console.log(xhr.responseText);
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Unable to load department details.'
+                        });
                     }
                 });
 

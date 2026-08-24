@@ -257,60 +257,60 @@ class CustodianController extends Controller
     //     return view('custodian.edit', compact('custodian', 'designations', 'departments', 'sections'));
     // }
     public function edit(Request $request, $id)
-{
-    $request->session()->forget('success');
+    {
+        $request->session()->forget('success');
 
-    try {
-        $custodianId = decryptId($id);
+        try {
+            $custodianId = decryptId($id);
 
-    } catch (\Throwable $e) {
+        } catch (\Throwable $e) {
 
-        return redirect()
-            ->route('custodian.index')
-            ->with('error', 'Invalid custodian selected.');
+            return redirect()
+                ->route('custodian.index')
+                ->with('error', 'Invalid custodian selected.');
+        }
+
+        $custodian = Custodian::with([
+            'designation',
+            'discipline',
+            'section',
+            'location',
+        ])->findOrFail($custodianId);
+
+        $designations = Designation::where('status', 1)
+            ->orderBy('name')
+            ->get();
+
+        $departments = Discipline::where('status', 1)
+            ->orderBy('name')
+            ->get();
+
+        $locations = Location::where('status', 1)
+            ->orderBy('name')
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get sections of selected department
+        |--------------------------------------------------------------------------
+        */
+
+        $sections = DeptSection::where(
+            'discipline_id',
+            $custodian->discipline_id
+        )
+        ->where('status', 1)
+        ->orderBy('section_name')
+        ->get();
+
+        return view('custodian.edit', compact(
+            'custodian',
+            'designations',
+            'departments',
+            'locations',
+            'sections'
+        ));
     }
-
-    $custodian = Custodian::with([
-        'designation',
-        'discipline',
-        'section',
-        'location',
-    ])->findOrFail($custodianId);
-
-    $designations = Designation::where('status', 1)
-        ->orderBy('name')
-        ->get();
-
-    $departments = Discipline::where('status', 1)
-        ->orderBy('name')
-        ->get();
-
-    $locations = Location::where('status', 1)
-        ->orderBy('name')
-        ->get();
-
-    /*
-    |--------------------------------------------------------------------------
-    | Get sections of selected department
-    |--------------------------------------------------------------------------
-    */
-
-    $sections = DeptSection::where(
-        'discipline_id',
-        $custodian->discipline_id
-    )
-    ->where('status', 1)
-    ->orderBy('section_name')
-    ->get();
-
-    return view('custodian.edit', compact(
-        'custodian',
-        'designations',
-        'departments',
-        'locations',
-        'sections'
-    ));
-}
 
     /**
      * Update the specified resource in storage.

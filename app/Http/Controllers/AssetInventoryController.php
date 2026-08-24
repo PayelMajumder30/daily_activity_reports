@@ -42,6 +42,11 @@ class AssetInventoryController extends Controller
             });
         }
 
+        //Asset status
+        if($request->filled('asset_status')) {
+            $query->where('asset_status', $request->asset_status);
+        } 
+
         // Location
         if ($request->filled('location')) {
             $query->where('location_id', $request->location);
@@ -64,8 +69,11 @@ class AssetInventoryController extends Controller
 
         // Asset model dropdown
         $assetModels = AssetModel::where('status', 1)->orderBy('model_name')->get();
+
+        // asset status
+        $assetStatuses = AssetInventory::where('asset_status', '!=', '')->distinct()->orderBy('asset_status')->pluck('asset_status');
             
-        return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels'));
+        return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels', 'assetStatuses'));
     }
 
     public function create() {

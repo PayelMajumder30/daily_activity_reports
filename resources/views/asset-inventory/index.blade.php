@@ -51,25 +51,25 @@
             <form method="GET" action="{{ route('asset-inventory.index') }}">             
                 <div class="row">
                     {{-- Tag No --}}
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label>Tag No.</label>
                         <input type="text" name="tag_no" class="form-control" value="{{ request('tag_no') }}"placeholder="Search Tag">      
                     </div>
 
                     {{-- PO Number --}}
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label>PO No.</label>
                         <input type="text" name="po_number" class="form-control" value="{{ request('po_number') }}" placeholder="Search PO">                               
                     </div>
 
                     {{-- Serial Number --}}
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label>Serial No.</label>
                         <input type="text" name="serial_no" class="form-control" value="{{ request('serial_no') }}" placeholder="Search Serial">     
                     </div>
 
                     {{-- Asset Type --}}
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label>Asset Type</label>
 
                         <select name="asset_type" class="form-select">                           
@@ -87,8 +87,22 @@
                         </select>
                     </div>
 
+                    <div class="col-md-3">
+                        <label>Asset status</label>
+                        <select name="asset_status" class="form-select">                                                      
+                            <option value="">
+                                All Asset status
+                            </option>
+                            @foreach($assetStatuses as $status)
+                                <option value="{{ $status }}" {{ request('asset_status') == $status ? 'selected' : '' }}>                                                              
+                                    {{ ucwords($status)}}
+                                </option>
+                            @endforeach
+                        </select>                               
+                    </div>
+
                     {{-- Location --}}
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label>Asset Model</label>
 
                         <select name="asset_model" class="form-select">                           
@@ -106,7 +120,7 @@
                     </div>
 
                     {{-- Installation Date --}}
-                    <div class="col-md-2">
+                    <div class="col-md-3">
                         <label>Installation Date</label>
 
                         <input type="text" name="installation_date" id="installation_date" class="form-control datepicker" value="{{ request('installation_date') }}" placeholder="DD-MM-YYYY">
