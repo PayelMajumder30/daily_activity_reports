@@ -337,10 +337,29 @@ class SettingController extends Controller
 
 
     // asset model
-    public function assetModelIndex(){
+    // public function assetModelIndex(){
 
-        // dd('Controller Hit');
-        $assetModels = AssetModel::with('assetType')->latest()->get();
+    //     // dd('Controller Hit');
+    //     $assetModels = AssetModel::with('assetType')->latest()->get();
+    //     $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();
+
+    //     return view('settings.assetModel.index', compact('assetModels', 'assetTypes'));
+    // }
+
+    public function assetModelIndex(Request $request){
+        $query = AssetModel::with('assetType');
+
+        // search by asset type
+        if($request->filled('asset_type')){
+            $query->where('asset_type_id', $request->asset_type);
+        }
+
+        // search model name
+        if($request->filled('model_name')){
+            $query->where('model_name', 'LIKE', '%' . $request->model_name . '%');
+        }
+
+        $assetModels = $query->latest()->get();
         $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();
 
         return view('settings.assetModel.index', compact('assetModels', 'assetTypes'));

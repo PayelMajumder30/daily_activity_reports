@@ -18,6 +18,12 @@
             </p>
         </div>
 
+        <div class="col-md-4 text-end">
+            <h6 class="text-secondary">
+                {{ now()->format('d M Y') }}
+            </h6>
+        </div>
+
     </div>
 
     {{-- ==========================

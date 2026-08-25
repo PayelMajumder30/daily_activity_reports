@@ -8,20 +8,22 @@
     {{-- Header --}}
 
     <div class="row mb-4">
-
         <div class="col-md-8">
-
             <h2 class="fw-bold">
-                <i class="bi bi-box-arrow-right"></i>
+                <i class="bi bi-person-check"></i>
                 Asset Issue Register
             </h2>
 
             <p class="text-muted">
                 Manage issued assets and issue history
             </p>
-
         </div>
 
+        <div class="col-md-4 text-end">
+            <h6 class="text-secondary">
+                {{ now()->format('d M Y') }}
+            </h6>
+        </div>
     </div>
 
 

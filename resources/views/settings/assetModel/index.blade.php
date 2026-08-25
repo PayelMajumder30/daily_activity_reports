@@ -24,55 +24,112 @@
         </div>
     </div>
 
-    <div class="row">
+  
 
-        <!-- Asset type List -->
-        <div class="card shadow border-0">
-            
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Asset Model List</h5>
+    <!-- Asset type List -->
+    <div class="card shadow border-0 mb-4">
+        
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"> <i class="bi bi-search"></i>Search Asset Model</h5>
 
-                    <button class="btn btn-primary btn-sm" id="addBtn">
-                        <i class="bi bi-plus-circle"></i>
-                        Add Asset Model
-                    </button>
-                </div>
+            <button class="btn btn-primary btn-sm" id="addBtn">
+                <i class="bi bi-plus-circle"></i>
+                Add Asset Model
+            </button>
+        </div>
 
-                <div class="card-body">
-                    <table class="table table-bordered table-hover mb-0" id="assetMoTable">
-                        <thead class="table-dark">
-                            <tr>
-                                <th width="70">SL</th>
-                                <th>Asset type</th>
-                                <th>Model Name</th>
-                                <th>Manufacturer</th>
-                                <th>Status</th>
-                                <th width="120">Action</th>
-                            </tr>
-                        </thead>
+        <div class="card-body">
+            <form method="GET" action="{{ route('asset-model.index') }}">
+                <div class="row">
 
-                        <tbody>
-                            @foreach($assetModels as $model)
-                                <tr>
-                                    <td>{{ $loop->iteration }}</td>
-                                    <td>{{ ucwords($model->assetType->name) }}</td>
-                                    <td>{{ $model->model_name }}</td>
-                                    <td>{{ $model->manufacturer ?? 'NA' }}</td>
-                                    <td>
-                                        <div class="form-check form-switch">
-                                            <input type="checkbox" class="form-check-input model-status" data-id="{{ encryptId($model->id) }}" {{ $model->status ? 'checked' : '' }}>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-warning btn-sm editModel" data-id="{{ encryptId($model->id) }}">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                    </td>
-                                </tr>
+                    {{-- Asset Type --}}
+                    <div class="col-md-4">
+                        <label class="form-label">
+                            Asset Type
+                        </label>
+
+                        <select name="asset_type" class="form-select">
+
+                            <option value="">
+                                All Asset Types
+                            </option>
+
+                            @foreach($assetTypes as $type)
+
+                                <option value="{{ $type->id }}" {{ request('asset_type') == $type->id ? 'selected' : '' }}>                                                                                                                             
+                                    {{ ucwords($type->name) }}
+                                </option>
                             @endforeach
-                        </tbody>
-                    </table>
+                        </select>
+                    </div>
+
+
+                    {{-- Model Name --}}
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+                            Model Name
+                        </label>
+
+                        <input type="text" name="model_name" class="form-control" value="{{ request('model_name') }}" placeholder="Search Model Name">
+                    </div>
+
+
+                    {{-- Buttons --}}
+                    <div class="col-md-4 d-flex align-items-end">
+
+                        <button type="submit" class="btn btn-primary">                                                                                                     
+                            <i class="bi bi-search"></i>
+                            Search
+                        </button>
+
+                        <a href="{{ route('asset-model.index') }}" class="btn btn-secondary ms-2">
+                            Reset
+                        </a>
+                    </div>
                 </div>
+
+            </form>
+        </div>
+    </div>
+
+    {{-- Table --}}
+
+    <div class="card-body">
+        <table class="table table-bordered table-hover mb-0" id="assetMoTable">
+            <thead class="table-dark">
+                <tr>
+                    <th width="70">SL</th>
+                    <th>Asset type</th>
+                    <th>Model Name</th>
+                    <th>Manufacturer</th>
+                    <th>Status</th>
+                    <th width="120">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach($assetModels as $model)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ ucwords($model->assetType->name) }}</td>
+                        <td>{{ $model->model_name }}</td>
+                        <td>{{ $model->manufacturer ?? 'NA' }}</td>
+                        <td>
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input model-status" data-id="{{ encryptId($model->id) }}" {{ $model->status ? 'checked' : '' }}>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-warning btn-sm editModel" data-id="{{ encryptId($model->id) }}">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
             
         </div>
 
