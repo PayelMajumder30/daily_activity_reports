@@ -179,7 +179,7 @@
                 searching: false,
                 responsive: true,
                 language: {
-                    emptyTable: "No Inventory Found"
+                    emptyTable: "No Section Found"
                 }
             });
 

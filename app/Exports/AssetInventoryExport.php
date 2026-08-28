@@ -24,7 +24,8 @@ class AssetInventoryExport implements FromQuery, WithHeadings, WithMapping
     {
         return AssetInventory::with([
             'assetModel.assetType',
-            'location'
+            'location',
+            'station'
         ])
         ->when(
             $this->filters['tag_no'] ?? null,
@@ -105,7 +106,8 @@ class AssetInventoryExport implements FromQuery, WithHeadings, WithMapping
             'Asset Type',
             'Asset Model',
             'Serial No.',
-            'Location',
+            'Region',
+            'Airport/Station',
             'Installation Date',
             'Warranty (Yrs)',
             'Warranty End Date',
@@ -125,24 +127,34 @@ class AssetInventoryExport implements FromQuery, WithHeadings, WithMapping
 
             $item->po_number ?? '-',
 
+            // Asset Type
             ucwords(
                 $item->assetModel?->assetType?->name ?? 'N/A'
             ),
 
+             // Asset Model
             $item->assetModel?->model_name ?? 'N/A',
 
+            // Serial No.
             $item->serial_no ?? 'N/A',
 
+             // Region
             ucwords(
                 $item->location?->name ?? 'N/A'
             ),
 
+            // Airport / Station
+            $item->station ? ucwords($item->station->station_name) : 'N/A',
+
+            // Installation Date
             $item->installation_date
                 ? $item->installation_date->format('d-m-Y')
                 : 'N/A',
 
+            // Warranty Years
             $item->warranty_year ?? 'N/A',
 
+             // Warranty End Date
             $item->warranty_end
                 ? $item->warranty_end->format('d-m-Y')
                 : 'N/A',

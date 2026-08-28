@@ -46,7 +46,6 @@
                 Search Custodians
             </h5>
 
-
             <a href="{{ route('custodian.create') }}" class="btn btn-primary btn-sm">               
                 <i class="bi bi-plus-circle"></i>
                 Add Custodian
@@ -188,7 +187,8 @@
                             <th>Designation</th>
                             <th>Department</th>                           
                             <th>Section</th>
-                            <th>Location</th>
+                            <th>Region</th>
+                            <th>Airport/Station</th>
                             <th>Status</th>
                             <th width="120">Action</th>
                         </tr>
@@ -209,9 +209,10 @@
                                 <td>{{ $custodian->emp_id }}</td> 
                                 <td>{{ $custodian->email }}</td>                                                                 
                                 <td>{{ $custodian->designation ? ucwords($custodian->designation->name) : '-' }}</td>                                                                                                                                                                              
-                                <td> {{ $custodian->discipline ? ucwords($custodian->discipline->name): '-' }}</td>                                                                                                                                                                             
+                                <td>{{ $custodian->discipline ? ucwords($custodian->discipline->name): '-' }}</td>                                                                                                                                                                             
                                 <td>{{ $custodian->section ? ucwords($custodian->section->section_name): 'N/A' }}</td>                                                                                                                                                 
-                                <td>{{ $custodian->location ? ucwords($custodian->location->name): 'N/A' }}</td>                                                                                                                                                 
+                                <td>{{ $custodian->location ? ucwords($custodian->location->name): 'N/A' }}</td> 
+                                <td>{{ $custodian->station ? ucwords($custodian->station->station_name): 'N/A' }}</td>                                                                                                                                                
                                 <td>
                                    <div class="form-check form-switch">
                                         <input class="form-check-input custodian-status" type="checkbox"                                       

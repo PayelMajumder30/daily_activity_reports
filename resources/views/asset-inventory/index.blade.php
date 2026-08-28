@@ -49,6 +49,12 @@
                     <i class="bi bi-file-earmark-excel"></i>
                     Export Excel
                 </a>
+
+                 {{-- Upload Excel --}}
+                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#excelUploadModal">
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Upload Excel
+                </button>
             </div>
            
         </div>
@@ -171,12 +177,13 @@
 
                     <tr>
                         <th>SL</th>
-                        <th>Tag</th>
-                        <th>PO NO</th>
                         <th>Asset Type</th>
                         <th>Asset Model</th>
-                        <th>Serial No.</th>
-                        <th>Location</th>
+                        <th>Asset Serial No.</th>
+                        <th>Asset Tag</th>
+                        <th>Region</th>
+                        <th>Airport/Station</th>
+                        <th>PO NO</th>
                         <th>Installation Date</th>
                         <th>Warranty (Yrs)</th>
                         <th>Warranty End Date</th>
@@ -191,20 +198,13 @@
 
                         <tr>
                             <td>{{ $loop->iteration }}</td>
+                            <td>{{ ucwords($item->assetType->name ?? 'N/A') }}</td>                                                          
+                            <td>{{ $item->assetModel->model_name ?? 'N/A' }}</td>                                                         
+                            <td>{{ $item->serial_no ?? 'N/A' }}</td>                                                          
                             <td>{{ $item->tag_no }}</td>
-                            <td>{{ $item->po_number }}</td>
-                            <td>
-                                {{ ucwords($item->assetModel->assetType->name ?? 'N/A') }}
-                            </td>
-                            <td>
-                                {{ $item->assetModel->model_name ?? 'N/A' }}
-                            </td>
-                            <td>
-                                {{ $item->serial_no ?? 'N/A' }}
-                            </td>
-                            <td>
-                                {{ ucwords($item->location->name ?? 'N/A') }}
-                            </td>
+                            <td>{{ ucwords($item->location->name ?? 'N/A') }}</td>                                                         
+                            <td>{{ ucwords($item->station->station_name ?? 'N/A') }}</td>  
+                            <td>{{ $item->po_number }}</td>                                                                                                          
                             <td>
                                 {{ $item->installation_date
                                     ? date('d-m-Y', strtotime($item->installation_date))
@@ -230,6 +230,101 @@
 
                 </tbody>
             </table>
+
+            {{-- =========================================================
+                Upload Inventory Excel Modal
+            ========================================================= --}}
+
+            <div class="modal fade" id="excelUploadModal" tabindex="-1" aria-labelledby="excelUploadModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+
+                            <h5 class="modal-title" id="excelUploadModalLabel">
+                                <i class="bi bi-file-earmark-excel"></i>
+                                Upload Asset Inventory Excel
+                            </h5>
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
+                            </button>
+
+                        </div>
+
+                        <div class="modal-body">
+
+                            <div class="alert alert-info">
+
+                                <strong>Excel Format:</strong>
+
+                                Please use the prescribed Excel format.
+
+                                <br>
+
+                                <a href="{{ route('asset-inventory.downloadTemplate') }}"
+                                class="btn btn-sm btn-success mt-2">
+
+                                    <i class="bi bi-download"></i>
+                                    Download Excel Format
+
+                                </a>
+
+                            </div>
+
+
+                            <form id="excelUploadForm"
+                                enctype="multipart/form-data">
+
+                                @csrf
+
+                                <div class="mb-3">
+
+                                    <label class="form-label">
+                                        Select Excel File
+                                        <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input type="file"
+                                        name="excel_file"
+                                        id="excel_file"
+                                        class="form-control"
+                                        accept=".xlsx,.xls">
+
+                                    <small class="text-muted">
+                                        Allowed format: .xlsx, .xls
+                                    </small>
+
+                                </div>
+
+                                <div id="excelImportErrors"
+                                    class="alert alert-danger d-none">
+
+                                </div>
+
+                                <div class="text-end">
+
+                                    <button type="submit"
+                                            class="btn btn-primary"
+                                            id="uploadExcelBtn">
+
+                                        <i class="bi bi-upload"></i>
+                                        Upload Excel
+
+                                    </button>
+
+                                </div>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
 
         </div>
 
@@ -257,6 +352,112 @@ $(document).ready(function () {
         language: {
             emptyTable: "No Inventory Found"
         }
+    });
+
+    $('#excelUploadForm').submit(function(e) {
+
+        e.preventDefault();
+        let form = this;
+        let file = $('#excel_file')[0].files[0];
+        if (!file) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'File Required',
+                text: 'Please select an Excel file.'
+            });
+
+            return;
+        }
+
+        let formData = new FormData(form);
+
+        $('#excelImportErrors')
+            .addClass('d-none')
+            .html('');
+
+        $('#uploadExcelBtn')
+            .prop('disabled', true)
+            .html(
+                '<span class="spinner-border spinner-border-sm"></span> Uploading...'
+            );
+
+        $.ajax({
+
+            url: "{{ route('asset-inventory.importExcel') }}",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(res) {
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Import Successful',
+                    text: res.message
+                }).then(function() {
+                    location.reload();
+
+                });
+
+            },
+
+            error: function(xhr) {
+                let response = xhr.responseJSON;
+                let message = '';
+                if (response && response.errors) {
+                    message =
+                        '<strong>Please check the following:</strong><br><br>';
+
+                    response.errors.forEach(function(error) {
+
+                        message += '• ' + error + '<br>';
+
+                    });
+
+                    if (response.success_count !== undefined) {
+
+                        message +=
+                            '<br><strong>Successfully imported:</strong> '
+                            + response.success_count;
+
+                    }
+
+                    $('#excelImportErrors')
+                        .removeClass('d-none')
+                        .html(message);
+
+                } else {
+
+                    message =
+                        response?.message ||
+                        'Unable to import Excel file.';
+
+                    Swal.fire({
+
+                        icon: 'error',
+
+                        title: 'Import Failed',
+
+                        text: message
+
+                    });
+
+                }
+
+            },
+
+            complete: function() {
+
+                $('#uploadExcelBtn')
+                    .prop('disabled', false)
+                    .html(
+                        '<i class="bi bi-upload"></i> Upload Excel'
+                    );
+
+            }
+
+        });
+
     });
 
 });

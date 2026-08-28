@@ -149,26 +149,29 @@
 
                     </div>
 
-                    {{-- Location--}}
-                    <div class="col-md-4 mb-3">
+                    {{-- Region --}}
+                    <div class="col-md-3 mb-3">
+
                         <label class="form-label">
-                            Location
+                            Region
                             <span class="text-danger">*</span>
                         </label>
 
-                        <select name="location_id" id="location_id" class="form-select @error('location_id') is-invalid @enderror">                                                   
-                          
+                        <select name="location_id" id="location_id" class="form-select @error('location_id') is-invalid @enderror">                                                                           
                             <option value="">
-                                Select Location
+                                Select Region
                             </option>
 
                             @foreach($locations as $location)
-                                <option value="{{ $location->id }}"
-                                    {{ old('location_id', $custodian->location_id) == $location->id ? 'selected' : '' }}>
+
+                                <option
+                                    value="{{ $location->id }}" {{ old('location_id', $custodian->location_id) == $location->id ? 'selected' : '' }}>
+                                                                 
                                     {{ ucwords($location->name) }}
                                 </option>
-                                
+
                             @endforeach
+
                         </select>
 
                         @error('location_id')
@@ -179,8 +182,29 @@
 
                     </div>
 
+                    {{-- Station --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">
+                            Station
+                        </label>
+
+                        <select name="station_id"                          
+                            id="station_id" class="form-select @error('station_id') is-invalid @enderror" disabled>                                                                          
+                            <option value="">
+                                Loading stations...
+                            </option>
+                        </select>
+
+                        @error('station_id')
+                            <small class="text-danger">
+                                {{ $message }}
+                            </small>
+                        @enderror
+
+                    </div>
+
                     {{-- Department --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
 
@@ -190,12 +214,7 @@
 
                         </label>
 
-                        <select
-                            name="discipline_id"
-                            id="discipline_id"
-                            class="form-select @error('discipline_id') is-invalid @enderror"
-                        >
-
+                        <select name="discipline_id" id="discipline_id" class="form-select @error('discipline_id') is-invalid @enderror">
                             <option value="">
                                 Select Department
                             </option>
@@ -207,13 +226,10 @@
                                     {{ old(
                                         'discipline_id',
                                         $custodian->discipline_id
-                                    ) == $department->id ? 'selected' : '' }}
-                                >
+                                    ) == $department->id ? 'selected' : '' }}>                              
 
                                     {{ ucwords($department->name) }}
-
                                 </option>
-
                             @endforeach
 
                         </select>
@@ -221,31 +237,22 @@
                         @error('discipline_id')
 
                             <small class="text-danger">
-
                                 {{ $message }}
-
                             </small>
-
                         @enderror
 
                     </div>
 
 
                     {{-- Section --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
-
                             Section
-
                         </label>
 
-                        <select
-                            name="section_id"
-                            id="section_id"
-                            class="form-select @error('section_id') is-invalid @enderror"
-                            {{ $sections->count() == 0 ? 'disabled' : '' }}
-                        >
+                        <select name="section_id"                           
+                            id="section_id" class="form-select @error('section_id') is-invalid @enderror" {{ $sections->count() == 0 ? 'disabled' : '' }}>                                                                           
 
                             @if($sections->count() > 0)
 
@@ -283,8 +290,6 @@
 
 
                     
-
-
                     {{-- Phone --}}
                     <!-- <div class="col-md-4 mb-3">
 
@@ -323,17 +328,12 @@
 
                     <button type="submit" class="btn btn-primary">                       
                         <i class="bi bi-check-circle"></i>
-
                         Update Custodian
-
                     </button>
 
 
-                    <a href="{{ route('custodian.index') }}" class="btn btn-secondary ms-2">
-                        <i class="bi bi-arrow-left"></i>
-
+                    <a href="{{ route('custodian.index') }}" class="btn btn-secondary ms-2">                       
                         Back
-
                     </a>
 
                 </div>
@@ -357,6 +357,172 @@ $(document).ready(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Region -> Station
+    |--------------------------------------------------------------------------
+    */
+
+    $('#location_id').on('change', function () {
+
+        let locationId = $(this).val();
+        let stationSelect = $('#station_id');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reset Station
+        |--------------------------------------------------------------------------
+        */
+
+        stationSelect
+            .empty()
+            .append('<option value="">Loading stations...</option>')
+            .prop('disabled', true);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | No Region Selected
+        |--------------------------------------------------------------------------
+        */
+
+        if (!locationId) {
+
+            stationSelect
+                .empty()
+                .append('<option value="">Select Region First</option>')
+                .prop('disabled', true);
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Station API URL
+        |--------------------------------------------------------------------------
+        */
+
+        let url = "{{ route('location.stations.byLocation', ':id') }}"
+            .replace(':id', locationId);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load Stations
+        |--------------------------------------------------------------------------
+        */
+
+        $.ajax({
+
+            url: url,
+            type: 'GET',
+
+            success: function (response) {
+
+                stationSelect.empty();
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Stations Found
+                |--------------------------------------------------------------------------
+                */
+
+                if (response.length > 0) {
+
+                    stationSelect.append(
+                        '<option value="">Select Station</option>'
+                    );
+
+
+                    $.each(response, function (index, station) {
+
+                        let stationName = station.station_name;
+
+                        if (station.short_name) {
+                            stationName += ' (' + station.short_name + ')';
+                        }
+
+
+                        stationSelect.append(
+                            $('<option>', {
+                                value: station.id,
+                                text: stationName
+                            })
+                        );
+
+                    });
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Select Existing / Old Station
+                    |--------------------------------------------------------------------------
+                    */
+
+                    let oldStation =
+                        "{{ old('station_id', $custodian->station_id) }}";
+
+                    if (oldStation) {
+                        stationSelect.val(oldStation);
+                    }
+
+
+                    stationSelect.prop('disabled', false);
+
+                } else {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | No Station Found
+                    |--------------------------------------------------------------------------
+                    */
+
+                    stationSelect
+                        .append(
+                            '<option value="">No Station Available</option>'
+                        )
+                        .prop('disabled', true);
+
+                }
+
+            },
+
+            error: function () {
+
+                stationSelect
+                    .empty()
+                    .append(
+                        '<option value="">Unable to load stations</option>'
+                    )
+                    .prop('disabled', true);
+
+            }
+
+        });
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Load Existing Region's Stations Automatically
+    |--------------------------------------------------------------------------
+    */
+
+    let oldLocation =
+        "{{ old('location_id', $custodian->location_id) }}";
+
+    if (oldLocation) {
+
+        $('#location_id').val(oldLocation);
+
+        $('#location_id').trigger('change');
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Department -> Section
     |--------------------------------------------------------------------------
     */
@@ -364,17 +530,32 @@ $(document).ready(function () {
     $('#discipline_id').on('change', function () {
 
         let departmentId = $(this).val();
+        let sectionSelect = $('#section_id');
 
 
-        $('#section_id')
-            .html('<option value="">Loading...</option>')
+        /*
+        |--------------------------------------------------------------------------
+        | Reset Section
+        |--------------------------------------------------------------------------
+        */
+
+        sectionSelect
+            .empty()
+            .append('<option value="">Loading...</option>')
             .prop('disabled', true);
 
 
+        /*
+        |--------------------------------------------------------------------------
+        | No Department
+        |--------------------------------------------------------------------------
+        */
+
         if (!departmentId) {
 
-            $('#section_id')
-                .html(
+            sectionSelect
+                .empty()
+                .append(
                     '<option value="">Select Department First</option>'
                 )
                 .prop('disabled', true);
@@ -382,48 +563,66 @@ $(document).ready(function () {
             return;
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Section API
+        |--------------------------------------------------------------------------
+        */
+
         let url = "{{ route('custodian.sections', ':id') }}"
             .replace(':id', departmentId);
+
 
         $.ajax({
 
             url: url,
-
             type: 'GET',
 
             success: function (response) {
 
+                sectionSelect.empty();
+
 
                 if (response.length > 0) {
 
-                    let options =
-                        '<option value="">Select Section</option>';
-
-
-                    $.each(
-                        response,
-                        function (index, section) {
-
-                            options +=
-                                '<option value="' +
-                                section.id +
-                                '">' +
-                                section.section_name +
-                                '</option>';
-
-                        }
+                    sectionSelect.append(
+                        '<option value="">Select Section</option>'
                     );
 
 
-                    $('#section_id')
-                        .html(options)
-                        .prop('disabled', false);
+                    $.each(response, function (index, section) {
 
+                        sectionSelect.append(
+                            $('<option>', {
+                                value: section.id,
+                                text: section.section_name
+                            })
+                        );
+
+                    });
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Restore Existing / Old Section
+                    |--------------------------------------------------------------------------
+                    */
+
+                    let oldSection =
+                        "{{ old('section_id', $custodian->section_id) }}";
+
+                    if (oldSection) {
+                        sectionSelect.val(oldSection);
+                    }
+
+
+                    sectionSelect.prop('disabled', false);
 
                 } else {
 
-                    $('#section_id')
-                        .html(
+                    sectionSelect
+                        .append(
                             '<option value="">No Section Available</option>'
                         )
                         .prop('disabled', true);
@@ -432,11 +631,11 @@ $(document).ready(function () {
 
             },
 
-
             error: function () {
 
-                $('#section_id')
-                    .html(
+                sectionSelect
+                    .empty()
+                    .append(
                         '<option value="">Unable to load sections</option>'
                     )
                     .prop('disabled', true);
@@ -448,8 +647,24 @@ $(document).ready(function () {
     });
 
 
-});
+    /*
+    |--------------------------------------------------------------------------
+    | Load Existing Department's Sections Automatically
+    |--------------------------------------------------------------------------
+    */
 
+    let oldDepartment =
+        "{{ old('discipline_id', $custodian->discipline_id) }}";
+
+    if (oldDepartment) {
+
+        $('#discipline_id').val(oldDepartment);
+
+        $('#discipline_id').trigger('change');
+
+    }
+
+});
 </script>
 
 @endpush

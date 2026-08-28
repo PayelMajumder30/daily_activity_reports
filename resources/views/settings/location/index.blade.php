@@ -10,10 +10,10 @@
         <div class="col-md-8">
             <h2 class="fw-bold">
                 <i class="bi bi-geo-alt"></i>
-                Location
+                Region
             </h2>
             <p class="text-muted">
-                Manage all Locations. 
+                Manage all Regions. 
             </p>
         </div>
 
@@ -30,7 +30,7 @@
         <div class="col-lg-8 mb-4">
             <div class="card shadow border-0 h-100">
                 <div class="card-header">
-                    <h5 class="mb-0">Location List</h5>
+                    <h5 class="mb-0">Region List</h5>
                 </div>
 
                 <div class="card-body">
@@ -39,6 +39,7 @@
                             <tr>
                                 <th width="70">SL</th>
                                 <th>Name</th>
+                                <th>Airport/Station</th>
                                 <th>Short Name</th>
                                 <th>Status</th>
                                 <th width="120">Action</th>
@@ -51,6 +52,11 @@
                                 <td>{{ $loop->iteration }}</td>
 
                                 <td>{{ ucwords($location->name) }}</td>
+                                 <td>
+                                    <a href="{{ route('location.stations.index', encryptId($location->id)) }}" class="btn btn-info btn-sm" title="station">                                        
+                                        <i class="bi bi-list-ul"></i>                                       
+                                    </a>
+                                </td>
                                 <td>{{ $location->short_name }}</td>
 
                                 <td class="text-center">
@@ -87,7 +93,7 @@
 
                 <div class="card-header">
                     <h5 id="formTitle" class="mb-0">
-                        Add Location
+                        Add Region
                     </h5>
                 </div>
 

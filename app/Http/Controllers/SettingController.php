@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Validation\Rule;
-use App\Models\{Designation, Discipline, AssetType, AssetModel, AssetTag, Location, DeptSection};
+use App\Models\{Designation, Discipline, AssetType, AssetModel, AssetTag, Location, DeptSection, AirportStation};
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -337,14 +337,6 @@ class SettingController extends Controller
 
 
     // asset model
-    // public function assetModelIndex(){
-
-    //     // dd('Controller Hit');
-    //     $assetModels = AssetModel::with('assetType')->latest()->get();
-    //     $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();
-
-    //     return view('settings.assetModel.index', compact('assetModels', 'assetTypes'));
-    // }
 
     public function assetModelIndex(Request $request){
         $query = AssetModel::with('assetType');
@@ -499,10 +491,9 @@ class SettingController extends Controller
     //     ]);
     // } 
 
-    // location
+    // location(region)
         public function locationIndex(){
 
-        // dd('Controller Hit');
         $locations = Location::latest()->get();
         return view('settings.location.index', compact('locations'));
     }
@@ -571,4 +562,172 @@ class SettingController extends Controller
             'status'  => $location->status
         ]);
     }  
+
+    // location(region)/ airport/station
+    public function stationIndex($id){
+
+        $locationId = decryptId($id);
+        $location = Location::findOrFail($locationId);
+        $stations = AirportStation::where('location_id', $locationId)->latest()->get();
+
+        return view('settings.location.station', compact('location', 'stations'));
+    }
+
+    public function stationStore(Request $request, $id)
+    {
+        $location = Location::findOrFail(decryptId($id));
+
+        $request->validate([
+            'station_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('airport_stations', 'station_name')
+                    ->where(function ($query) use ($location) {
+                        return $query->where(
+                            'location_id',
+                            $location->id
+                        );
+                    }),
+            ],
+
+            'short_name' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+        ], [
+            'station_name.required' => 'Station name is required.',
+            'station_name.unique'   => 'This station already exists under this Region.',
+        ]);
+
+        AirportStation::create([
+            'location_id' => $location->id,
+            'station_name' => $request->station_name,
+            'short_name' => strtoupper($request->short_name),
+            'status' => 1,
+        ]);
+
+        eventLog(
+            'Create',
+            'Region Station',
+            'Created station: ' . $request->station_name .
+            ' under region: ' . $location->name
+        );
+
+        return redirect()
+            ->route(
+                'location.stations.index',
+                encryptId($location->id)
+            )
+            ->with('success', 'Station added successfully.');
+    }
+
+    public function stationEdit($id) {
+        $station = AirportStation::findOrFail(decryptId($id));
+
+        return response()->json([
+            'id'            => encryptId($station->id),
+            'station_name'  => $station->station_name,
+            'short_name'    => $station->short_name,
+            'location_id'   => encryptId($station->location_id),
+        ]);
+    }
+
+    public function stationUpdate(Request $request, $id)
+    {
+        $station = AirportStation::findOrFail(decryptId($id));
+
+        $request->validate([
+            'station_name' => [
+                'required',
+                'string',
+                'max:255',
+
+                Rule::unique('airport_stations', 'station_name')
+                    ->where(function ($query) use ($station) {
+                        return $query->where(
+                            'location_id',
+                            $station->location_id
+                        );
+                    })
+                    ->ignore($station->id),
+            ],
+
+            'short_name' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+        ], [
+            'station_name.required' => 'Station name is required.',
+            'station_name.unique'   => 'This station already exists under this region.',
+        ]);
+
+        $oldName = $station->station_name;
+        $oldShortName = $station->short_name;
+
+        $station->update([
+            'station_name' => $request->station_name,
+            'short_name' => $request->filled('short_name')
+                            ? strtoupper($request->short_name)
+                            : null,
+        ]);
+
+        eventLog(
+            'Update',
+            'Region Station',
+            'Updated station from "' .
+            $oldName .
+            ' (' . $oldShortName . ')" to "' .
+            $station->station_name .
+            ' (' . $station->short_name . ')"'
+        );
+
+        return redirect()
+            ->route(
+                'location.stations.index',
+                encryptId($station->location_id)
+            )
+            ->with('success', 'Station updated successfully.');
+    }
+
+    public function stationStatus($id)
+    {
+        $station = AirportStation::findOrFail(decryptId($id));
+
+        $station->status = !$station->status;
+        $station->save();
+
+        eventLog(
+            'Status Change',
+            'Region Station',
+            $station->status
+                ? 'Activated station: ' . $station->station_name
+                : 'Deactivated station: ' . $station->station_name
+        );
+
+        return response()->json([
+            'success' => true,
+            'status'  => $station->status
+        ]);
+    }
+
+    public function stationsByLocation($id)
+    {
+        $stations = AirportStation::where('location_id', $id)
+            ->where('status', 1)
+            ->orderBy('station_name')
+            ->get();
+
+        return response()->json(
+            $stations->map(function ($station) {
+                return [
+                    'id' => $station->id,
+                    'station_name' => $station->station_name,
+                    'short_name' => $station->short_name,
+                ];
+            })
+        );
+    }
 }

@@ -43,7 +43,6 @@
 
         </div>
 
-
         <div class="card-body">
             <form action="{{ route('custodian.store') }}" method="POST">
                 @csrf
@@ -134,34 +133,23 @@
                     </div>
 
                     {{-- Location--}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
-                            Location
+                            Region
                             <span class="text-danger">*</span>
                         </label>
 
-                        <select
-                            name="location_id"
-                            id="location_id"
-                            class="form-select @error('location_id') is-invalid @enderror">
-
-                            <option value="">
-                                Select Location
-                            </option>
+                        <select name="location_id" id="location_id" class="form-select">
+                            <option value="">Select Region</option>
 
                             @foreach($locations as $location)
-
                                 <option
                                     value="{{ $location->id }}"
-                                    {{ old('location_id') == $location->id ? 'selected' : '' }}>
-
+                                    {{ old('location_id', $custodian->location_id ?? '') == $location->id ? 'selected' : '' }}>                             
                                     {{ ucwords($location->name) }}
-
                                 </option>
-
                             @endforeach
-
                         </select>
 
                         @error('location_id')
@@ -172,8 +160,24 @@
 
                     </div>
 
+                     {{-- Station--}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">
+                            Station<span class="text-danger">*</span>
+                        </label>
+
+                        <select name="station_id" id="station_id" class="form-select" disabled>
+                            <option value="">Select Region First</option>
+                        </select>
+                        @error('station_id')
+                            <small class="text-danger">
+                                {{ $message }}
+                            </small>
+                        @enderror
+                    </div>
+
                     {{-- Department --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Department
@@ -205,7 +209,7 @@
                     </div>
 
                     {{-- Section --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Section
@@ -218,12 +222,6 @@
 
                         </select>
 
-                        @error('section_id')
-
-                            <small class="text-danger">
-                                {{ $message }}
-                            </small>
-                        @enderror
                     </div>                  
 
                 </div>
@@ -256,136 +254,215 @@
 
 <script>
 
-$(document).ready(function () {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Department -> Section
-    |--------------------------------------------------------------------------
-    */
-
-    $('#discipline_id').on('change', function () {
-        let departmentId = $(this).val();
+    $(document).ready(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | Loading
+        | Old values after validation error
         |--------------------------------------------------------------------------
         */
 
-        $('#section_id').html('<option value="">Loading...</option>').prop('disabled', true);                 
+        const oldLocation    = @json(old('location_id'));
+        const oldStation     = @json(old('station_id'));
+        const oldDepartment  = @json(old('discipline_id'));
+        const oldSection     = @json(old('section_id'));
+
 
         /*
         |--------------------------------------------------------------------------
-        | No Department Selected
+        | Department -> Section
         |--------------------------------------------------------------------------
         */
 
-        if (!departmentId) {
+        $('#discipline_id').on('change', function () {
 
-            $('#section_id')
-                .html(
-                    '<option value="">Select Department First</option>'
-                )
+            let departmentId = $(this).val();
+            let sectionSelect = $('#section_id');
+
+            // Reset section dropdown
+            sectionSelect
+                .empty()
+                .append('<option value="">Loading sections...</option>')
                 .prop('disabled', true);
 
-            return;
-        }
+            // No department selected
+            if (!departmentId) {
 
-        /*
-        |--------------------------------------------------------------------------
-        | AJAX URL
-        |--------------------------------------------------------------------------
-        */
+                sectionSelect
+                    .empty()
+                    .append('<option value="">Select Department First</option>')
+                    .prop('disabled', true);
 
-        let url = "{{ route('custodian.sections', ':id') }}"
-            .replace(':id', departmentId);
+                return;
+            }
 
+            // AJAX URL
+            let url = "{{ route('custodian.sections', ':id') }}"
+                .replace(':id', departmentId);
 
-        /*
-        |--------------------------------------------------------------------------
-        | AJAX Request
-        |--------------------------------------------------------------------------
-        */
+            $.ajax({
 
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function (response) {
-                if (response.length > 0) {
-                    let options =
-                        '<option value="">Select Section</option>';
+                url: url,
+                type: 'GET',
 
-                    $.each(
-                        response,
-                        function (index, section) {
+                success: function (response) {
 
-                            options +=
-                                '<option value="' +
-                                section.id +
-                                '">' +
-                                section.section_name +
-                                '</option>';
+                    sectionSelect.empty();
 
+                    if (response.length > 0) {
+
+                        sectionSelect.append(
+                            '<option value="">Select Section</option>'
+                        );
+
+                        $.each(response, function (index, section) {
+
+                            sectionSelect.append(
+                                $('<option>', {
+                                    value: section.id,
+                                    text: section.section_name
+                                })
+                            );
+
+                        });
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Restore old section after validation error
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if (oldSection) {
+                            sectionSelect.val(oldSection);
                         }
-                    );
 
-                    $('#section_id').html(options).prop('disabled', false);                                            
+                        sectionSelect.prop('disabled', false);
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Restore Old Section After Validation Error
-                    |--------------------------------------------------------------------------
-                    */
+                    } else {
 
-                    let oldSection = "{{ old('section_id') }}";
-                        
-                    if (oldSection) {
-                        $('#section_id').val(oldSection);                           
+                        sectionSelect
+                            .append(
+                                '<option value="">No Section Available</option>'
+                            )
+                            .prop('disabled', true);
                     }
 
-                } else {
+                },
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Department Has No Section
-                    |--------------------------------------------------------------------------
-                    */
+                error: function () {
 
-                    $('#section_id').html('<option value="">No Section Available</option>').prop('disabled', true);
-                                                                                                  
+                    sectionSelect
+                        .empty()
+                        .append(
+                            '<option value="">Unable to load sections</option>'
+                        ).prop('disabled', true);
+                        
                 }
 
-            },
-
-            error: function () {
-
-                $('#section_id')
-                    .html(
-                        '<option value="">Unable to load sections</option>'
-                    )
-                    .prop('disabled', true);
-            }
+            });
 
         });
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Location -> Station
+        |--------------------------------------------------------------------------
+        */
+
+        $('#location_id').on('change', function () {
+
+            let locationId = $(this).val();
+            let stationSelect = $('#station_id');
+
+            stationSelect
+                .empty()
+                .append('<option value="">Loading stations...</option>')
+                .prop('disabled', true);
+
+            if (!locationId) {
+                stationSelect
+                    .empty()
+                    .append('<option value="">Select Location First</option>')
+                    .prop('disabled', true);
+
+                return;
+            }
+
+            let url = "{{ route('location.stations.byLocation', ':id') }}"
+                .replace(':id', locationId);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+
+                success: function (response) {
+
+                    stationSelect.empty();
+
+                    if (response.length > 0) {
+
+                        stationSelect.append(
+                            '<option value="">Select Station</option>'
+                        );
+
+                        $.each(response, function (index, station) {
+
+                            let stationName = station.station_name;
+
+                            if (station.short_name) {
+                                stationName += ' (' + station.short_name + ')';
+                            }
+
+                            stationSelect.append(
+                                $('<option>', {
+                                    value: station.id,
+                                    text: stationName
+                                })
+                            );
+                        });
+
+                        stationSelect.prop('disabled', false);
+
+                    } else {
+
+                        stationSelect
+                            .append(
+                                '<option value="">No Station Available</option>'
+                            )
+                            .prop('disabled', true);
+                    }
+                },
+
+                error: function () {
+
+                    stationSelect
+                        .empty()
+                        .append(
+                            '<option value="">Unable to load stations</option>'
+                        )
+                        .prop('disabled', true);
+                }
+            });
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Automatically restore Department and Location after validation error
+        |--------------------------------------------------------------------------
+        */
+
+        if (oldDepartment) {
+            $('#discipline_id').val(oldDepartment).trigger('change');
+        }
+
+        if (oldLocation) {
+            $('#location_id').val(oldLocation).trigger('change');
+        }
+
     });
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Load Section Automatically When Validation Fails
-    |--------------------------------------------------------------------------
-    */
-
-    let oldDepartment =
-        "{{ old('discipline_id') }}";
-
-    if (oldDepartment) {
-        $('#discipline_id').trigger('change');
-    }
-
-});
 
 </script>
 

@@ -33,17 +33,6 @@
             <form id="previewForm">
                 @csrf
                 <div class="row">
-                    <div class="col-md-3">
-                        <label>PO Number</label> <span class="text-danger">*</span>
-                        <input type="text" class="form-control" name="po_number" id="po_number">
-                        <small class="text-danger" id="po_number_error"></small>
-                    </div>
-
-                    <div class="col-md-2">
-                        <label>Quantity</label> <span class="text-danger">*</span>
-                        <input type="number" class="form-control" name="quantity" id="quantity" min="1">
-                        <small class="text-danger" id="quantity_error"></small>
-                    </div>
 
                     <div class="col-md-3">
                         <label>Asset Type</label> <span class="text-danger">*</span>
@@ -59,29 +48,61 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label>Asset Model</label> <span class="text-danger">*</span>
+                        <label>Asset Model</label>
                         <select name="asset_model_id" id="asset_model_id" class="form-select">
                             <option>Select Type First</option>
                         </select>
                         <small class="text-danger" id="asset_model_error"></small>
                     </div>
+                    
+                    <div class="col-md-3">
+                        <label>PO Number</label> <span class="text-danger">*</span>
+                        <input type="text" class="form-control" name="po_number" id="po_number">
+                        <small class="text-danger" id="po_number_error"></small>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>Quantity</label> <span class="text-danger">*</span>
+                        <input type="number" class="form-control" name="quantity" id="quantity" min="1">
+                        <small class="text-danger" id="quantity_error"></small>
+                    </div>
+
                 </div>
 
                 <br>
                 <div class="row">
+                   {{-- Region --}}
                     <div class="col-md-3">
-                        <label>Location</label> <span class="text-danger">*</span>
+                        <label>Region</label>
+                        <span class="text-danger">*</span>
+
                         <select name="location_id" id="location_id" class="form-select">
-                            <option value="">Select</option>
+                            <option value="">Select Region</option>
+
                             @foreach($locations as $location)
                                 <option value="{{ $location->id }}">
-                                    {{ ucwords($location->name)}}
+                                    {{ ucwords($location->name) }}
                                 </option>
                             @endforeach
                         </select>
+
                         <small class="text-danger" id="location_error"></small>
                     </div>
 
+                    {{-- Station --}}
+                    <div class="col-md-3">
+                        <label>Station</label>
+                        <span class="text-danger">*</span>
+
+                        <select name="station_id" id="station_id" class="form-select" disabled>                                                                                          
+                            <option value="">Select Region First</option>
+
+                        </select>
+
+                        <small class="text-danger" id="station_error"></small>
+                    </div>
+
+                    <br>
                     <div class="col-md-3">
                         <label>Installation Date</label> <span class="text-danger">*</span>
                         <input type="date" name="installation_date" id="installation_date" class="form-control">
@@ -94,11 +115,13 @@
                         <small class="text-danger" id="warranty_years_error"></small>
                     </div>
 
-                    <div class="col-md-4 d-flex align-items-end mb-0 gap-2">
-                        <button type="button" class="btn btn-success" id="generateRows"> Generate Inventory Rows</button>
-                        <a href="{{ route('asset-inventory.index') }}" class="btn btn-secondary">                                  
-                            Back
-                        </a>
+                    <div class="col-12 mt-4">
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-success" id="generateRows"> Generate Inventory Rows</button>
+                            <a href="{{ route('asset-inventory.index') }}" class="btn btn-secondary">                                  
+                                Back
+                            </a>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -123,11 +146,8 @@
         // ==========================
 
         $('#asset_type_id').change(function () {
-
             let type = $(this).val();
-
             $('#asset_model_id').html('<option>Loading...</option>');
-
             if(type == ''){
 
                 $('#asset_model_id').html(
@@ -138,18 +158,11 @@
             }
 
             $.ajax({
-
-                url:"{{ route('asset-inventory.getModels',':id') }}"
-                        .replace(':id',type),
-
+                url:"{{ route('asset-inventory.getModels',':id') }}".replace(':id',type),                       
                 type:"GET",
-
                 success:function(res){
-
                     let option='';
-
                     if(res.length==0){
-
                         option =
                         '<option value="">No Model Available</option>';
 
@@ -159,7 +172,6 @@
                         '<option value="">Select Model</option>';
 
                         $.each(res,function(index,item){
-
                             option +=
                             `<option value="${item.id}"
                                     data-short="${item.short_name ?? ''}">
@@ -167,7 +179,6 @@
                             </option>`;
 
                         });
-
                     }
 
                     $('#asset_model_id').html(option);
@@ -178,7 +189,91 @@
 
         });
 
+        // ==========================
+        // Region -> Station
+        // ==========================
 
+        $('#location_id').change(function () {
+
+            let locationId = $(this).val();
+            let stationSelect = $('#station_id');
+
+            stationSelect
+                .empty()
+                .append('<option value="">Loading stations...</option>')
+                .prop('disabled', true);
+
+            if (locationId === '') {
+
+                stationSelect
+                    .empty()
+                    .append('<option value="">Select Region First</option>')
+                    .prop('disabled', true);
+
+                return;
+            }
+
+            let url = "{{ route('location.stations.byLocation', ':id') }}"
+                .replace(':id', locationId);
+
+            $.ajax({
+
+                url: url,
+                type: "GET",
+
+                success: function (response) {
+
+                    stationSelect.empty();
+
+                    if (response.length > 0) {
+
+                        stationSelect.append(
+                            '<option value="">Select Station</option>'
+                        );
+
+                        $.each(response, function (index, station) {
+
+                            let stationName = station.station_name;
+
+                            if (station.short_name) {
+                                stationName += ' (' + station.short_name + ')';
+                            }
+
+                            stationSelect.append(
+                                $('<option>', {
+                                    value: station.id,
+                                    text: stationName
+                                })
+                            );
+
+                        });
+
+                        stationSelect.prop('disabled', false);
+
+                    } else {
+
+                        stationSelect
+                            .append(
+                                '<option value="">No Station Available</option>'
+                            )
+                            .prop('disabled', true);
+                    }
+
+                },
+
+                error: function () {
+
+                    stationSelect
+                        .empty()
+                        .append(
+                            '<option value="">Unable to load stations</option>'
+                        )
+                        .prop('disabled', true);
+                }
+
+            });
+
+        });
         // ==========================
         // Generate Preview Table
         // ==========================
@@ -303,18 +398,18 @@
                 }
 
 
-                if (
-                    $('#asset_model_id').val() == '' ||
-                    $('#asset_model_id option:selected')
-                        .text()
-                        .trim() == 'No Model Available'
-                ) {
+                // if (
+                //     $('#asset_model_id').val() == '' ||
+                //     $('#asset_model_id option:selected')
+                //         .text()
+                //         .trim() == 'No Model Available'
+                // ) {
 
-                    error(
-                        'asset_model',
-                        'Asset Model is required.'
-                    );
-                }
+                //     error(
+                //         'asset_model',
+                //         'Asset Model is required.'
+                //     );
+                // }
 
 
                 if ($('#location_id').val() == '') {
@@ -322,6 +417,12 @@
                     error(
                         'location',
                         'Location is required.'
+                    );
+                }
+                if ($('#station_id').val() == '') {
+                    error(
+                        'station',
+                        'Station is required.'
                     );
                 }
 
@@ -358,8 +459,8 @@
                     $('#quantity').val()
                 );
 
-                let locationId = $('#location_id').val();
-                    
+                let locationId = $('#location_id').val();  
+                let stationId = $('#station_id').val();               
                 let assetTypeId = $('#asset_type_id').val();                    
 
                 // ==========================
@@ -370,10 +471,12 @@
 
                     url: "{{ route('asset-inventory.generateTags', [
                         'location' => ':location',
+                        'station' => ':station',
                         'assetType' => ':assetType',
                         'quantity' => ':quantity'
                     ]) }}"
                     .replace(':location', locationId)
+                    .replace(':station', stationId)
                     .replace(':assetType', assetTypeId)
                     .replace(':quantity', qty),
 
@@ -442,7 +545,8 @@
 
                 let assetTypeId = $('#asset_type_id').val();                   
                 let assetModelId = $('#asset_model_id').val();                    
-                let locationId = $('#location_id').val();                    
+                let locationId = $('#location_id').val();     
+                let stationId = $('#station_id').val();               
                 let assetType =
                     $('#asset_type_id option:selected').text().trim();
                                                 
@@ -451,6 +555,9 @@
                                                
                 let location =
                     $('#location_id option:selected').text().trim();
+
+                let station =
+                    $('#station_id option:selected').text().trim();
                                                
                 let po = $('#po_number').val();
                     
@@ -515,21 +622,14 @@
                         <form id="inventoryStoreForm">
 
                             @csrf
-
-                            <input type="hidden" name="asset_type_id" value="${assetTypeId}">
-                                                               
+                            <input type="hidden" name="asset_type_id" value="${assetTypeId}">                                                              
                             <input type="hidden" name="asset_model_id" value="${assetModelId}">                                                               
-
-                            <input type="hidden" name="po_number" value="${po}">
-                                                               
-                            <input type="hidden" name="location_id" value="${locationId}">
-                                
+                            <input type="hidden" name="po_number" value="${po}">                                                             
+                            <input type="hidden" name="location_id" value="${locationId}">                              
+                            <input type="hidden" name="station_id" value="${stationId}">                              
                             <input type="hidden" name="installation_date" value="${installationDateDb}">
-
-                            <input type="hidden" name="warranty_year" value="${warrantyYears}">
-                                                               
-                            <input type="hidden" name="warranty_end" value="${warrantyEndDb}">
-                                                               
+                            <input type="hidden" name="warranty_year" value="${warrantyYears}">                                                             
+                            <input type="hidden" name="warranty_end" value="${warrantyEndDb}">                                                            
                             <table class="table table-bordered table-striped">
 
                                 <thead class="table-dark">
@@ -545,8 +645,8 @@
                                         </th>
 
                                         <th>Warranty End</th>
-
-                                        <th>Location</th>
+                                        <th>Region</th>
+                                        <th>Station</th>
 
                                     </tr>
 
@@ -580,7 +680,8 @@
                                 <input type="text" class="form-control serial-no" name="serial_no[]" placeholder="Enter Serial No" required>
                             </td>
                             <td>${warrantyDate}</td>                                                           
-                            <td>${location}</td>                                                            
+                            <td>${location}</td>   
+                            <td>${station}</td>                                                         
                         </tr>
 
                     `;

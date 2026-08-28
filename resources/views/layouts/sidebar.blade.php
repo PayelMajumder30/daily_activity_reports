@@ -175,7 +175,7 @@
                             <a href="{{ route('location.index')}}"
                                 class="nav-link text-white {{ request()->routeIs('location.*') ? 'active bg-primary' : '' }}">
                                 <i class="bi bi-geo-alt"></i>
-                                Location
+                                Region
                             </a>
                         </li>
 

@@ -16,4 +16,9 @@ class AssetType extends Model
     {
         return $this->hasMany(AssetModel::class);
     }
+
+    public function assetInventory(): Hasmany
+    {
+        return $this->hasMany(AssetInventory::class);
+    }
 }

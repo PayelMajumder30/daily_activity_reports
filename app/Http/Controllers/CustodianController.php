@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use App\Models\{AssetInventory, AssetType, AssetModel, Custodian, Designation, Discipline, DeptSection, Location};
+use App\Models\{AssetInventory, AssetType, AssetModel, Custodian, Designation, Discipline, DeptSection, Location, AirportStation};
 
 class CustodianController extends Controller
 {
@@ -46,15 +46,15 @@ class CustodianController extends Controller
     }
 
     public function create(){
+
         $designations = Designation::where('status', 1)->orderBy('name')->get();
-
         $departments = Discipline::where('status', 1)->orderBy('name')->get();
-
-        $locations = Location::where('status', 1)->orderBy('name')->get();
-
-        return view('custodian.create', compact('designations', 'departments', 'locations'));
+        $locations = Location::where('status', 1)->orderBy('name')->get();     
+        $stations = AirportStation::where('status', 1)->orderBy('station_name')->get();
+        return view('custodian.create', compact('designations', 'departments', 'locations', 'stations'));
     }
 
+    
     public function store(Request $request)
     {
         /*
@@ -62,8 +62,10 @@ class CustodianController extends Controller
         | Basic Validation
         |--------------------------------------------------------------------------
         */
+        // dd($request->all());
 
         $request->validate([
+
             'custodian_name' => [
                 'required',
                 'string',
@@ -77,9 +79,10 @@ class CustodianController extends Controller
 
             'discipline_id' => [
                 'required',
-                Rule::exists('locations', 'id')->where(function($query) {
-                    $query->where('status', 1);
-                })
+                Rule::exists('disciplines', 'id')
+                    ->where(function ($query) {
+                        $query->where('status', 1);
+                    }),
             ],
 
             'location_id' => [
@@ -87,6 +90,11 @@ class CustodianController extends Controller
                 'exists:locations,id',
             ],
 
+            'station_id' => [
+                'required',
+                'exists:airport_stations,id',
+            ],
+           
             'emp_id' => [
                 'required',
                 'digits:8',
@@ -107,21 +115,81 @@ class CustodianController extends Controller
             ],
 
         ], [
-            'custodian_name.required'   => 'Custodian name is required.',                              
+
+            'custodian_name.required'   => 'Custodian name is required.',                
             'designation_id.required'   => 'Designation is required.',               
-            'designation_id.exists'     => 'Selected designation is invalid.', 
-            'location_id.required'      => 'Location is required.',               
-            'location_id.exists'        => 'Selected location is invalid.',                
+            'designation_id.exists'     => 'Selected designation is invalid.',                
             'discipline_id.required'    => 'Department is required.',                
-            'discipline_id.exists'      => 'Selected department is invalid.',                
-            'emp_id.required'           => 'Employee ID is required.',                
+            'discipline_id.exists'      => 'Selected department is invalid.',               
+            'location_id.required'      => 'Region is required.',               
+            'station_id.required'       => 'Station is required.',               
+            'station_id.exists'         => 'Selected station is invalid.',               
+            'emp_id.required'           => 'Employee ID is required.',              
             'emp_id.digits'             => 'Please enter an 8 digit employee ID.',                
-            'emp_id.unique'             => 'This Employee ID already exists.',                
-            'email.required'            => 'Email is required.',
-            'email.email'               => 'Please enter a valid email address.',
-            'email.unique'              => 'This email address already exists.', 
-                         
+            'emp_id.unique'             => 'This Employee ID already exists.',               
+            'email.required'            => 'Email is required.',             
+            'email.email'               => 'Please enter a valid email address.',            
+            'email.unique'              => 'This email address already exists.',
+                
         ]);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Decrypt Location
+        |--------------------------------------------------------------------------
+        */
+
+        try {
+
+            $locationId = $request->location_id;
+
+        } catch (\Exception $e) {
+            return back()
+                ->withErrors([
+                    'location_id' => 'Invalid location selected.'
+                ])->withInput();             
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Location
+        |--------------------------------------------------------------------------
+        */
+
+        $location = Location::where('id', $locationId)
+            ->where('status', 1)
+            ->first();
+
+        if (!$location) {
+
+            return back()
+                ->withErrors([
+                    'location_id' => 'Invalid location selected.'
+                ])->withInput();               
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Station Belongs To Location
+        |--------------------------------------------------------------------------
+        */
+
+        $station = AirportStation::where('id', $request->station_id)
+            ->where('location_id', $request->location_id)
+            ->where('status', 1)
+            ->first();
+
+        if (!$station) {
+
+            return back()
+                ->withErrors([
+                    'station_id' =>
+                        'Selected station does not belong to the selected location.'
+                ])->withInput();              
+        }
 
 
         /*
@@ -130,11 +198,19 @@ class CustodianController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $discipline = Discipline::where('id', $request->discipline_id)->where('status', 1)->first();
-                      
+        $discipline = Discipline::where('id', $request->discipline_id)
+            ->where('status', 1)
+            ->first();
+
         if (!$discipline) {
-            return back()->withErrors(['discipline_id' =>'Invalid department selected.'])->withInput();     
+
+            return back()
+                ->withErrors([
+                    'discipline_id' => 'Invalid department selected.'                       
+                ])
+                ->withInput();
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -142,12 +218,13 @@ class CustodianController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $hasSections = DeptSection::where(
-            'discipline_id',
-            $request->discipline_id
-        )
-        ->where('status', 1)
-        ->exists();
+        // $hasSections = DeptSection::where(
+        //     'discipline_id',
+        //     $request->discipline_id
+        // )
+        // ->where('status', 1)
+        // ->exists();
+
 
         /*
         |--------------------------------------------------------------------------
@@ -157,45 +234,45 @@ class CustodianController extends Controller
 
         $sectionId = null;
 
-        if ($hasSections) {
+        // if ($hasSections) {
+        //     if (!$request->filled('section_id')) {
+        //         return back()
+        //             ->withErrors([
+        //                 'section_id' => 'Section is required.'                          
+        //             ])->withInput();                 
+        //     }
 
-            /*
-            |----------------------------------------------------------------------
-            | Department HAS sections
-            | Therefore section is required
-            |----------------------------------------------------------------------
-            */
+        //     $sectionExists = DeptSection::where('id', $request->section_id)
+        //         ->where('discipline_id', $request->discipline_id)
+        //         ->where('status', 1)
+        //         ->exists();
 
-            if (!$request->filled('section_id')) {
-                return back()->withErrors(['section_id' =>'Section is required.'])->withInput();         
-            }
+        //     if (!$sectionExists) {
+        //         return back()
+        //             ->withErrors(['section_id' => 'Selected section does not belong to the selected department.'                                             
+        //             ])->withInput();
+                    
+        //     }
+        //     $sectionId = $request->section_id;
+        // }
 
-            /*
-            |----------------------------------------------------------------------
-            | Make sure selected section belongs to department
-            |----------------------------------------------------------------------
-            */
+        if ($request->filled('section_id')) {
 
-            $sectionExists = DeptSection::where('id', $request->section_id)->where('discipline_id',$request->discipline_id)
-                                            ->where('status', 1)
-                                            ->exists();
+            $sectionExists = DeptSection::where('id', $request->section_id)
+                ->where('discipline_id', $request->discipline_id)
+                ->where('status', 1)
+                ->exists();
 
             if (!$sectionExists) {
-                return back()->withErrors(['section_id' =>'Selected section does not belong to the selected department.'])->withInput();   
+                return back()
+                    ->withErrors([
+                        'section_id' => 'Selected section does not belong to the selected department.'                           
+                    ])->withInput();                  
             }
 
             $sectionId = $request->section_id;
-
-        } else {
-
-            /*
-            |----------------------------------------------------------------------
-            | Department DOES NOT have sections
-            | Keep section_id NULL
-            |----------------------------------------------------------------------
-            */
-            $sectionId = null;
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -204,17 +281,19 @@ class CustodianController extends Controller
         */
 
         Custodian::create([
-            'custodian_name'    => $request->custodian_name,               
-            'designation_id'    => $request->designation_id,               
-            'discipline_id'     => $request->discipline_id,                
-            'section_id'        => $sectionId,    
-            'location_id'       => $request->location_id,           
-            'emp_id'            => $request->emp_id,               
-            'email'             => $request->email,              
-            'phone'             => $request->phone,               
-            'status'            => 1,               
-        ]);
 
+            'custodian_name'    => $request->custodian_name,
+            'designation_id'    => $request->designation_id,
+            'discipline_id'     => $request->discipline_id,
+            'section_id'        => $sectionId,
+            'location_id'       => $request->location_id,
+            'station_id'        => $request->station_id,
+            'emp_id'            => $request->emp_id,
+            'email'             => $request->email,
+            'phone'             => $request->phone,
+            'status'            => 1,
+
+        ]);
 
         /*
         |--------------------------------------------------------------------------
@@ -222,40 +301,17 @@ class CustodianController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        return redirect()->route('custodian.index')->with('success', 'Custodian added successfully.');                               
+        return redirect()
+            ->route('custodian.index')
+            ->with(
+                'success',
+                'Custodian added successfully.'
+            );
     }
 
       /**
      * Show the form for editing the specified resource.
      */
-    // public function edit(Request $request, $id)
-    // {
-    //     $request->session()->forget('success');
-    //     try {
-    //         $custodianId = decryptId($id);
-
-    //     } catch (\Throwable $e) {
-    //         return redirect()->route('custodian.index')->with('error', 'Invalid custodian selected.');                       
-    //     }
-
-    //     $custodian = Custodian::with([
-    //         'designation',
-    //         'discipline',
-    //     ])->findOrFail($custodianId);
-
-    //     $designations = Designation::where('status', 1)->orderBy('name')->get();                    
-    //     $departments = Discipline::where('status', 1)->orderBy('name')->get();
-    //     $locations = Location::where('status', 1)->orderBy('name')->get();
-                     
-    //     /*
-    //     |--------------------------------------------------------------------------
-    //     | Get sections of selected department
-    //     |--------------------------------------------------------------------------
-    //     */
-
-    //     $sections = DeptSection::where('discipline_id', $custodian->discipline_id)->where('status', 1)->orderBy('section_name')->get();
-    //     return view('custodian.edit', compact('custodian', 'designations', 'departments', 'sections'));
-    // }
     public function edit(Request $request, $id)
     {
         $request->session()->forget('success');
@@ -275,6 +331,7 @@ class CustodianController extends Controller
             'discipline',
             'section',
             'location',
+            'station',
         ])->findOrFail($custodianId);
 
         $designations = Designation::where('status', 1)
@@ -298,10 +355,8 @@ class CustodianController extends Controller
         $sections = DeptSection::where(
             'discipline_id',
             $custodian->discipline_id
-        )
-        ->where('status', 1)
-        ->orderBy('section_name')
-        ->get();
+        )->where('status', 1)->orderBy('section_name')->get();
+                     
 
         return view('custodian.edit', compact(
             'custodian',
@@ -365,6 +420,11 @@ class CustodianController extends Controller
                 'exists:locations,id',
             ],
 
+            'station_id' => [
+                'required',
+                'exists:airport_stations,id',
+            ],
+
             'emp_id' => [
                 'required',
                 'digits:8',
@@ -399,7 +459,7 @@ class CustodianController extends Controller
 
         ]);
 
-
+       
         /*
         |--------------------------------------------------------------------------
         | Validate Department
@@ -494,38 +554,65 @@ class CustodianController extends Controller
             $sectionId = null;
         }
 
+        $station = AirportStation::where('id', $request->station_id)
+            ->where('location_id', $request->location_id)
+            ->where('status', 1)
+            ->first();
+
+        if (!$station) {
+
+            return back()
+                ->withErrors([
+                    'station_id' =>
+                        'Selected station does not belong to the selected region.'
+                ])
+                ->withInput();
+        }
         /*
         |--------------------------------------------------------------------------
         | Update Custodian
         |--------------------------------------------------------------------------
         */
 
-        $custodian->update([
+        // $custodian->update([
 
-            'custodian_name' =>
-                $request->custodian_name,
+        //     'custodian_name' =>
+        //         $request->custodian_name,
 
-            'designation_id' =>
-                $request->designation_id,
+        //     'designation_id' =>
+        //         $request->designation_id,
 
                 
-            'location_id' =>
-                $request->location_id,
+        //     'location_id' =>
+        //         $request->location_id,
 
-            'discipline_id' =>
-                $request->discipline_id,
+        //     'discipline_id' =>
+        //         $request->discipline_id,
 
-            'section_id' =>
-                $sectionId,
+        //     'section_id' =>
+        //         $sectionId,
 
-            'emp_id' =>
-                $request->emp_id,
+        //     'emp_id' =>
+        //         $request->emp_id,
 
-            'email' =>
-                $request->email,
+        //     'email' =>
+        //         $request->email,
 
-            'phone' =>
-                $request->phone,
+        //     'phone' =>
+        //         $request->phone,
+
+        // ]);
+        $custodian->update([
+
+            'custodian_name' => $request->custodian_name,
+            'designation_id' => $request->designation_id,
+            'location_id' => $request->location_id,
+            'station_id' => $request->station_id,       
+            'discipline_id' => $request->discipline_id,
+            'section_id' => $sectionId,
+            'emp_id' => $request->emp_id,
+            'email' => $request->email,
+            'phone' => $request->phone,
 
         ]);
 

@@ -10,13 +10,17 @@ class AssetInventory extends Model
 {
     //
     public $table = 'asset_inventories';
-    protected $fillable = ['tag_no', 'asset_model_id', 'location_id', 'po_number', 'serial_no', 'installation_date', 'warranty_year',
+    protected $fillable = ['tag_no', 'asset_type_id', 'asset_model_id', 'location_id', 'station_id', 'po_number', 'serial_no', 'installation_date', 'warranty_year',
      'warranty_end', 'asset_status', 'remarks', 'created_by', 'status'];
 
     protected $casts = [
         'installation_date' => 'date',
         'warranty_end'      => 'date',
     ];
+
+    public function assetType(): BelongsTo {
+        return $this->belongsTo(AssetType::class, 'asset_type_id');
+    }
 
     public function assetModel(): BelongsTo {
         return $this->belongsTo(AssetModel::class);
@@ -25,6 +29,11 @@ class AssetInventory extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function station(): BelongsTo
+    {
+        return $this->belongsTo(AirportStation::class, 'station_id');
     }
 
     public function createdBy(): BelongsTo

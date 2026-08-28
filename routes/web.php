@@ -125,12 +125,21 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
     });
 
     // setting/location
-    Route::prefix('setting/location')->name('location.')->group(function () {   
+    Route::prefix('setting/region')->name('location.')->group(function () {   
         Route::get('/', [SettingController::class,'locationIndex'])->name('index');
         Route::post('/store', [SettingController::class,'locationStore'])->name('store');
         Route::get('/edit/{id}', [SettingController::class,'locationEdit'])->name('edit');
         Route::put('/update/{id}', [SettingController::class,'locationUpdate'])->name('update');
         Route::post('/status/{id}', [SettingController::class,'locationChangeStatus'])->name('changeStatus');
+
+        // airport/station
+        Route::get('/stations/{id}', [SettingController::class, 'stationIndex'])->name('stations.index');
+        Route::post('/stations/store/{id}', [SettingController::class, 'stationStore'])->name('stations.store');
+        Route::get('/stations/edit/{id}', [SettingController::class, 'stationEdit'])->name('stations.edit');
+        Route::put('/stations/update/{id}', [SettingController::class, 'stationUpdate'])->name('stations.update');       
+        Route::post('/stations/status/{id}', [SettingController::class, 'stationStatus'])->name('stations.status');
+        Route::get('/stations/by-location/{id}', [SettingController::class, 'stationsByLocation'])->name('stations.byLocation');
+        
     });
 
     // Custodian
@@ -150,9 +159,15 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/create', [AssetInventoryController::class, 'create'])->name('create');
         Route::post('/store', [AssetInventoryController::class, 'store'])->name('store');
         Route::get('/generate-preview', [AssetInventoryController::class, 'generatePreview'])->name('generatePreview');
-        Route::get('/generate-tags/{location}/{assetType}/{quantity}',[AssetInventoryController::class, 'generateTags'])->name('generateTags');
+        // Route::get('/generate-tags/{location}/{assetType}/{quantity}',[AssetInventoryController::class, 'generateTags'])->name('generateTags');
+        Route::get('/generate-tags/{location}/{station}/{assetType}/{quantity}',[AssetInventoryController::class, 'generateTags'])->name('generateTags');
         Route::get('/get-models/{type}', [AssetInventoryController::class,'getModels'])->name('getModels');   
         Route::get('/export', [AssetInventoryController::class, 'export'])->name('export');    
+        Route::get('/excel-template', [AssetInventoryController::class, 'downloadTemplate'])->name('downloadTemplate');
+        Route::post('/import-excel', [AssetInventoryController::class, 'importExcel'])->name('importExcel');
+        
+        
+    
     });
 
     // asset register
