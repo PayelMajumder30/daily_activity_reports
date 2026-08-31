@@ -166,6 +166,10 @@ class AssetInventoryController extends Controller
                     ], 422);
                 }
 
+                $assetModel = AssetModel::findOrFail($request->asset_model_id);
+
+                $station = AirportStation::findOrFail($request->station_id);
+
                 AssetInventory::create([
                     'tag_no'            => $tagNo,
                     'asset_type_id'     => $request->asset_type_id,
@@ -254,6 +258,7 @@ class AssetInventoryController extends Controller
         return response()->json($models);
     }
 
+    // for export all inventory data
     public function export(Request $request)
     {
         /*
@@ -302,64 +307,159 @@ class AssetInventoryController extends Controller
         );
     }
 
+    // public function downloadTemplate()
+    // {
+    //     $spreadsheet = new Spreadsheet();
+
+    //     $sheet = $spreadsheet->getActiveSheet();
+
+    //     $headers = [
+    //         'SL',
+    //         'Asset Type',
+    //         'Asset Model',
+    //         'Asset Serial No.',
+    //         'Asset Tag',
+    //         'Region',
+    //         'Airport/Station',
+    //         'PO NO',
+    //         'Installation Date',
+    //         'Warranty (Yrs)',
+    //         'Warranty End Date',
+    //         'Asset Status',
+    //     ];
+
+    //     $column = 'A';
+
+    //     foreach ($headers as $header) {
+
+    //         $sheet->setCellValue(
+    //             $column . '1',
+    //             $header
+    //         );
+
+    //         $column++;
+    //     }
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Example row
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     $example = [
+    //         1,
+    //         2,
+    //         18,
+    //         '1234',
+    //         'ATC/IT/0826/CP/0001',
+    //         1,
+    //         10,
+    //         'gem-235',
+    //         '27-08-2026',
+    //         2,
+    //         '26-08-2028',
+    //         'Available',
+    //     ];
+
+    //     $column = 'A';
+
+    //     foreach ($example as $value) {
+
+    //         $sheet->setCellValue(
+    //             $column . '2',
+    //             $value
+    //         );
+
+    //         $column++;
+    //     }
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Auto width
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     foreach (range('A', 'L') as $column) {
+
+    //         $sheet->getColumnDimension($column)
+    //             ->setAutoSize(true);
+    //     }
+
+    //     $writer = new Xlsx($spreadsheet);
+
+    //     $fileName = 'asset_inventory_import_format.xlsx';
+
+    //     $tempFile = tempnam(
+    //         sys_get_temp_dir(),
+    //         'asset_inventory_'
+    //     );
+
+    //     $writer->save($tempFile);
+
+    //     return response()
+    //         ->download($tempFile, $fileName)
+    //         ->deleteFileAfterSend(true);
+    // }
+
     public function downloadTemplate()
     {
         $spreadsheet = new Spreadsheet();
 
+        /*
+        |--------------------------------------------------------------------------
+        | Main Asset Inventory Sheet
+        |--------------------------------------------------------------------------
+        */
+
         $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Asset Inventory');
 
         $headers = [
+
             'SL',
-            'Asset Type',
             'Asset Model',
             'Asset Serial No.',
             'Asset Tag',
-            'Region',
-            'Airport/Station',
+            'Airport Station',
             'PO NO',
             'Installation Date',
             'Warranty (Yrs)',
             'Warranty End Date',
             'Asset Status',
+
         ];
 
         $column = 'A';
 
         foreach ($headers as $header) {
-
-            $sheet->setCellValue(
-                $column . '1',
-                $header
-            );
-
+            $sheet->setCellValue($column . '1', $header);      
             $column++;
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | Example row
+        | Example Row
         |--------------------------------------------------------------------------
         */
 
         $example = [
             1,
-            2,
-            18,
+            3,
             '1234',
             'ATC/IT/0826/CP/0001',
-            1,
             10,
-            'gem-235',
+            'GEM-235',
             '27-08-2026',
             2,
             '26-08-2028',
             'Available',
         ];
 
+
         $column = 'A';
 
         foreach ($example as $value) {
-
             $sheet->setCellValue(
                 $column . '2',
                 $value
@@ -368,17 +468,166 @@ class AssetInventoryController extends Controller
             $column++;
         }
 
+
         /*
         |--------------------------------------------------------------------------
-        | Auto width
+        | Auto Width
         |--------------------------------------------------------------------------
         */
 
-        foreach (range('A', 'L') as $column) {
-
+        foreach (range('A', 'J') as $column) {
             $sheet->getColumnDimension($column)
                 ->setAutoSize(true);
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reference Data Worksheet
+        |--------------------------------------------------------------------------
+        */
+
+        $referenceSheet = $spreadsheet->createSheet();
+
+        $referenceSheet->setTitle('Reference Data');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Asset Reference
+        |--------------------------------------------------------------------------
+        |
+        | Sequence:
+        |
+        | Asset Type | Asset Model | Asset Model ID | GAP
+        |
+        */
+
+        $referenceSheet->setCellValue('A1', 'Asset Type');
+        $referenceSheet->setCellValue('B1', 'Asset Model');
+        $referenceSheet->setCellValue('C1', 'Asset Model ID');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Asset Models
+        |--------------------------------------------------------------------------
+        |
+        | Asset Type ascending
+        | Models shown according to Asset Type
+        |
+        */
+
+        $assetModels = AssetModel::with([
+        'assetType' => function ($query) {
+            $query->where('asset_types.status', 1);
+                }
+            ])
+            ->join(
+                'asset_types',
+                'asset_models.asset_type_id',
+                '=',
+                'asset_types.id'
+            )
+            ->where('asset_models.status', 1)
+            ->where('asset_types.status', 1)
+            ->orderBy('asset_types.name', 'asc')
+            ->orderBy('asset_models.model_name', 'asc')
+            ->select('asset_models.*')
+            ->get();
+
+        $row = 2;
+
+        foreach ($assetModels as $model) {
+
+            $referenceSheet->setCellValue(
+                'A' . $row,
+                $model->assetType->name ?? ''
+            );
+
+            $referenceSheet->setCellValue(
+                'B' . $row,
+                $model->model_name
+            );
+
+            $referenceSheet->setCellValue(
+                'C' . $row,
+                $model->id
+            );
+
+            $row++;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Station Reference
+        |--------------------------------------------------------------------------
+        */
+
+        $referenceSheet->setCellValue('E1', 'Region');
+        $referenceSheet->setCellValue('F1', 'Airport/Station');
+        $referenceSheet->setCellValue('G1', 'Airport/Station ID');
+
+        $stations = AirportStation::with([
+                'location' => function ($query) {
+                    $query->where('locations.status', 1);
+                }
+            ])
+            ->join(
+                'locations',
+                'airport_stations.location_id',
+                '=',
+                'locations.id'
+            )
+            ->where('airport_stations.status', 1)
+            ->where('locations.status', 1)
+            ->orderBy('locations.name', 'asc')
+            ->orderBy('airport_stations.station_name', 'asc')
+            ->select('airport_stations.*')
+            ->get();
+
+        $row = 2;
+
+        foreach ($stations as $station) {
+
+            $referenceSheet->setCellValue(
+                'E' . $row,
+                $station->location->name ?? ''
+            );
+
+            $referenceSheet->setCellValue(
+                'F' . $row,
+                $station->station_name
+            );
+
+            $referenceSheet->setCellValue(
+                'G' . $row,
+                $station->id
+            );
+
+            $row++;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Auto Width Reference Sheet
+        |--------------------------------------------------------------------------
+        */
+
+       foreach (range('A', 'G') as $column) {
+
+            $referenceSheet
+                ->getColumnDimension($column)
+                ->setAutoSize(true);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Download
+        |--------------------------------------------------------------------------
+        */
 
         $writer = new Xlsx($spreadsheet);
 
@@ -389,13 +638,15 @@ class AssetInventoryController extends Controller
             'asset_inventory_'
         );
 
+
         $writer->save($tempFile);
 
         return response()
-            ->download($tempFile, $fileName)
-            ->deleteFileAfterSend(true);
+            ->download($tempFile, $fileName)->deleteFileAfterSend(true);
+      
     }
 
+    // for import all inventory
     public function importExcel(Request $request)
     {
         $request->validate([

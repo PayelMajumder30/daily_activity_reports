@@ -246,10 +246,9 @@
                                 <i class="bi bi-file-earmark-excel"></i>
                                 Upload Asset Inventory Excel
                             </h5>
-
-                            <button type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal">
+ 
+                            <button type="button" class="btn-close" data-bs-dismiss="modal">                                  
+                                    
                             </button>
 
                         </div>
@@ -275,8 +274,7 @@
                             </div>
 
 
-                            <form id="excelUploadForm"
-                                enctype="multipart/form-data">
+                            <form id="excelUploadForm" enctype="multipart/form-data">                               
 
                                 @csrf
 
@@ -287,11 +285,7 @@
                                         <span class="text-danger">*</span>
                                     </label>
 
-                                    <input type="file"
-                                        name="excel_file"
-                                        id="excel_file"
-                                        class="form-control"
-                                        accept=".xlsx,.xls">
+                                    <input type="file" name="excel_file" id="excel_file" class="form-control" accept=".xlsx,.xls">                                                                                                                                                             
 
                                     <small class="text-muted">
                                         Allowed format: .xlsx, .xls
@@ -306,10 +300,8 @@
 
                                 <div class="text-end">
 
-                                    <button type="submit"
-                                            class="btn btn-primary"
-                                            id="uploadExcelBtn">
-
+                                    <button type="submit" class="btn btn-primary" id="uploadExcelBtn">
+                                                                                       
                                         <i class="bi bi-upload"></i>
                                         Upload Excel
 
@@ -433,13 +425,9 @@ $(document).ready(function () {
                         'Unable to import Excel file.';
 
                     Swal.fire({
-
                         icon: 'error',
-
                         title: 'Import Failed',
-
                         text: message
-
                     });
 
                 }
