@@ -504,11 +504,10 @@ class AssetIssueRegisterController extends Controller
             'discipline',
             'section',
             'location',
+            'station',
         ])->find($custodianId);
 
-
         if (!$custodian) {
-
             return response()->json([
                 'status'  => false,
                 'message' => 'Custodian not found.'
@@ -524,7 +523,7 @@ class AssetIssueRegisterController extends Controller
 
         $issues = AssetIssueRegister::with([
             'assetInventory.assetModel.assetType',
-            'assetInventory.location',
+            'assetInventory.location', 'assetInventory.station',
         ])
         ->where('custodian_id', $custodianId)
         ->where('issue_status', 'Issued')
@@ -541,43 +540,21 @@ class AssetIssueRegisterController extends Controller
         $assets = $issues->map(function ($issue) {
 
             $inventory = $issue->assetInventory;
-
             return [
-
-                'issue_id' => encryptId($issue->id),
-
-                'tag_no' => $inventory?->tag_no ?? '-',
-
-                'asset_type' =>
-                    $inventory?->assetModel?->assetType?->name ?? '-',
-
-                'asset_model' =>
-                    $inventory?->assetModel?->model_name ?? '-',
-
-                'manufacturer' =>
-                    $inventory?->assetModel?->manufacturer ?? '-',
-
-                'serial_no' =>
-                    $inventory?->serial_no ?? '-',
-
-                'location' =>
-                    $inventory?->location?->name ?? '-',
-
-                'issued_date' =>
-                    $issue->issued_date
-                        ? $issue->issued_date->format('d-m-Y')
-                        : '-',
-
-                'issue_status' =>
-                    $issue->issue_status ?? '-',
-
-                'remarks' =>
-                    $issue->remarks ?? '-',
-            ];
-
-        })->values();
-
-
+                'issue_id'      => encryptId($issue->id),
+                'tag_no'        => $inventory?->tag_no ?? '-',
+                'asset_type'    => $inventory?->assetModel?->assetType?->name ?? '-',                
+                'asset_model'   => $inventory?->assetModel?->model_name ?? '-',                  
+                'manufacturer'  => $inventory?->assetModel?->manufacturer ?? '-',                    
+                'serial_no'     => $inventory?->serial_no ?? '-',                  
+                'location'      => $inventory?->location?->name ?? '-',                   
+                'station'       => $inventory?->station?->station_name ?? '-',                   
+                'issued_date'   => $issue->issued_date ? $issue->issued_date->format('d-m-Y') : '-',                                                               
+                'issue_status'  => $issue->issue_status ?? '-',                   
+                'remarks'       => $issue->remarks ?? '-',
+                    
+            ]; })->values();
+    
         /*
         |--------------------------------------------------------------------------
         | First Issue Information
@@ -585,7 +562,6 @@ class AssetIssueRegisterController extends Controller
         */
 
         $firstIssue = $issues->first();
-
 
         /*
         |--------------------------------------------------------------------------
@@ -599,50 +575,23 @@ class AssetIssueRegisterController extends Controller
 
             'custodian' => [
 
-                'custodian_name' =>
-                    $custodian->custodian_name ?? '-',
-
-                'emp_id' =>
-                    $custodian->emp_id ?? '-',
-
-                'email' =>
-                    $custodian->email ?? '-',
-
-                'designation' =>
-                    $custodian->designation?->name ?? '-',
-
-                'department' =>
-                    $custodian->discipline?->name ?? '-',
-
-                'section' =>
-                    $custodian->section?->section_name ?? 'N/A',
-
-                'location' =>
-                    $custodian->location?->name ?? 'N/A',
-
-                'status' =>
-                    $custodian->status == 1
-                        ? 'Active'
-                        : 'Inactive',
+                'custodian_name'    => $custodian->custodian_name ?? '-',                   
+                'emp_id'            => $custodian->emp_id ?? '-',                   
+                'email'             => $custodian->email ?? '-',                    
+                'designation'       => $custodian->designation?->name ?? '-',                    
+                'department'        => $custodian->discipline?->name ?? '-',                   
+                'section'           => $custodian->section?->section_name ?? 'N/A',                    
+                'location'          => $custodian->location?->name ?? 'N/A',                   
+                'station'           => $custodian->station?->station_name ?? 'N/A',                   
+                'status'            => $custodian->status == 1 ? 'Active' : 'Inactive',                                                               
             ],
 
             'issue' => [
-
-                'total_assets' =>
-                    $assets->count(),
-
-                'user_type' =>
-                    $firstIssue?->user_type ?? '-',
-
-                'operator_name' =>
-                    $firstIssue?->operator_name ?? '-',
-
-                'issued_date' =>
-                    $firstIssue?->issued_date
-                        ? $firstIssue->issued_date->format('d-m-Y')
-                        : '-',
+                'total_assets'  => $assets->count(),                   
+                'user_type'     => $firstIssue?->user_type ?? '-',                   
+                'operator_name' => $firstIssue?->operator_name ?? '-',                  
+                'issued_date'   => $firstIssue?->issued_date ? $firstIssue->issued_date->format('d-m-Y') : '-',                                                          
             ],
-
             'assets' => $assets,
         ]);
     }
@@ -653,11 +602,8 @@ class AssetIssueRegisterController extends Controller
     public function custodianExport($id)
     {
         try {
-
             $custodianId = decryptId($id);
-
         } catch (\Throwable $e) {
-
             return redirect()->back()->with('error', 'Invalid custodian selected.');                          
         }
 
@@ -666,17 +612,11 @@ class AssetIssueRegisterController extends Controller
             return redirect()->back()->with('error', 'Custodian not found.');             
         }
 
-        $fileName = 'Custodian_' .
-            preg_replace('/[^A-Za-z0-9_-]/', '_', $custodian->custodian_name) .
-            '_Assets.xlsx';
-
+        $fileName = 'Custodian_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $custodian->custodian_name) . '_Assets.xlsx';                    
         eventLog('Downloaded', 'Asset Issue Register', 'Custodian asset details Excel downloaded for custodian: ' 
             . ($custodian->custodian_name ?? '-') . ' by user ID: ' .  auth()->id());
 
-        return Excel::download(
-            new CustodianAssetExport($custodianId),
-            $fileName
-        );
+        return Excel::download(new CustodianAssetExport($custodianId), $fileName);                         
     }
 
     /**
@@ -760,7 +700,6 @@ class AssetIssueRegisterController extends Controller
     /**
      * Main transfer function.
      */
-
     public function transferAsset(Request $request)
     {
         $request->validate([
@@ -822,7 +761,6 @@ class AssetIssueRegisterController extends Controller
             */
 
             if ($issue->issue_status !== 'Issued') {
-
                 throw new \Exception(
                     'Only currently issued assets can be transferred.'
                 );
@@ -837,7 +775,6 @@ class AssetIssueRegisterController extends Controller
             */
 
             $fromCustodianId = $issue->custodian_id;
-
 
             /*
             |--------------------------------------------------------------------------
@@ -868,11 +805,9 @@ class AssetIssueRegisterController extends Controller
                 ->first();
 
             if (!$toCustodian) {
-
                 throw new \Exception(
                     'Selected custodian is not active.'
                 );
-
             }
 
 
@@ -883,11 +818,8 @@ class AssetIssueRegisterController extends Controller
             */
 
             $issue->update([
-
                 'issue_status' => 'Transferred',
-
                 'remarks' => $request->remarks,
-
             ]);
 
 
@@ -899,24 +831,12 @@ class AssetIssueRegisterController extends Controller
 
             AssetTransfer::create([
 
-                'asset_inventory_id' =>
-                    $issue->asset_inventory_id,
-
-                'from_custodian_id' =>
-                    $fromCustodianId,
-
-                'to_custodian_id' =>
-                    $request->to_custodian_id,
-
-                'transfer_date' =>
-                    $request->transfer_date,
-
-                'created_by' =>
-                    auth()->id(),
-
-                'remarks' =>
-                    $request->remarks,
-
+                'asset_inventory_id'    => $issue->asset_inventory_id,               
+                'from_custodian_id'     => $fromCustodianId,                
+                'to_custodian_id'       => $request->to_custodian_id,                  
+                'transfer_date'         => $request->transfer_date,                 
+                'created_by'            => auth()->id(),                   
+                'remarks'               => $request->remarks,                 
             ]);
 
 
@@ -928,30 +848,14 @@ class AssetIssueRegisterController extends Controller
 
             AssetIssueRegister::create([
 
-                'asset_inventory_id' =>
-                    $issue->asset_inventory_id,
-
-                'custodian_id' =>
-                    $request->to_custodian_id,
-
-                'user_type' =>
-                    $issue->user_type,
-
-                'operator_name' =>
-                    $issue->operator_name,
-
-                'issued_date' =>
-                    $request->transfer_date,
-
-                'returned_date' =>
-                    null,
-
-                'issue_status' =>
-                    'Issued',
-
-                'remarks' =>
-                    $request->remarks,
-
+                'asset_inventory_id'    => $issue->asset_inventory_id,                  
+                'custodian_id'          => $request->to_custodian_id,                 
+                'user_type'             => $issue->user_type,                   
+                'operator_name'         => $issue->operator_name,                 
+                'issued_date'           => $request->transfer_date,                 
+                'returned_date'         => null,                  
+                'issue_status'          => 'Issued',                   
+                'remarks'               => $request->remarks,                   
             ]);
 
 
@@ -962,11 +866,8 @@ class AssetIssueRegisterController extends Controller
             */
 
             $issue->assetInventory->update([
-
                 'asset_status' => 'Assigned'
-
             ]);
-
 
             /*
             |--------------------------------------------------------------------------
@@ -990,28 +891,18 @@ class AssetIssueRegisterController extends Controller
 
             DB::commit();
 
-
             return response()->json([
-
                 'success' => true,
-
-                'message' =>
-                    'Asset transferred successfully.'
-
+                'message' => 'Asset transferred successfully.'                 
             ]);
-
 
         } catch (\Throwable $e) {
 
             DB::rollBack();
 
             return response()->json([
-
                 'success' => false,
-
-                'message' =>
-                    $e->getMessage()
-
+                'message' => $e->getMessage()               
             ], 422);
         }
     }

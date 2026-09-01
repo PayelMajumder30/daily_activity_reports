@@ -2,23 +2,38 @@
 
 namespace App\Imports;
 
-use App\Models\{AssetInventory, AssetModel, AirportStation};
+use App\Models\AssetInventory;
+use App\Models\AssetModel;
+use App\Models\AirportStation;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
-class AssetInventoryImport implements ToCollection, WithHeadingRow
+class AssetInventoryImport implements ToCollection, WithHeadingRow, WithMultipleSheets
 {
     public array $errors = [];
     public int $successCount = 0;
     private array $excelTags = [];
+    private array $excelSerials = [];
+
+    /**
+     * Define which sheets to process.
+     * Only the 'Asset Inventory' sheet will be parsed.
+     */
+    public function sheets(): array
+    {
+        return [
+            'Asset Inventory' => $this,
+        ];
+    }
 
     public function collection(Collection $rows)
     {
         if ($rows->isEmpty()) {
-            $this->errors[] = 'Excel file does not contain any data.';
+            $this->errors[] = 'Excel file does not contain any data in "Asset Inventory" sheet.';
             return;
         }
 
@@ -125,7 +140,20 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
+             // Database Duplicate Serial no. Check
+            if (AssetInventory::where('serial_no', $serialNo)->exists()) {
+                $this->errors[] = "Row {$rowNumber}: Serial No. '{$serialNo}' already exists in database.";
+                continue;
+            }
+
+            // Excel Duplicate Serial No Check
+            if (in_array($serialNo, $this->excelSerials)) {
+                $this->errors[] = "Row {$rowNumber}: Serial No. '{$serialNo}' is duplicated in this Excel file.";
+                continue;
+            }
+
             $this->excelTags[] = $tagNo;
+            $this->excelSerials[] = $serialNo;
 
             // Validate Warranty Years
             if (!is_numeric($warrantyYear) || $warrantyYear < 0) {
@@ -159,9 +187,9 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow
                 'serial_no'         => $serialNo,
                 'po_number'         => $poNumber,
                 'asset_model_id'    => $assetModel->id,
-                'asset_type_id'     => $assetModel->asset_type_id, // Derived from AssetModel
+                'asset_type_id'     => $assetModel->asset_type_id,
                 'station_id'        => $station->id,
-                'location_id'       => $station->location_id,     // Derived from AirportStation
+                'location_id'       => $station->location_id,
                 'installation_date' => $installationDateValue,
                 'warranty_year'     => (int) $warrantyYear,
                 'warranty_end'      => $warrantyEndValue,

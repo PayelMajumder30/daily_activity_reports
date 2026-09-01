@@ -442,12 +442,7 @@
                                                         Designation
                                                     </label>
 
-                                                    <input
-                                                        type="text"
-                                                        id="transfer_designation"
-                                                        class="form-control"
-                                                        readonly>
-
+                                                    <input type="text" id="transfer_designation" class="form-control" readonly>
                                                 </div>
 
 
@@ -458,28 +453,17 @@
                                                         Department
                                                     </label>
 
-                                                    <input
-                                                        type="text"
-                                                        id="transfer_department"
-                                                        class="form-control"
-                                                        readonly>
-
+                                                    <input type="text" id="transfer_department" class="form-control" readonly>
                                                 </div>
 
 
                                                 {{-- Section --}}
                                                 <div class="col-md-6 mb-3">
-
                                                     <label class="form-label">
                                                         Section
                                                     </label>
 
-                                                    <input
-                                                        type="text"
-                                                        id="transfer_section"
-                                                        class="form-control"
-                                                        readonly>
-
+                                                    <input type="text" id="transfer_section" class="form-control" readonly>                                                                                                                                                                                                                      
                                                 </div>
 
 
@@ -487,13 +471,10 @@
                                                 <div class="col-md-6 mb-3">
 
                                                     <label class="form-label">
-
                                                         Transfer Date
-
                                                         <span class="text-danger">
                                                             *
                                                         </span>
-
                                                     </label>
 
                                                     <input type="date" name="transfer_date" id="transfer_date" class="form-control" value="{{ date('Y-m-d') }}">
@@ -786,9 +767,9 @@
                     $.each(assets, function (index, asset) {
                         assetRows += `
                             <tr>
-                                <td>
-                                    ${index + 1}
-                                </td>
+                                <td>${index + 1}</td>
+                                    
+                                
 
                                 <td>
                                     <strong>
@@ -796,36 +777,18 @@
                                     </strong>
                                 </td>
 
-                                <td>
-                                    ${asset.asset_type ?? '-'}
-                                </td>
-
-                                <td>
-                                    ${asset.asset_model ?? '-'}
-                                </td>
-
-                                <td>
-                                    ${asset.manufacturer ?? '-'}
-                                </td>
-
-                                <td>
-                                    ${asset.serial_no ?? '-'}
-                                </td>
-
-                                <td>
-                                    ${asset.location ?? '-'}
-                                </td>
-
-                                <td>
-                                    ${asset.issued_date ?? '-'}
-                                </td>
-
+                                <td> ${asset.asset_type ?? '-'} </td>                                                                 
+                                <td> ${asset.asset_model ?? '-'} </td>                                                                 
+                                <td> ${asset.manufacturer ?? '-'} </td>                                                                  
+                                <td> ${asset.serial_no ?? '-'} </td>                                                                  
+                                <td> ${asset.location ?? '-'} </td>                                                              
+                                <td> ${asset.station ?? '-'} </td>   
+                                <td> ${asset.issued_date ?? '-'} </td>                                                              
                                 <td>
                                     <span class="badge bg-success">
                                         ${asset.issue_status ?? '-'}
                                     </span>
                                 </td>
-
                             </tr>
 
                         `;
@@ -837,7 +800,7 @@
                     assetRows = `
                         <tr>
 
-                            <td colspan="9" class="text-center text-muted py-4">                               
+                            <td colspan="10" class="text-center text-muted py-4">                               
                                 <i class="bi bi-info-circle"></i>
                                 No currently issued assets found.
 
@@ -971,9 +934,8 @@
                                 {{-- Location --}}
 
                                 <div class="col-md-3 mb-3">
-
                                     <label class="text-muted small">
-                                        Location
+                                        Region
                                     </label>
 
                                     <div>
@@ -982,6 +944,17 @@
 
                                 </div>
 
+                                {{-- Station --}}
+                                <div class="col-md-3 mb-3">
+                                    <label class="text-muted small">
+                                        Airport / Station
+                                    </label>
+
+                                    <div>
+                                        ${custodian.station ?? 'N/A'}
+                                    </div>
+
+                                </div>
 
                                 {{-- Status --}}
 
@@ -1104,7 +1077,8 @@
                                             <th>Model</th>
                                             <th>Manufacturer</th>
                                             <th>Serial No.</th>
-                                            <th>Location</th>
+                                            <th>Region</th>
+                                            <th>Airport/Station</th>
                                             <th>Issue Date</th>
                                             <th>Status</th>
                                         </tr>
@@ -1264,9 +1238,7 @@
         $('#transfer_from_custodian').val('');
         $('#transfer_from_emp_id').val('');
 
-        $('#transfer_to_custodian')
-            .val('')
-            .trigger('change');
+        $('#transfer_to_custodian').val('').trigger('change');                 
 
         $('#transfer_to_emp_id').val('');
         $('#transfer_to_designation').val('');
@@ -1279,7 +1251,6 @@
         $('#transfer_date').val(
             new Date().toISOString().split('T')[0]
         );
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1338,10 +1309,7 @@
         |--------------------------------------------------------------------------
         */
 
-        transferSelect
-            .val('')
-            .trigger('change');
-
+        transferSelect.val('').trigger('change');
 
         /*
         |--------------------------------------------------------------------------
@@ -1349,16 +1317,9 @@
         |--------------------------------------------------------------------------
         */
 
-        let modalElement =
-            document.getElementById('transferAssetModal');
-
-        let modal =
-            bootstrap.Modal.getOrCreateInstance(
-                modalElement
-            );
-
+        let modalElement = document.getElementById('transferAssetModal');           
+        let modal = bootstrap.Modal.getOrCreateInstance(modalElement);        
         modal.show();
-
 
         /*
         |--------------------------------------------------------------------------
@@ -1366,11 +1327,8 @@
         |--------------------------------------------------------------------------
         */
 
-        let url =
-            "{{ route('asset-issue-register.transfer-details', ':id') }}"
-                .replace(':id', issueId);
-
-
+        let url = "{{ route('asset-issue-register.transfer-details', ':id') }}".replace(':id', issueId);
+                       
         $.ajax({
             url: url,
             type: 'GET',
@@ -1388,10 +1346,8 @@
                     return;
                 }
 
-                let issue =
-                    response.issue;
-
-
+                let issue = response.issue;
+                    
                 /*
                 |--------------------------------------------------------------
                 | Current Asset
@@ -1402,7 +1358,6 @@
                 $('#transfer_asset_type').val(issue.asset_type);                   
                 $('#transfer_asset_model').val(issue.asset_model);
                     
-
                 /*
                 |--------------------------------------------------------------
                 | Current Custodian
@@ -1416,7 +1371,6 @@
 
 
             error: function (xhr) {
-
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
@@ -1450,145 +1404,134 @@
     |--------------------------------------------------------------------------
     */
 
-    $(document).on(
-        'click',
-        '.transfer-asset',
-        function () {
-            let issueId = $(this).data('id');
+    $(document).on('click', '.transfer-asset', function () {let issueId = $(this).data('id');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reset modal
+        |--------------------------------------------------------------------------
+        */
+
+        $('#transferAssetForm')[0].reset();
+        $('#transfer_issue_id').val(issueId);
+        $('#transfer_to_custodian_id').val('').trigger('change');               
+        $('#current_custodian_name').val('');
+        $('#current_custodian_emp_id').val('');
+        $('#transfer_asset_tag').val('');
+        $('#transfer_emp_id').val('');
+        $('#transfer_designation').val('');
+        $('#transfer_department').val('');
+        $('#transfer_section').val('');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Default transfer date
+        |--------------------------------------------------------------------------
+        */
+
+        $('#transfer_date').val(
+            new Date().toISOString().split('T')[0]
+        );
+
+        /*
+        |--------------------------------------------------------------------------
+        | Show loading
+        |--------------------------------------------------------------------------
+        */
+
+        Swal.fire({
+            title: 'Loading',
+            text: 'Loading transfer details...',
+            allowOutsideClick: false,
+            didOpen: function () {
+                Swal.showLoading();
+            }
+
+        });
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Reset modal
-            |--------------------------------------------------------------------------
-            */
+        /*
+        |--------------------------------------------------------------------------
+        | Get current issue details
+        |--------------------------------------------------------------------------
+        */
 
-            $('#transferAssetForm')[0].reset();
-            $('#transfer_issue_id').val(issueId);
-            $('#transfer_to_custodian_id').val('').trigger('change');               
-            $('#current_custodian_name').val('');
-            $('#current_custodian_emp_id').val('');
-            $('#transfer_asset_tag').val('');
-            $('#transfer_emp_id').val('');
-            $('#transfer_designation').val('');
-            $('#transfer_department').val('');
-            $('#transfer_section').val('');
+        let url = "{{ route('asset-issue-register.transfer-details', ':id') }}".replace(':id', issueId);
+                    
+        $.ajax({
+            url: url,
+            type: 'GET',
 
-            /*
-            |--------------------------------------------------------------------------
-            | Default transfer date
-            |--------------------------------------------------------------------------
-            */
+            success: function (response) {
+                Swal.close();
 
-            $('#transfer_date').val(
-                new Date().toISOString().split('T')[0]
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Show loading
-            |--------------------------------------------------------------------------
-            */
-
-            Swal.fire({
-                title: 'Loading',
-                text: 'Loading transfer details...',
-                allowOutsideClick: false,
-                didOpen: function () {
-                    Swal.showLoading();
-                }
-
-            });
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Get current issue details
-            |--------------------------------------------------------------------------
-            */
-
-            let url = "{{ route('asset-issue-register.transfer-details', ':id') }}".replace(':id', issueId);
-                        
-            $.ajax({
-                url: url,
-                type: 'GET',
-
-                success: function (response) {
-                    Swal.close();
-
-                    if (!response.status) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text:
-                                response.message ||
-                                'Unable to load transfer details.'
-                        });
-
-                        return;
-                    }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Current custodian
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $('#current_custodian_name').val(
-                        response.issue.custodian_name || '-'
-                    );
-
-                    $('#current_custodian_emp_id').val(
-                        response.issue.emp_id || '-'
-                    );
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Asset tag
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $('#transfer_asset_tag').val(
-                        response.issue.asset_tag || '-'
-                    );
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Store issue ID
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $('#transfer_issue_id').val(
-                        response.issue.issue_id
-                    );
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Open modal
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $('#transferAssetModal').modal('show');
-
-                },
-
-
-                error: function (xhr) {
-
-                    Swal.close();
-
-
+                if (!response.status) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
                         text:
-                            xhr.responseJSON?.message ||
+                            response.message ||
                             'Unable to load transfer details.'
+                    });
 
+                    return;
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Current custodian
+                |--------------------------------------------------------------------------
+                */
+
+                $('#current_custodian_name').val(
+                    response.issue.custodian_name || '-'
+                );
+
+                $('#current_custodian_emp_id').val(
+                    response.issue.emp_id || '-'
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Asset tag
+                |--------------------------------------------------------------------------
+                */
+
+                $('#transfer_asset_tag').val(
+                    response.issue.asset_tag || '-'
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Store issue ID
+                |--------------------------------------------------------------------------
+                */
+
+                $('#transfer_issue_id').val(
+                    response.issue.issue_id
+                );
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Open modal
+                |--------------------------------------------------------------------------
+                */
+
+                $('#transferAssetModal').modal('show');
+
+            },
+
+
+                error: function (xhr) {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON?.message || 'Unable to load transfer details.'                                                  
                     });
 
                 }
@@ -1632,20 +1575,15 @@
             let currentEmpId = $('#current_custodian_emp_id').val();             
             let selectedText = $('#transfer_to_custodian_id option:selected').text();
                            
-
             /*
             |--------------------------------------------------------------------------
             | Get custodian details
             |--------------------------------------------------------------------------
             */
 
-            let url =
-                "{{ route('asset-issue-register.custodian-details', ':id') }}"
-                .replace(':id', custodianId);
-
-
+            let url = "{{ route('asset-issue-register.custodian-details', ':id') }}".replace(':id', custodianId);
+                               
             $.ajax({
-
                 url: url,
                 type: 'GET',
                 success: function (response) {
@@ -1731,21 +1669,32 @@
     CONFIRM TRANSFER
     ============================================================== */
 
-    $('#confirmTransferBtn').on(
-        'click',
-        function () {
+    $('#confirmTransferBtn').on('click',function () {
+               
+            let issueId = $('#transfer_issue_id').val();               
+            let toCustodianId = $('#transfer_to_custodian_id').val();             
+            let transferDate = $('#transfer_date').val();               
+            let remarks = $('#transfer_remarks').val();      
+            
+            /*
+            |--------------------------------------------------------------------------
+            | Get Custodian Names
+            |--------------------------------------------------------------------------
+            */
 
-            let issueId =
-                $('#transfer_issue_id').val();
+           let currentCustodianName = $('#current_custodian_name').val();
+           let selectedOption = $('#transfer_to_custodian_id option:selected');
+           let newCustodianName = selectedOption.text().trim();
 
-            let toCustodianId =
-                $('#transfer_to_custodian_id').val();
+            /*
+            |--------------------------------------------------------------------------
+            | Remove Employee ID From Selected Text
+            |--------------------------------------------------------------------------
+            */
 
-            let transferDate =
-                $('#transfer_date').val();
-
-            let remarks =
-                $('#transfer_remarks').val();
+            if(newCustodianName.includes('-')){
+                newCustodianName = newCustodianName.split('-')[0].trim();
+            }
 
             /*
             |--------------------------------------------------------------------------
@@ -1766,7 +1715,6 @@
 
 
             if (!transferDate) {
-
                 Swal.fire({
                     icon: 'warning',
                     title: 'Transfer Date Required',
@@ -1785,8 +1733,37 @@
 
             Swal.fire({
                 title: 'Transfer Asset?',
-                text:
-                    'This asset will be returned from the current custodian and issued to the new custodian.',
+                html: `
+                    <div class="text-start">
+
+                        <p class="mb-3">
+                            Are you sure you want to transfer this asset?
+                        </p>
+
+                        <div class="card border-0 bg-light">
+
+                            <div class="card-body py-3">
+
+                                <div class="mb-2">
+                                    <strong>From:</strong>
+                                    <span class="text-danger">
+                                        ${currentCustodianName || '-'}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    <strong>To:</strong>
+                                    <span class="text-success">
+                                        ${newCustodianName || '-'}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `,
 
                 icon: 'question',
                 showCancelButton: true,

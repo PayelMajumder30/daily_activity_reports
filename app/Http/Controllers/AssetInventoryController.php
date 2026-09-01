@@ -307,99 +307,6 @@ class AssetInventoryController extends Controller
         );
     }
 
-    // public function downloadTemplate()
-    // {
-    //     $spreadsheet = new Spreadsheet();
-
-    //     $sheet = $spreadsheet->getActiveSheet();
-
-    //     $headers = [
-    //         'SL',
-    //         'Asset Type',
-    //         'Asset Model',
-    //         'Asset Serial No.',
-    //         'Asset Tag',
-    //         'Region',
-    //         'Airport/Station',
-    //         'PO NO',
-    //         'Installation Date',
-    //         'Warranty (Yrs)',
-    //         'Warranty End Date',
-    //         'Asset Status',
-    //     ];
-
-    //     $column = 'A';
-
-    //     foreach ($headers as $header) {
-
-    //         $sheet->setCellValue(
-    //             $column . '1',
-    //             $header
-    //         );
-
-    //         $column++;
-    //     }
-
-    //     /*
-    //     |--------------------------------------------------------------------------
-    //     | Example row
-    //     |--------------------------------------------------------------------------
-    //     */
-
-    //     $example = [
-    //         1,
-    //         2,
-    //         18,
-    //         '1234',
-    //         'ATC/IT/0826/CP/0001',
-    //         1,
-    //         10,
-    //         'gem-235',
-    //         '27-08-2026',
-    //         2,
-    //         '26-08-2028',
-    //         'Available',
-    //     ];
-
-    //     $column = 'A';
-
-    //     foreach ($example as $value) {
-
-    //         $sheet->setCellValue(
-    //             $column . '2',
-    //             $value
-    //         );
-
-    //         $column++;
-    //     }
-
-    //     /*
-    //     |--------------------------------------------------------------------------
-    //     | Auto width
-    //     |--------------------------------------------------------------------------
-    //     */
-
-    //     foreach (range('A', 'L') as $column) {
-
-    //         $sheet->getColumnDimension($column)
-    //             ->setAutoSize(true);
-    //     }
-
-    //     $writer = new Xlsx($spreadsheet);
-
-    //     $fileName = 'asset_inventory_import_format.xlsx';
-
-    //     $tempFile = tempnam(
-    //         sys_get_temp_dir(),
-    //         'asset_inventory_'
-    //     );
-
-    //     $writer->save($tempFile);
-
-    //     return response()
-    //         ->download($tempFile, $fileName)
-    //         ->deleteFileAfterSend(true);
-    // }
 
     public function downloadTemplate()
     {
@@ -407,7 +314,7 @@ class AssetInventoryController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Main Asset Inventory Sheet
+        | // 1. Create the Main "Asset Inventory" Worksheet
         |--------------------------------------------------------------------------
         */
 
@@ -445,10 +352,10 @@ class AssetInventoryController extends Controller
 
         $example = [
             1,
-            3,
+            29,
             '1234',
-            'ATC/IT/0826/CP/0001',
-            10,
+            'ER/IT/0826/MT/0001',
+            4,
             'GEM-235',
             '27-08-2026',
             2,
@@ -476,10 +383,8 @@ class AssetInventoryController extends Controller
         */
 
         foreach (range('A', 'J') as $column) {
-            $sheet->getColumnDimension($column)
-                ->setAutoSize(true);
+            $sheet->getColumnDimension($column)->setAutoSize(true);               
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -488,9 +393,7 @@ class AssetInventoryController extends Controller
         */
 
         $referenceSheet = $spreadsheet->createSheet();
-
         $referenceSheet->setTitle('Reference Data');
-
 
         /*
         |--------------------------------------------------------------------------
@@ -522,12 +425,7 @@ class AssetInventoryController extends Controller
             $query->where('asset_types.status', 1);
                 }
             ])
-            ->join(
-                'asset_types',
-                'asset_models.asset_type_id',
-                '=',
-                'asset_types.id'
-            )
+            ->join('asset_types', 'asset_models.asset_type_id', '=', 'asset_types.id')    
             ->where('asset_models.status', 1)
             ->where('asset_types.status', 1)
             ->orderBy('asset_types.name', 'asc')
@@ -573,12 +471,7 @@ class AssetInventoryController extends Controller
                     $query->where('locations.status', 1);
                 }
             ])
-            ->join(
-                'locations',
-                'airport_stations.location_id',
-                '=',
-                'locations.id'
-            )
+            ->join('locations', 'airport_stations.location_id','=','locations.id')            
             ->where('airport_stations.status', 1)
             ->where('locations.status', 1)
             ->orderBy('locations.name', 'asc')
@@ -616,12 +509,8 @@ class AssetInventoryController extends Controller
         */
 
        foreach (range('A', 'G') as $column) {
-
-            $referenceSheet
-                ->getColumnDimension($column)
-                ->setAutoSize(true);
+            $referenceSheet->getColumnDimension($column)->setAutoSize(true);                           
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -638,11 +527,8 @@ class AssetInventoryController extends Controller
             'asset_inventory_'
         );
 
-
         $writer->save($tempFile);
-
-        return response()
-            ->download($tempFile, $fileName)->deleteFileAfterSend(true);
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);            
       
     }
 
@@ -661,7 +547,6 @@ class AssetInventoryController extends Controller
         try {
 
             $import = new AssetInventoryImport();
-
             Excel::import($import, $request->file('excel_file'));
 
             /*
@@ -682,8 +567,7 @@ class AssetInventoryController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => $import->successCount .
-                    ' asset inventory record(s) imported successfully.',
+                'message' => $import->successCount . 'asset inventory record(s) imported successfully.',                   
             ]);
 
         } catch (\Throwable $e) {

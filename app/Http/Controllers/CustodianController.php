@@ -30,8 +30,14 @@ class CustodianController extends Controller
             $query->where('discipline_id', 'LIKE', '%' . $request->discipline_id . '%');
         }
 
+        /* search by designation*/
         if($request->filled('designation_id')) {
             $query->where('designation_id', 'LIKE', '%' . $request->designation_id . '%');
+        }
+
+        /* search by airport/station*/
+        if($request->filled('station_id')) {
+            $query->where('station_id', 'LIKE', '%' . $request->station_id . '%');
         }
 
         $custodians = $query->latest()->get();
@@ -41,8 +47,11 @@ class CustodianController extends Controller
 
         /* Designations*/
         $designations = Designation::where('status', 1)->orderBy('name')->get();
+
+        /* Airport/Station*/
+        $stations = AirportStation::where('status', 1)->orderBy('station_name')->get();
         
-        return view('custodian.index', compact('custodians', 'departments', 'designations'));
+        return view('custodian.index', compact('custodians', 'departments', 'designations', 'stations'));
     }
 
     public function create(){
@@ -62,7 +71,6 @@ class CustodianController extends Controller
         | Basic Validation
         |--------------------------------------------------------------------------
         */
-        // dd($request->all());
 
         $request->validate([
 

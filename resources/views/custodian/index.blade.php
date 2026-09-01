@@ -8,15 +8,10 @@
 
     {{-- Page Header --}}
     <div class="row mb-4">
-
         <div class="col-md-8">
-
             <h2 class="fw-bold">
-
                 <i class="bi bi-person-workspace"></i>
-
                 Custodians
-
             </h2>
 
             <p class="text-muted">
@@ -38,9 +33,7 @@
 
     {{-- Search Card --}}
     <div class="card shadow border-0 mb-4">
-
         <div class="card-header d-flex justify-content-between align-items-center">
-
             <h5 class="mb-0">
                 <i class="bi bi-search"></i>
                 Search Custodians
@@ -55,9 +48,7 @@
 
 
         <div class="card-body">
-
             <form method="GET" action="{{ route('custodian.index') }}">
-
                 <div class="row">
 
                     {{-- Custodian Name --}}
@@ -72,7 +63,7 @@
 
 
                     {{-- Employee ID --}}
-                    <div class="col-md-3">
+                    <div class="col-md-2">
 
                         <label class="form-label">
                             Employee ID
@@ -81,9 +72,35 @@
                         <input type="text" name="emp_id" value="{{ request('emp_id') }}" class="form-control" placeholder="Search employee ID">
                     </div>
 
+                     {{-- Designation --}}
+                    <div class="col-md-2">
+
+                        <label class="form-label">
+                            Designation
+                        </label>
+
+                        <select name="designation_id" class="form-select">
+
+                            <option value="">
+                                All Designations
+                            </option>
+
+                            @foreach($designations as $designation)
+
+                                <option value="{{ $designation->id }}" {{ request('designation_id') == $designation->id ? 'selected' : '' }}>
+                                    {{ ucwords($designation->name) }}
+
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
 
                     {{-- Department --}}
-                    <div class="col-md-3">
+                    <div class="col-md-2">
 
                         <label class="form-label">
                             Department
@@ -108,23 +125,23 @@
 
                     </div>
 
-                       {{-- Designation --}}
-                    <div class="col-md-3">
+                     {{-- Stations --}}
+                    <div class="col-md-2">
 
                         <label class="form-label">
-                            Designation
+                            Airport/Station
                         </label>
 
-                        <select name="designation_id" class="form-select">
+                        <select name="station_id" class="form-select">
 
                             <option value="">
-                                All Designations
+                                All Station
                             </option>
 
-                            @foreach($designations as $designation)
+                            @foreach($stations as $station)
 
-                                <option value="{{ $designation->id }}" {{ request('designation_id') == $designation->id ? 'selected' : '' }}>
-                                    {{ ucwords($designation->name) }}
+                                <option value="{{ $station->id }}" {{ request('station_id') == $station->id ? 'selected' : '' }}>
+                                    {{ ucwords($station->station_name) }}
 
                                 </option>
 

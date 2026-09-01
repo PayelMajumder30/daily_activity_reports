@@ -25,14 +25,16 @@ class CustodianAssetExport implements FromArray, WithHeadings
             'Designation',
             'Department',
             'Section',
-            'Custodian Location',
+            'Custodian Region',
+            'Custodian Airport / Station',
 
             'Asset Tag No.',
             'Asset Type',
             'Asset Model',
             'Manufacturer',
             'Serial No.',
-            'Asset Location',
+            'Asset Region',
+            'Asset Airport / Station',
             'Issued Date',
             'Issue Status',
             'Remarks',
@@ -46,11 +48,12 @@ class CustodianAssetExport implements FromArray, WithHeadings
             'discipline',
             'section',
             'location',
+            'station',
         ])->findOrFail($this->custodianId);
 
         $issues = AssetIssueRegister::with([
             'assetInventory.assetModel.assetType',
-            'assetInventory.location',
+            'assetInventory.location', 'assetInventory.station',
         ])
         ->where('custodian_id', $this->custodianId)
         ->where('issue_status', 'Issued')
@@ -71,6 +74,7 @@ class CustodianAssetExport implements FromArray, WithHeadings
                 $custodian->discipline->name ?? '-',
                 $custodian->section->section_name ?? 'N/A',
                 $custodian->location->name ?? 'N/A',
+                $custodian->station->station_name ?? 'N/A',
 
                 // Asset Details
                 $inventory->tag_no ?? '-',
@@ -78,7 +82,8 @@ class CustodianAssetExport implements FromArray, WithHeadings
                 $inventory->assetModel?->model_name ?? '-',
                 $inventory->assetModel?->manufacturer ?? '-',
                 $inventory->serial_no ?? '-',
-                $inventory->location?->name ?? '-',
+                $inventory->location?->name ?? 'N/A',
+                $inventory->station?->station_name ?? 'N/A',
                 $issue->issued_date? $issue->issued_date->format('d-m-Y'): '-',                                    
                 $issue->issue_status ?? '-',
                 $issue->remarks ?? '-',
@@ -105,8 +110,10 @@ class CustodianAssetExport implements FromArray, WithHeadings
                 $custodian->discipline->name ?? '-',
                 $custodian->section->section_name ?? 'N/A',
                 $custodian->location->name ?? 'N/A',
+                $custodian->station?->station_name ?? 'N/A',
 
                 'No currently issued assets',
+                '-',
                 '-',
                 '-',
                 '-',

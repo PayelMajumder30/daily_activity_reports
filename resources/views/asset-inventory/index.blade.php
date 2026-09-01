@@ -256,21 +256,21 @@
                         <div class="modal-body">
 
                             <div class="alert alert-info">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+                                    <strong>Important Excel Import Guidelines:</strong>
+                                </div>
+                                <ul class="mb-2 ps-3 small">
+                                    <li>Please use the official downloaded Excel template without modifying its structure.</li>
+                                    <li><strong>Do not rename or delete</strong> the <code>Asset Inventory</code> or <code>Reference Data</code> sheet names.</li>
+                                    <li><strong>Do not change, reorder, or remove</strong> any column headers in row 1.</li>
+                                    <li>Use valid <strong>Asset Model ID</strong> and <strong>Airport Station ID</strong> values from the <em>Reference Data</em> sheet.</li>
+                                    <li>Ensure dates follow the <code>DD-MM-YYYY</code> format or standard Excel date cell type.</li>
+                                </ul>
 
-                                <strong>Excel Format:</strong>
-
-                                Please use the prescribed Excel format.
-
-                                <br>
-
-                                <a href="{{ route('asset-inventory.downloadTemplate') }}"
-                                class="btn btn-sm btn-success mt-2">
-
-                                    <i class="bi bi-download"></i>
-                                    Download Excel Format
-
+                                <a href="{{ route('asset-inventory.downloadTemplate') }}" class="btn btn-sm btn-success mt-1">
+                                    <i class="bi bi-download"></i> Download Excel Format
                                 </a>
-
                             </div>
 
 
@@ -346,6 +346,22 @@ $(document).ready(function () {
         }
     });
 
+    // Reset form, clear error alert, and restore button state on modal hide
+    $('#excelUploadModal').on('hidden.bs.modal', function () {
+        // 1. Reset the HTML form (clears selected file input)
+        $('#excelUploadForm')[0].reset();
+
+        // 2. Hide and clear the error alert box
+        $('#excelImportErrors')
+            .addClass('d-none')
+            .html('');
+
+        // 3. Reset the submit button text and state
+        $('#uploadExcelBtn')
+            .prop('disabled', false)
+            .html('<i class="bi bi-upload"></i> Upload Excel');
+    });
+
     $('#excelUploadForm').submit(function(e) {
 
         e.preventDefault();
@@ -401,22 +417,15 @@ $(document).ready(function () {
                         '<strong>Please check the following:</strong><br><br>';
 
                     response.errors.forEach(function(error) {
-
                         message += '• ' + error + '<br>';
 
                     });
 
                     if (response.success_count !== undefined) {
-
-                        message +=
-                            '<br><strong>Successfully imported:</strong> '
-                            + response.success_count;
-
+                        message += '<br><strong>Successfully imported:</strong> ' + response.success_count;                                               
                     }
 
-                    $('#excelImportErrors')
-                        .removeClass('d-none')
-                        .html(message);
+                    $('#excelImportErrors').removeClass('d-none').html(message);                                              
 
                 } else {
 
@@ -435,18 +444,13 @@ $(document).ready(function () {
             },
 
             complete: function() {
-
-                $('#uploadExcelBtn')
-                    .prop('disabled', false)
-                    .html(
-                        '<i class="bi bi-upload"></i> Upload Excel'
-                    );
-
+                $('#uploadExcelBtn').prop('disabled', false).html('<i class="bi bi-upload"></i> Upload Excel');                                                                             
             }
 
         });
 
     });
+
 
 });
 
