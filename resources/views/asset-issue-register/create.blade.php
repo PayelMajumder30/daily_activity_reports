@@ -217,7 +217,6 @@
                         <button type="button" class="btn btn-primary btn-sm" id="addAssetBtn">
                             <i class="bi bi-plus-circle"></i>
                             Add Asset
-
                         </button>
 
                     </div>
@@ -229,24 +228,16 @@
                                                                
                                 <thead class="table-dark">
                                     <tr>
-
-                                        <th width="60"> SL</th>
-                                                                                  
+                                        <th width="60"> SL</th>                                                                                 
                                         <th>Tag No.</th>                                                                                 
-
-                                        <th> Asset Type </th>
-                                                                                   
-                                        <th> Asset Model </th>
-                                                                                    
+                                        <th> Asset Type </th>                                                                                  
+                                        <th> Asset Model </th>                                                                                    
                                         <th width="80"> Action</th>                                                                                   
-
                                     </tr>
-
                                 </thead>
 
 
                                 <tbody id="selectedAssetsBody">
-
                                     <tr id="noAssetRow">
                                         <td colspan="5" class="text-center text-muted">                                                                                       
                                             No assets selected.
@@ -275,7 +266,7 @@
                     FORM BUTTONS
                 =========================================================== --}}
 
-                <div class="mt-4">
+                <div class="mt-4 d-flex justify-content-end">
 
                     <button type="submit" class="btn btn-primary" id="issueAssetBtn">
                         <i class="bi bi-check-circle"></i>

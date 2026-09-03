@@ -915,4 +915,75 @@ class AssetIssueRegisterController extends Controller
         );
     }
 
+    public function retain($id)
+    {
+        try {
+
+            $issueId = decryptId($id);
+
+            DB::transaction(function () use ($issueId) {
+
+                $issue = AssetIssueRegister::with('assetInventory')
+                    ->findOrFail($issueId);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Check Current Status
+                |--------------------------------------------------------------------------
+                */
+
+                if ($issue->issue_status !== 'Issued') {
+
+                    throw new \Exception(
+                        'Only currently issued assets can be retained.'
+                    );
+
+                }
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Issue Register
+                |--------------------------------------------------------------------------
+                */
+
+                $issue->update([
+                    'issue_status'  => 'Retained',
+                    'retained_date' => now()->toDateString(),
+                ]);
+
+
+                /*
+                |--------------------------------------------------------------------------
+                | Update Asset Inventory
+                |--------------------------------------------------------------------------
+                */
+
+                if ($issue->assetInventory) {
+
+                    $issue->assetInventory->update([
+                        'asset_status' => 'Retained',
+                    ]);
+
+                }
+
+            });
+
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Asset successfully retained by the custodian.'
+            ]);
+
+        } catch (\Exception $e) {
+
+            return response()->json([
+                'status'  => false,
+                'message' => $e->getMessage()
+            ], 422);
+
+        }
+    }
+
 }

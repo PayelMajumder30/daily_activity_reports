@@ -45,7 +45,8 @@ return new class extends Migration
                 'Available',
                 'Assigned',
                 'Repair',
-                'Scrapped'
+                'Scrapped',
+                'Retained'
             ])->default('Available');
 
             // Remarks

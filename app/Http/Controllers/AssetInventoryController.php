@@ -514,6 +514,13 @@ class AssetInventoryController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Event Log
+        |--------------------------------------------------------------------------
+        */
+        eventLog('Download', 'Asset Inventory', 'Asset inventory import template downloaded.');
+
+        /*
+        |--------------------------------------------------------------------------
         | Download
         |--------------------------------------------------------------------------
         */
@@ -548,6 +555,7 @@ class AssetInventoryController extends Controller
 
             $import = new AssetInventoryImport();
             Excel::import($import, $request->file('excel_file'));
+            $fileName = $request->file('excel_file')->getClientOriginalName();
 
             /*
             |--------------------------------------------------------------------------
@@ -557,6 +565,12 @@ class AssetInventoryController extends Controller
 
             if (count($import->errors) > 0) {
 
+                eventLog(
+                    'Import Failed',
+                    'Asset Inventory',
+                    "Asset inventory Excel import failed for file: {$fileName}. Imported: {$import->successCount}, Errors: " . count($import->errors)
+                );
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Some records could not be imported.',
@@ -564,6 +578,18 @@ class AssetInventoryController extends Controller
                     'errors' => $import->errors,
                 ], 422);
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Event Log (Success)
+            |--------------------------------------------------------------------------
+            */
+
+            eventLog(
+                'Import',
+                'Asset Inventory',
+                "Asset inventory Excel imported successfully. File: {$fileName}, Total imported: {$import->successCount}"
+            );
 
             return response()->json([
                 'success' => true,

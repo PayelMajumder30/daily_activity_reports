@@ -36,16 +36,24 @@
                 Search Issued Assets
             </h5>
 
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-3">
+
+                {{-- Issue Asset --}}
                 <a href="{{ route('asset-issue-register.create') }}" class="btn btn-primary btn-sm">               
                     <i class="bi bi-plus-circle"></i>
                     Issue Asset
                 </a>
+
+                {{-- Retained Asset --}}
+                <a href="{{ route('asset-retained.create') }}" class="btn btn-warning btn-sm">               
+                    <i class="bi bi-plus-circle"></i>
+                     Asset Retention
+                </a>
+
                 {{-- Export Excel --}}
-                <a href="{{ route('asset-issue-register.export', request()->query()) }}" class="btn btn-success btn-sm">
-                
+                <a href="{{ route('asset-issue-register.export', request()->query()) }}" class="btn btn-success btn-sm">              
                     <i class="bi bi-file-earmark-excel"></i>
-                    Export Excel
+                    Export to Excel
                 </a>
             </div>
         </div>
@@ -166,6 +174,7 @@
                             <th>User Type</th>
                             <th>Issued Date</th>
                             <th>Returned Date</th>
+                            <th>Retained Date</th>
                             <!-- <th>Asset History</th> -->
                             <th>Status</th>
                             <th>Action</th>
@@ -190,23 +199,30 @@
                                 <td>{{ ucwords($issue->custodian->discipline->name ?? 'N/A') }}</td>                                 
                                 <td>{{ ucfirst($issue->user_type) }}</td>                                                                 
                                 <td>{{ $issue->issued_date? $issue->issued_date->format('d-m-Y'): 'N/A' }}</td>
-                                <td>{{ $issue->returned_date? $issue->returned_date->format('d-m-Y'): '-' }} </td>
+                                <td>{{ $issue->returned_date? $issue->returned_date->format('d-m-Y'): 'N/A' }} </td>
+                                <td>{{ $issue->retained_date? $issue->retained_date->format('d-m-Y'): 'N/A' }} </td>
   
                                 <!-- <td></td> -->
-                                <td>
-                                   @if($issue->issue_status === 'Issued')
+                               <td>
+                                    @if($issue->issue_status === 'Issued')
                                         <span class="badge bg-success">
                                             Issued
                                         </span>
-
                                     @elseif($issue->issue_status === 'Transferred')
                                         <span class="badge bg-warning text-dark">
                                             Transferred
                                         </span>
-
                                     @elseif($issue->issue_status === 'Returned')
                                         <span class="badge bg-secondary">
                                             Returned
+                                        </span>
+                                    @elseif($issue->issue_status === 'Retained')
+                                        <span class="badge bg-info text-dark">
+                                            Retained
+                                        </span>
+                                    @else
+                                        <span class="badge bg-light text-dark">
+                                            {{ ucwords($issue->issue_status) }}
                                         </span>
                                     @endif
                                 </td>
@@ -227,11 +243,18 @@
                                             <i class="bi bi-arrow-return-left"></i>
                                         </button>
 
-                                    {{-- Transfer Asset --}}
-                                    <button type="button" class="btn btn-sm btn-warning transfer-asset" data-id="{{ encryptId($issue->id)}}" 
-                                    data-custodian-id="{{ encryptId($issue->custodian_id) }}" title="Transfer Asset">
-                                        <i class="bi bi-arrow-left-right"></i>
-                                    </button>
+                                        {{-- Transfer Asset --}}
+                                        <button type="button" class="btn btn-sm btn-warning transfer-asset" data-id="{{ encryptId($issue->id)}}" 
+                                        data-custodian-id="{{ encryptId($issue->custodian_id) }}" title="Transfer Asset">
+                                            <i class="bi bi-arrow-left-right"></i>
+                                        </button>
+
+                                        {{-- Retention Asset --}}
+                                        <button type="button" class="btn btn-sm btn-primary retain-asset"                                                                                     
+                                            data-id="{{ encryptId($issue->id) }}" data-custodian="{{ ucwords($issue->custodian->custodian_name ?? '') }}"                        
+                                            data-tag="{{ $issue->assetInventory->tag_no ?? '' }}" title="Retain Asset">                                                                 
+                                            <i class="bi bi-archive-fill"></i>co
+                                        </button>
                                     @endif
                                    
                                 </td>
@@ -1128,19 +1151,11 @@
                 );
 
 
-                let message =
-                    xhr.responseJSON?.message ??
-                    'Unable to load custodian details.';
-
-
+                let message = xhr.responseJSON?.message ?? 'Unable to load custodian details.';                                      
                 $('#issueDetailsContent').html(`
-
                     <div class="alert alert-danger">
-
                         <i class="bi bi-exclamation-triangle"></i>
-
                         ${message}
-
                     </div>
 
                 `);
@@ -1857,6 +1872,127 @@
 
         }
     );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Retain Asset
+    |--------------------------------------------------------------------------
+    */
+
+    $(document).on('click', '.retain-asset', function () {
+
+        let button = $(this);
+
+        let id = button.data('id');
+        let custodianName = button.data('custodian');
+        let assetTag = button.data('tag');
+
+
+        Swal.fire({
+
+            title: 'Retain Asset?',
+
+            html: `
+                <div class="text-start">
+
+                    <p>
+                        Are you sure you want to retain this asset?
+                    </p>
+
+                    <div class="card border-0 bg-light">
+
+                        <div class="card-body">
+
+                            <div class="mb-2">
+
+                                <strong>Asset Tag:</strong>
+
+                                <span class="text-primary">
+                                    ${assetTag || '-'}
+                                </span>
+
+                            </div>
+
+
+                            <div>
+
+                                <strong>Retained To Custodian:</strong>
+
+                                <span class="text-success">
+                                    ${custodianName || '-'}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            `,
+
+            icon: 'question',
+
+            showCancelButton: true,
+
+            confirmButtonText: 'Yes, Retain Asset',
+
+            cancelButtonText: 'Cancel'
+
+        }).then((result) => {
+
+            if (!result.isConfirmed) {
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | AJAX Request
+            |--------------------------------------------------------------------------
+            */
+
+            $.ajax({
+
+                url: "{{ route('asset-issue-register.retain', ':id') }}".replace(':id', id),              
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}"
+                },
+
+
+                success: function (response) {
+
+                    Swal.fire({
+
+                        icon: 'success',
+                        title: 'Asset Retained',
+                        text: response.message,
+                        timer: 2000,
+                        showConfirmButton: false
+
+                    }).then(() => {
+                        location.reload();
+                    });
+                },
+
+
+                error: function (xhr) {
+                    let message = xhr.responseJSON?.message || 'Unable to retain asset.';                                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Retention Failed',
+                        text: message
+
+                    });
+
+                }
+
+            });
+
+        });
+
+    });
 </script>
 
 @endpush

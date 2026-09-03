@@ -26,4 +26,9 @@ class Location extends Model
     {
         return $this->hasMany(AirportStation::class, 'location_id');
     }
+
+    public function retainedAssets(): HasMany
+    {
+        return $this->hasMany(AssetRetainedAsset::class, 'asset_inventory_id');
+    }
 }

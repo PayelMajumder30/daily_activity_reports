@@ -47,7 +47,7 @@
                 <a href="{{ route('asset-inventory.export', request()->query()) }}"
                 class="btn btn-success btn-sm">
                     <i class="bi bi-file-earmark-excel"></i>
-                    Export Excel
+                    Export to Excel
                 </a>
 
                  {{-- Upload Excel --}}
@@ -303,8 +303,7 @@
                                     <button type="submit" class="btn btn-primary" id="uploadExcelBtn">
                                                                                        
                                         <i class="bi bi-upload"></i>
-                                        Upload Excel
-
+                                        Bulk Upload
                                     </button>
 
                                 </div>

@@ -149,11 +149,9 @@
             let type = $(this).val();
             $('#asset_model_id').html('<option>Loading...</option>');
             if(type == ''){
-
                 $('#asset_model_id').html(
                     '<option value="">Select Type First</option>'
                 );
-
                 return;
             }
 
@@ -163,9 +161,7 @@
                 success:function(res){
                     let option='';
                     if(res.length==0){
-                        option =
-                        '<option value="">No Model Available</option>';
-
+                        option = '<option value="">No Model Available</option>';                      
                     }else{
 
                         option =
@@ -188,6 +184,84 @@
             });
 
         });
+
+        // $('#asset_type_id').change(function () {
+
+        //     let typeId = $(this).val();
+        //     let modelSelect = $('#asset_model_id');
+
+        //     modelSelect
+        //         .empty()
+        //         .append('<option value="">Loading Asset models...</option>')
+        //         .prop('disabled', true);
+
+        //     if (typeId === '') {
+
+        //         modelSelect
+        //             .empty()
+        //             .append('<option value="">Select Asset type First</option>')
+        //             .prop('disabled', true);
+
+        //         return;
+        //     }
+
+        //     let url = "{{ route('asset-inventory.getModels', ':id') }}".replace(':id', typeId);             
+        //     $.ajax({
+
+        //         url: url,
+        //         type: "GET",
+
+        //         success: function (response) {
+        //             modelSelect.empty();
+        //             if (response.length > 0) {
+
+        //                 modelSelect.append(
+        //                     '<option value="">Select Asset models</option>'
+        //                 );
+
+        //                 $.each(response, function (index, assetModel) {
+
+        //                     let modelName = assetModel.model_name;
+
+        //                     if (assetModel.short_name) {
+        //                         modelName += ' (' + assetModel.short_name + ')';
+        //                     }
+
+        //                     modelSelect.append(
+        //                         $('<option>', {
+        //                             value: assetModel.id,
+        //                             text: modelName
+        //                         })
+        //                     );
+
+        //                 });
+
+        //                 modelSelect.prop('disabled', false);
+
+        //             } else {
+
+        //                 modelSelect
+        //                     .append(
+        //                         '<option value="">No Station Available</option>'
+        //                     ).prop('disabled', true);
+                            
+        //             }
+
+        //         },
+
+        //         error: function () {
+
+        //             stationSelect
+        //                 .empty()
+        //                 .append(
+        //                     '<option value="">Unable to load stations</option>'
+        //                 )
+        //                 .prop('disabled', true);
+        //         }
+
+        //     });
+
+        // });
 
         // ==========================
         // Region -> Station
@@ -213,9 +287,7 @@
                 return;
             }
 
-            let url = "{{ route('location.stations.byLocation', ':id') }}"
-                .replace(':id', locationId);
-
+            let url = "{{ route('location.stations.byLocation', ':id') }}".replace(':id', locationId);             
             $.ajax({
 
                 url: url,
@@ -274,6 +346,7 @@
             });
 
         });
+
         // ==========================
         // Generate Preview Table
         // ==========================
@@ -819,7 +892,6 @@
                         let value = $(this).val().trim();
                         if (value === '') {
                             $(this).addClass('is-invalid');
-
                             valid = false;
 
                         } else {

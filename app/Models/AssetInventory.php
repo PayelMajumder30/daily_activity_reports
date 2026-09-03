@@ -23,12 +23,12 @@ class AssetInventory extends Model
     }
 
     public function assetModel(): BelongsTo {
-        return $this->belongsTo(AssetModel::class);
+        return $this->belongsTo(AssetModel::class, 'asset_model_id');
     }
 
     public function location(): BelongsTo
     {
-        return $this->belongsTo(Location::class);
+        return $this->belongsTo(Location::class, 'location_id');
     }
 
     public function station(): BelongsTo
@@ -50,5 +50,11 @@ class AssetInventory extends Model
     {
         return $this->hasMany(AssetTransfer::class, 'asset_inventory_id');
     }
+
+    public function retainedAssets(): HasMany
+    {
+        return $this->hasMany(AssetRetainedAsset::class, 'asset_inventory_id');
+    }
+
    
 }

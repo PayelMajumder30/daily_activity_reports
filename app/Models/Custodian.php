@@ -55,4 +55,9 @@ class Custodian extends Model
             'to_custodian_id'
         );
     }
+
+    public function retainedAssets(): HasMany
+    {
+        return $this->hasMany(AssetRetainedAsset::class, 'asset_inventory_id');
+    }
 }

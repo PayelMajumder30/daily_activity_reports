@@ -3,7 +3,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController, EventLogController,
-                            SettingController, AssetInventoryController, IssueRegController, CustodianController, AssetIssueRegisterController};
+                            SettingController, AssetInventoryController, IssueRegController, CustodianController, AssetIssueRegisterController, AssetRetainedController};
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -195,10 +195,19 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/transfer-details/{id}', [AssetIssueRegisterController::class, 'transferDetails'])->name('transfer-details');
         Route::post('/transfer', [AssetIssueRegisterController::class, 'transferAsset'] )->name('transfer');     
         
-        Route::get('/export', [AssetIssueRegisterController::class, 'export'])->name('export');
-    
+        Route::get('/export', [AssetIssueRegisterController::class, 'export'])->name('export');    
+        Route::post('/{id}/retain', [AssetIssueRegisterController::class, 'retain'])->name('retain');   
 
     });
+
+    // Asset retained
+    Route::prefix('asset-retained')->name('asset-retained.')->group(function() {
+        Route::get('/create', [AssetRetainedController::class, 'create'])->name('create');
+        Route::post('/store', [AssetRetainedController::class, 'store'])->name('store');
+        Route::get('/custodian-assets/{custodianId}', [AssetRetainedController::class, 'getCustodianAssets'])->name('custodian-assets');
+        Route::get('/asset-details/{assetId}', [AssetRetainedController::class, 'getAssetDetailsByTag'])->name('asset-details');
+    });
+
 });
 
 require __DIR__.'/auth.php';

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('operator_name')->nullable();
             $table->date('issued_date');
             $table->date('returned_date')->nullable();
-            $table->enum('issue_status', ['Issued', 'Returned'])->default('Issued');
+            $table->enum('issue_status', ['Issued', 'Returned', 'Retained'])->default('Issued');
             $table->text('remarks')->nullable();
             $table->timestamps();
         });
