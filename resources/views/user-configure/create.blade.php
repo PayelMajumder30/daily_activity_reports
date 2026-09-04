@@ -1,0 +1,147 @@
+@extends('layouts.app')
+
+@section('title', 'Add User Configuration')
+
+@section('content')
+
+<div class="container-fluid py-4">
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold">
+                <i class="bi bi-file-earmark-text"></i>
+                Add Users
+            </h2>
+            <p class="text-muted">
+                Create a new user account by entering the user's details and selecting the appropriate access role.
+            </p>
+        </div>
+
+        <div class="col-md-4 text-end">
+            <h6 class="text-secondary">
+                {{ now()->format('d M Y') }}
+            </h6>
+        </div>
+    </div>
+
+
+    <div class="card shadow">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <h4>Add User</h4>
+
+            <a href="{{ route('user-configuration.index') }}" class="btn btn-secondary">
+                Back
+            </a>
+
+        </div>
+
+        <div class="card-body">
+
+            <form action="{{ route('user-configuration.store') }}" method="POST">
+                @csrf
+
+                <!-- Row 1 -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>Name <span class="text-danger">*</span></label>
+
+                        <input type="text"
+                            name="name"
+                            class="form-control @error('name') is-invalid @enderror"
+                            value="{{ old('name') }}">
+
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Email <span class="text-danger">*</span></label>
+
+                        <input type="email"
+                            name="email"
+                            class="form-control @error('email') is-invalid @enderror"
+                            value="{{ old('email') }}">
+
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Row 2 -->
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label>Password <span class="text-danger">*</span></label>
+
+                        <div class="input-group">
+                            <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword"><i class="bi bi-eye"></i></button>
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                       
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <label>Role <span class="text-danger">*</span></label>
+
+                        <select name="role"
+                                class="form-select @error('role') is-invalid @enderror">
+
+                            <option value="">Select Role</option>
+
+                            <option value="0" {{ old('role') == 0 ? 'selected' : '' }}>
+                                Management
+                            </option>
+
+                            <option value="1" {{ old('role') == 1 ? 'selected' : '' }}>
+                                Uploader
+                            </option>
+
+                            <option value="2" {{ old('role') == 2 ? 'selected' : '' }}>
+                                Manpower
+                            </option>
+
+                        </select>
+
+                        @error('role')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Save User
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@push('scripts')
+<script>
+    $('#togglePassword').click(function () {
+        
+        let password = $('#password');
+        let icon = $(this).find('i');
+
+        if(password.attr('type') === 'password'){
+            password.attr('type', 'text');
+            console.log('text');
+            icon.removeClass('bi-eye').addClass('bi-eye-slash');
+        } else {
+            password.attr('type', 'password');
+            icon.removeClass('bi-eye-slash').addClass('bi-eye');
+        }
+    })
+</script>
+@endpush
+
+@endsection

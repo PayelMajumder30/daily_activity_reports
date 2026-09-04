@@ -36,7 +36,7 @@
 
         <div class="card-body">
 
-            <form id="uploadForm" method="POST" enctype="multipart/form-data">
+            <form id="uploadForm" method="POST" enctype="multipart/form-data" autocomplete="off">
                 @csrf
 
                 <div class="row">
@@ -52,26 +52,49 @@
                     </div>
 
                     <div class="col-md-3">
-                        <label>&nbsp;</label>
+                        <label class="d-block">&nbsp;</label>
 
-                        <button type="submit" id="btnUpload" class="btn btn-success w-100" disabled>                              
-                             <i class="bi bi-upload"></i> Upload
-                        </button>
+                        <div class="d-flex gap-2">
+
+                            <button type="submit" id="btnUpload" class="btn btn-success flex-fill" disabled>    
+                                <i class="bi bi-upload"></i>
+                                Upload
+                            </button>
+
+                            <a href="{{ route('uploader.downloadTemplate') }}" class="btn btn-warning flex-fill" title="Download Sample Excel File">                           
+                                <i class="bi bi-file-earmark-excel"></i>
+                                Sample Excel
+                            </a>
+
+                        </div>
                     </div>
 
                 </div>
 
             </form>
 
-            <input type="hidden" id="upload_id">
+            <input type="hidden" id="upload_id" value="{{ $uploadId }}">
 
         </div>
     </div>
 
     {{-- Preview Card --}}
-    <div class="card shadow border-0 d-none"
-        id="previewCard">
+    <div class="card shadow border-0 {{ $preview->count() ? '' : 'd-none' }}" id="previewCard">
+        
+        <div class="alert alert-info mb-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <strong>Report Date :</strong>
+                    {{ optional($upload)->report_date?->format('d-m-Y') }}
+                </div>
 
+                <div class="col-md-6 text-end">
+                    <strong>File :</strong>
+                    {{ $upload->file_name ?? 'N/A' }}
+                </div>
+            </div>
+        </div>
+        
         <div class="card-header bg-dark text-white">
             <h5 class="mb-0">Preview Data</h5>
         </div>
@@ -84,26 +107,71 @@
 
                     <tr>
                         <th width="5%">SL</th>
-                        <th>Complaint</th>
+                        <th>Activity Details</th>
+                        <th>Type of Activity</th>
+                        <th>Asset Tag No</th>
                         <th>Engineer</th>
                         <th>Status</th>
-                        <th>Resolution</th>
+                        <th>Activity Duration</th>
                         <th width="12%">Action</th>
                     </tr>
 
                 </thead>
 
-                <tbody>
+               <tbody>
+
+                    @foreach($preview as $row)
+                    <tr id="row_{{ $row->id }}">
+
+                        <td>{{ $loop->iteration }}</td>
+
+                        <td id="complaint_{{ $row->id }}">
+                            {{ $row->complaint_title }}
+                        </td>
+
+                        <td id="activity_{{ $row->id }}">
+                            {{ $row->type_of_activity ?? 'NA' }}
+                        </td>
+
+                        <td id="asset_{{ $row->id }}">
+                            {{ $row->asset_tag_no ?? 'NA' }}
+                        </td>
+
+                        <td id="engineer_{{ $row->id }}">
+                            {{ $row->engineer_name }}
+                        </td>
+
+                        <td id="status_{{ $row->id }}">
+                            {{ $row->status }}
+                        </td>
+
+                        <td id="time_{{ $row->id }}">
+                            {{ $row->resolution_time }}
+                        </td>
+
+                        <td>
+                            <button class="btn btn-warning btnEdit"
+                                    data-id="{{ $row->id }}">
+                                Edit
+                            </button>
+                        </td>
+
+                    </tr>
+                    @endforeach
 
                 </tbody>
 
             </table>
+ 
+            <div class="d-flex gap-2 mt-3">
+                <button type="button" id="btnFinalSave" class="btn btn-success">             
+                    <i class="bi bi-save"></i>Final Save
+                </button>
 
-            <button type="button"
-                    id="btnFinalSave"
-                    class="btn btn-success">
-                Final Save
-            </button>
+                <button type="button" id="btnDeleteUpload" class="btn btn-danger">
+                    <i class="bi bi-trash"></i>Delete Upload
+                </button>
+            </div>
 
         </div>
 
@@ -112,6 +180,7 @@
 </div>
 
 @push('scripts')
+
     <script>
        
         function checkUploadForm() {
@@ -192,6 +261,14 @@
                                     ${row.complaint_title}
                                 </td>
 
+                                <td id="activity_${row.id}">
+                                    ${row.type_of_activity ?? 'NA'}
+                                </td>
+
+                                <td id="asset_${row.id}">
+                                    ${row.asset_tag_no ?? 'NA'}
+                                </td>
+
                                 <td id="engineer_${row.id}">
                                     ${row.engineer_name}
                                 </td>
@@ -205,12 +282,8 @@
                                 </td>
 
                                 <td>
-                                    <button
-                                        class="btn btn-warning btnEdit"
-                                        data-id="${row.id}">
-
+                                    <button class="btn btn-warning btnEdit" data-id="${row.id}"> 
                                         Edit
-
                                     </button>
                                 </td>
 
@@ -221,21 +294,27 @@
 
                 },
                 error:function(xhr){
-                    // --- ALSO ADD THIS LINE TO HIDE THE MODAL ON FAILURE ---
-                    $('#loadingModal').modal('hide'); 
+
+                    $('#loadingModal').modal('hide');
 
                     console.log(xhr.responseText);
-                    Swal.fire({
-
-                        icon:'error',
-                        title:'Upload Failed',
-                        text:'Something went wrong while uploading.'
-
-                    });
 
                     $('#btnUpload')
-                    .prop('disabled', false)
-                    .html('<i class="bi bi-upload"></i> Upload');
+                        .prop('disabled', false)
+                        .html('<i class="bi bi-upload"></i> Upload');
+
+                    let message = 'This report date or file already exist.';
+
+                    if (xhr.status === 422 && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Upload Failed',
+                        text: message
+                    });
+
                 }
 
             });
@@ -249,6 +328,14 @@
 
             $('#complaint_'+id).html(
                 '<input class="form-control" value="'+$('#complaint_'+id).text().trim()+'">'
+            );
+
+            $('#activity_'+id).html(
+                '<input class="form-control" value="'+$('#activity_'+id).text().trim()+'">'
+            );
+
+            $('#asset_'+id).html(
+                '<input class="form-control" value="'+$('#asset_'+id).text().trim()+'">'
             );
 
             $('#engineer_'+id).html(
@@ -279,6 +366,8 @@
                 data: {
                     _token: "{{ csrf_token() }}",
                     complaint_title: $('#complaint_' + id + ' input').val(),
+                    type_of_activity: $('#activity_' + id + ' input').val(),
+                    asset_tag_no: $('#asset_' + id + ' input').val(),
                     engineer_name: $('#engineer_' + id + ' input').val(),
                     status: $('#status_' + id + ' input').val(),
                     resolution_time: $('#time_' + id + ' input').val()
@@ -288,11 +377,15 @@
                 success: function () {
 
                     let title = $('#complaint_' + id + ' input').val();
+                    let activity = $('#activity_' + id + ' input').val();
+                    let asset = $('#asset_' + id + ' input').val();
                     let engineer = $('#engineer_' + id + ' input').val();
                     let status = $('#status_' + id + ' input').val();
                     let time = $('#time_' + id + ' input').val();
 
                     $('#complaint_' + id).text(title);
+                    $('#activity_' + id).text(activity || 'NA');
+                    $('#asset_' + id).text(asset || 'NA');
                     $('#engineer_' + id).text(engineer);
                     $('#status_' + id).text(status);
                     $('#time_' + id).text(time);
@@ -321,29 +414,110 @@
         // Final Save AJAX
         $('#btnFinalSave').click(function(){
 
+            let btn = $(this);
+
+            btn.prop('disabled', true)
+            .html('<i class="bi bi-arrow-repeat"></i> Saving...');
+
             $.ajax({
-
-                url:"{{ route('uploader.save') }}",
-                type:"POST",
-                data:{
-                _token:"{{ csrf_token() }}",
-                upload_id:$('#upload_id').val()
+                url: "{{ route('uploader.save') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    upload_id: $('#upload_id').val()
                 },
-                success:function(){
+
+                success: function(response){
+
                     Swal.fire({
-
-                        icon:'success',
-                        title:'Success',
-                        text:'Complaint data saved successfully.'
-
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message
                     }).then(function(){
-
                         location.reload();
-
                     });
+
+                },
+
+                error: function(xhr){
+
+                    btn.prop('disabled', false)
+                    .html('<i class="bi bi-save"></i> Final Save');
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON.message
+                    });
+
                 }
 
             });
+
+        });
+
+        // delete temporary uploaded file
+        $('#btnDeleteUpload').click(function () {
+            let uploadId = $('#upload_id').val();
+            let btn = $(this);
+
+            Swal.fire({
+                title: 'Delete Uploaded Data?',
+                text: 'This uploaded Excel preview will be removed.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+
+                if(result.isConfirmed){
+
+                    // Disable button while deleting
+                    btn.prop('disabled', true).html('<i class="bi bi-arrow-repeat"></i> Deleting...');
+
+                    $.ajax({
+                        url: "{{ route('uploader.delete', '__ID__') }}".replace('__ID__', uploadId),
+                        type: "DELETE",
+                        data:{
+                            _token:"{{ csrf_token() }}"
+                        },
+
+                        success:function(res){
+
+                            Swal.fire({
+                                icon:'success',
+                                title:'Deleted',
+                                text:res.message
+                            });
+
+                            $('#previewCard').addClass('d-none');
+                            $('#previewTable tbody').html('');
+                            $('#uploadForm')[0].reset();
+                            $('#upload_id').val('');
+                            $('#btnUpload').prop('disabled', true).html('<i class="bi bi-upload"></i> Upload');
+
+                            //restore delete button
+                            btn.prop('disabled', false).html('<i class="bi bi-trash"></i> Delete Upload');
+         
+                        },
+
+                        error:function(xhr){
+
+                            btn.prop('disabled', false).html('<i class="bi bi-trash"></i> Delete Upload');
+                            Swal.fire({
+                                icon:'error',
+                                title:'Error',
+                                text:xhr.responseJSON.message
+                            });
+
+                        }
+
+                    });
+
+                }
+
+            });
+
         });
     </script>
 @endpush

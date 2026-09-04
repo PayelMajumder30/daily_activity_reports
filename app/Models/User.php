@@ -22,7 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role'
+        'role',
+        'status',
     ];
 
     protected $casts = [
@@ -56,5 +57,25 @@ class User extends Authenticatable
     public function uploads(): HasMany
     {
         return $this->hasMany(Upload::class);
+    }
+
+    public function eventlogs(): HasMany
+    {
+        return $this->hasMany(EventLog::class);
+    }
+
+    public function assetAssigned(): Hasmany
+    {
+        return $this->hasMany(AssetAssigned::class, 'created_by');
+    }
+
+    public function assetTransfers(): HasMany
+    {
+        return $this->hasMany(AssetTransfer::class, 'created_by');
+    }
+
+    public function retainedAssets(): HasMany
+    {
+        return $this->hasMany(AssetRetainedAsset::class, 'asset_inventory_id');
     }
 }
