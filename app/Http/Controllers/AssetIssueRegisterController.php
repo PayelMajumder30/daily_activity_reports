@@ -819,6 +819,7 @@ class AssetIssueRegisterController extends Controller
 
             $issue->update([
                 'issue_status' => 'Transferred',
+                'transfer_date' => $request->transfer_date,
                 'remarks' => $request->remarks,
             ]);
 
@@ -853,7 +854,9 @@ class AssetIssueRegisterController extends Controller
                 'user_type'             => $issue->user_type,                   
                 'operator_name'         => $issue->operator_name,                 
                 'issued_date'           => $request->transfer_date,                 
-                'returned_date'         => null,                  
+                'returned_date'         => null,
+                'retained_date'         => null,
+                'transfer_date'         => null,                
                 'issue_status'          => 'Issued',                   
                 'remarks'               => $request->remarks,                   
             ]);
@@ -915,50 +918,31 @@ class AssetIssueRegisterController extends Controller
         );
     }
 
-    public function retain($id)
+    public function retain(Request $request, $id)
     {
+        $request->validate([
+            'retained_date' => ['required', 'date'],
+        ]);
+
         try {
 
             $issueId = decryptId($id);
 
-            DB::transaction(function () use ($issueId) {
+            DB::transaction(function () use ($issueId, $request) {
 
                 $issue = AssetIssueRegister::with('assetInventory')
                     ->findOrFail($issueId);
 
-
-                /*
-                |--------------------------------------------------------------------------
-                | Check Current Status
-                |--------------------------------------------------------------------------
-                */
-
                 if ($issue->issue_status !== 'Issued') {
-
                     throw new \Exception(
                         'Only currently issued assets can be retained.'
                     );
-
                 }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Update Issue Register
-                |--------------------------------------------------------------------------
-                */
 
                 $issue->update([
                     'issue_status'  => 'Retained',
-                    'retained_date' => now()->toDateString(),
+                    'retained_date' => $request->retained_date,
                 ]);
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Update Asset Inventory
-                |--------------------------------------------------------------------------
-                */
 
                 if ($issue->assetInventory) {
 
@@ -969,7 +953,6 @@ class AssetIssueRegisterController extends Controller
                 }
 
             });
-
 
             return response()->json([
                 'status'  => true,
@@ -985,5 +968,4 @@ class AssetIssueRegisterController extends Controller
 
         }
     }
-
 }

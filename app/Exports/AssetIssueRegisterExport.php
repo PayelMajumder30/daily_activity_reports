@@ -150,8 +150,16 @@ class AssetIssueRegisterExport implements FromCollection, WithHeadings, ShouldAu
                         ? $issue->issued_date->format('d-m-Y')
                         : 'N/A',
 
+                    'Transfer Date' => $issue->transfer_date
+                        ? $issue->transfer_date->format('d-m-Y')
+                        : '-',
+
                     'Returned Date' => $issue->returned_date
                         ? $issue->returned_date->format('d-m-Y')
+                        : '-',
+
+                    'Retained Date' => $issue->retained_date
+                        ? $issue->retained_date->format('d-m-Y')
                         : '-',
 
                     'Status' => $issue->issue_status ?? 'N/A',
@@ -172,7 +180,9 @@ class AssetIssueRegisterExport implements FromCollection, WithHeadings, ShouldAu
             'Designation',
             'User Type',
             'Issued Date',
+            'Transfer Date',
             'Returned Date',
+            'Retained Date',
             'Status',
         ];
     }

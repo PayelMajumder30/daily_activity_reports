@@ -131,7 +131,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-end">
+                    <div class="mt-3">
                         <button type="submit" class="btn btn-primary">                                                     
                             <i class="bi bi-search"></i>
                             Search
@@ -173,6 +173,7 @@
                             <th>Department</th>
                             <th>User Type</th>
                             <th>Issued Date</th>
+                            <th>Transfer Date</th>
                             <th>Returned Date</th>
                             <th>Retained Date</th>
                             <!-- <th>Asset History</th> -->
@@ -199,6 +200,7 @@
                                 <td>{{ ucwords($issue->custodian->discipline->name ?? 'N/A') }}</td>                                 
                                 <td>{{ ucfirst($issue->user_type) }}</td>                                                                 
                                 <td>{{ $issue->issued_date? $issue->issued_date->format('d-m-Y'): 'N/A' }}</td>
+                                <td>{{ $issue->transfer_date ? $issue->transfer_date->format('d-m-Y'): 'N/A' }}</td>
                                 <td>{{ $issue->returned_date? $issue->returned_date->format('d-m-Y'): 'N/A' }} </td>
                                 <td>{{ $issue->retained_date? $issue->retained_date->format('d-m-Y'): 'N/A' }} </td>
   
@@ -253,7 +255,7 @@
                                         <button type="button" class="btn btn-sm btn-primary retain-asset"                                                                                     
                                             data-id="{{ encryptId($issue->id) }}" data-custodian="{{ ucwords($issue->custodian->custodian_name ?? '') }}"                        
                                             data-tag="{{ $issue->assetInventory->tag_no ?? '' }}" title="Retain Asset">                                                                 
-                                            <i class="bi bi-archive-fill"></i>co
+                                            <i class="bi bi-archive-fill"></i>
                                         </button>
                                     @endif
                                    
@@ -368,8 +370,7 @@
                                                         Custodian Name
                                                     </label>
 
-                                                    <input type="text" id="current_custodian_name" class="form-control" readonly>                                                                                                                                                                    
-                                                        
+                                                    <input type="text" id="current_custodian_name" class="form-control" readonly>                                                                                                                                                                                                                           
                                                 </div>
 
 
@@ -1880,13 +1881,14 @@
     */
 
     $(document).on('click', '.retain-asset', function () {
-
         let button = $(this);
 
         let id = button.data('id');
         let custodianName = button.data('custodian');
         let assetTag = button.data('tag');
 
+        // Today's date in YYYY-MM-DD format
+        let today = new Date().toISOString().split('T')[0];
 
         Swal.fire({
 
@@ -1899,7 +1901,7 @@
                         Are you sure you want to retain this asset?
                     </p>
 
-                    <div class="card border-0 bg-light">
+                    <div class="card border-0 bg-light mb-3">
 
                         <div class="card-body">
 
@@ -1912,7 +1914,6 @@
                                 </span>
 
                             </div>
-
 
                             <div>
 
@@ -1928,6 +1929,22 @@
 
                     </div>
 
+                    <div>
+
+                        <label class="form-label fw-bold">
+                            Retention Date
+                        </label>
+
+                        <input
+                            type="date"
+                            id="swal_retained_date"
+                            class="form-control"
+                            value="${today}"
+                            
+                        >
+
+                    </div>
+
                 </div>
             `,
 
@@ -1937,7 +1954,26 @@
 
             confirmButtonText: 'Yes, Retain Asset',
 
-            cancelButtonText: 'Cancel'
+            cancelButtonText: 'Cancel',
+
+            preConfirm: () => {
+
+                let retainedDate =
+                    document.getElementById('swal_retained_date').value;
+
+                if (!retainedDate) {
+
+                    Swal.showValidationMessage(
+                        'Please select the retention date.'
+                    );
+
+                    return false;
+                }
+
+                return {
+                    retained_date: retainedDate
+                };
+            }
 
         }).then((result) => {
 
@@ -1945,21 +1981,22 @@
                 return;
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | AJAX Request
-            |--------------------------------------------------------------------------
-            */
+            let retainedDate = result.value.retained_date;
 
             $.ajax({
 
-                url: "{{ route('asset-issue-register.retain', ':id') }}".replace(':id', id),              
-                type: 'POST',
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
+                url: "{{ route('asset-issue-register.retain', ':id') }}"
+                    .replace(':id', id),
 
+                type: 'POST',
+
+                data: {
+
+                    _token: "{{ csrf_token() }}",
+
+                    retained_date: retainedDate
+
+                },
 
                 success: function (response) {
 
@@ -1968,20 +2005,28 @@
                         icon: 'success',
                         title: 'Asset Retained',
                         text: response.message,
-                        timer: 2000,
-                        showConfirmButton: false
-
+                        timer: 1500,
+                        showConfirmButton: false,
+                        allowOutsideClick: false
                     }).then(() => {
-                        location.reload();
+                         // Direct redirect to updated issue register page
+                        window.location.href = "{{ route('asset-issue-register.index') }}";                          
                     });
+
                 },
 
-
                 error: function (xhr) {
-                    let message = xhr.responseJSON?.message || 'Unable to retain asset.';                                    
+
+                    let message =
+                        xhr.responseJSON?.message ||
+                        'Unable to retain asset.';
+
                     Swal.fire({
+
                         icon: 'error',
+
                         title: 'Retention Failed',
+
                         text: message
 
                     });
