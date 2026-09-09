@@ -337,7 +337,6 @@ class SettingController extends Controller
 
 
     // asset model
-
     public function assetModelIndex(Request $request){
         $query = AssetModel::with('assetType');
 

@@ -45,10 +45,10 @@
                 </a>
 
                 {{-- Retained Asset --}}
-                <a href="{{ route('asset-retained.create') }}" class="btn btn-warning btn-sm">               
+                <!-- <a href="{{ route('asset-retained.create') }}" class="btn btn-warning btn-sm">               
                     <i class="bi bi-plus-circle"></i>
                      Asset Retention
-                </a>
+                </a> -->
 
                 {{-- Export Excel --}}
                 <a href="{{ route('asset-issue-register.export', request()->query()) }}" class="btn btn-success btn-sm">              

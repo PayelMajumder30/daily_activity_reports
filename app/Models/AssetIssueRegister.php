@@ -13,7 +13,7 @@ class AssetIssueRegister extends Model
     protected $fillable = ['asset_inventory_id', 'custodian_id', 'user_type', 'operator_name', 'issued_date', 'retained_date', 'transfer_date', 'returned_date', 'issue_status', 'remarks'];
 
     protected $casts = [
-        'issued_date'  => 'date',
+        'issued_date'   => 'date',
         'returned_date' => 'date',
         'retained_date' => 'date',
         'transfer_date' => 'date',

@@ -22,6 +22,11 @@ class Location extends Model
         return $this->hasMany(Custodian::class);
     }
 
+    public function user(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+    
     public function airportStation(): HasMany
     {
         return $this->hasMany(AirportStation::class, 'location_id');

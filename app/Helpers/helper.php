@@ -32,7 +32,6 @@ if(!function_exists('eventLog')) {
 }
 
 // for tag generate
-
 if (!function_exists('generateAssetTag')) {
 
     function generateAssetTag($locationId, $stationId, $assetTypeId, $running = null)

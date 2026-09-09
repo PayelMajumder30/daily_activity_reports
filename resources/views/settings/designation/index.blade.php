@@ -181,8 +181,7 @@
 
                         $('#cancelBtn').removeClass('d-none');
 
-                        $('#designationForm')
-                            .attr('action', updateUrl.replace(':id', id));
+                        $('#designationForm').attr('action', updateUrl.replace(':id', id));                           
 
                         $('#methodField').html('@method("PUT")');
                     }
@@ -212,29 +211,6 @@
 
         });
 
-        // $(document).on('submit', '.delete-form', function(e){
-
-        //     e.preventDefault();
-
-        //     let form = this;
-
-        //     Swal.fire({
-        //         title: 'Delete Activity?',
-        //         text: "This record will be permanently deleted.",
-        //         icon: 'warning',
-        //         showCancelButton: true,
-        //         confirmButtonColor: '#d33',
-        //         cancelButtonColor: '#6c757d',
-        //         confirmButtonText: 'Yes, Delete',
-        //         cancelButtonText: 'Cancel'
-        //     }).then((result)=>{
-
-        //         if(result.isConfirmed){
-        //             form.submit();
-        //         }
-
-        //     });
-        // });
 
         $(document).on('change', '.designation-status', function () {
             let checkbox = $(this);

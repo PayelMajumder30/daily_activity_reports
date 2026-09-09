@@ -295,11 +295,8 @@
             ],
 
             order: [[0, 'asc']],
-
             pageLength: 10,
-
             searching: false,
-
             language: {
                 emptyTable: "No custodians Found"
             }
@@ -333,17 +330,13 @@
                     Swal.fire({
 
                         icon: 'success',
-
                         title: 'Updated',
-
                         text: res.status
                             ? 'Custodian Activated'
                             : 'Custodian Deactivated',
 
                         timer: 1200,
-
                         showConfirmButton: false
-
                     });
 
                 },
@@ -358,13 +351,9 @@
 
 
                     Swal.fire({
-
                         icon: 'error',
-
                         title: 'Error',
-
                         text: 'Unable to update status.'
-
                     });
 
                 }

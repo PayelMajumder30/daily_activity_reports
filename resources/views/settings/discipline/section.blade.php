@@ -89,8 +89,7 @@
 
         </div>
 
-
-       
+     
         {{-- Add / Update Section --}}
         <div class="col-lg-4">
 
@@ -127,12 +126,10 @@
 
                         </div>
 
-
                         <button type="submit" class="btn btn-primary" id="sectionSubmitBtn">
                             <i class="bi bi-check-circle"></i>
                             Save Section
                         </button>
-
 
                         <button type="button" class="btn btn-secondary d-none" id="sectionCancelBtn">
                             Cancel
@@ -298,10 +295,7 @@
                         type: 'POST',
 
                         data: {
-
-                            _token:
-                                "{{ csrf_token() }}"
-
+                            _token: "{{ csrf_token() }}"                               
                         },
 
                         success: function (res) {
@@ -309,15 +303,12 @@
                             Swal.fire({
 
                                 icon: 'success',
-
                                 title: 'Updated',
-
                                 text: res.status
                                     ? 'Section Activated'
                                     : 'Section Deactivated',
 
                                 timer: 1200,
-
                                 showConfirmButton: false
 
                             });

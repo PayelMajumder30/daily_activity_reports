@@ -13,6 +13,29 @@ class AssetIssueRegisterController extends Controller
 {
     //
 
+    /** 
+     * Display the Asset Issue Register list with optional search filters. 
+     * This function retrieves asset issue history records along with the 
+     * related Asset Inventory, Asset Model, Asset Type, Location, Transfer, 
+     * and Custodian information. 
+     *  The list can be filtered by: 
+     *  - Employee ID 
+     *  - Custodian Name 
+     *  - Asset Tag Number 
+     *  - Asset Type 
+     *  - Issue Status 
+     * 
+     * The function also retrieves: 
+     *  - Available Issue Status values for the status filter. 
+     *  - Active Asset Types for the asset type filter. 
+     *  - Active Custodians for the custodian filter. 
+     * 
+     * Related models are eager loaded to avoid unnecessary database queries 
+     *  while displaying the Asset Issue Register list. 
+     * 
+     * @param Request $request Contains optional search and filter parameters. 
+     * @return \Illuminate\View\View Returns the Asset Issue Register listing page. */
+
     public function index(Request $request){
 
         $query = AssetIssueRegister::with(['assetInventory.assetModel.assetType', 'assetInventory.location', 'assetInventory.assetTransfers.fromCustodian',
@@ -79,6 +102,26 @@ class AssetIssueRegisterController extends Controller
         return view('asset-issue-register.index', compact('issueRegisters', 'issueStatuses', 'custodians', 'assetTypes'));
     }
 
+    /** * Generate a human-readable history description for an asset issue record. 
+     * 
+     * This private helper function determines the history message based on 
+     * the current issue status of the asset. 
+     * 
+     *  Supported history scenarios include: 
+     *  - Asset issued directly by the IT Department. 
+     *  - Asset transferred from one custodian to another. 
+     *  - Asset returned to the IT Department. 
+     * 
+     *  For transferred assets, the function checks the Asset Transfer history 
+     *  to identify the source and destination custodians. 
+     * 
+     *  For issued assets, the function checks whether the issue was created 
+     *  as a result of an asset transfer or was the first issue from the 
+     *  IT Department. 
+     * 
+     *  @param AssetIssueRegister $issue Asset Issue Register record. 
+     *  @return string Human-readable asset history description. */
+
     private function getAssetHistory($issue): string
     {
         $asset = $issue->assetInventory;
@@ -117,14 +160,8 @@ class AssetIssueRegisterController extends Controller
 
             $transfer = $asset->assetTransfers
                 ->filter(function ($transfer) use ($issue) {
-
-                    return
-                        $transfer->from_custodian_id == $issue->custodian_id
-                        &&
-                        $transfer->transfer_date >= $issue->issued_date;
-                })
-                ->sortByDesc('id')
-                ->first();
+                    return $transfer->from_custodian_id == $issue->custodian_id && $transfer->transfer_date >= $issue->issued_date;                                                               
+                })->sortByDesc('id')->first();                          
 
             if ($transfer) {
 
@@ -197,6 +234,23 @@ class AssetIssueRegisterController extends Controller
         return $assetName . ' - No history available';
     }
 
+    /** 
+     *  Display the form used to issue assets to a custodian. 
+     * 
+     *  This function retrieves: 
+     *  - Active assets whose current status is "Available". 
+     *  - Active custodians. 
+     *  - Simplified asset data required by JavaScript on the issue form. 
+     * 
+     *  Only available assets are displayed to prevent users from selecting 
+     *  assets that are already assigned, retained, or otherwise unavailable. 
+     * 
+     *  The asset data is also transformed into a simplified collection 
+     *  containing the Asset ID, Tag Number, Asset Type, and Asset Model 
+     *  for frontend JavaScript usage. 
+     * 
+     *  @return \Illuminate\View\View Returns the Asset Issue Register creation page. */
+
     public function create()
     {
         /*
@@ -243,6 +297,44 @@ class AssetIssueRegisterController extends Controller
         return view('asset-issue-register.create', compact('assets', 'custodians', 'assetData')
         );
     }
+
+
+    /** 
+     *  Issue one or multiple assets to a selected custodian. 
+     * 
+     *  This function validates the submitted issue information and creates 
+     *  an Asset Issue Register record for each selected asset. 
+     * 
+     * Main operations: 
+     *  - Validates the selected custodian. 
+     *  - Validates that at least one asset has been selected. 
+     *  - Prevents duplicate assets in the same request. 
+     *  - Validates the selected user type. 
+     *  - Requires an operator name when the user type is "operator". 
+     *  - Validates the issue date. 
+     * 
+     * Each selected asset is locked using lockForUpdate() before processing 
+     *  to prevent concurrent requests from issuing the same asset. 
+     * 
+     *  Before issuing an asset, the function verifies that its current status 
+     *  is "Available". If the asset has already been assigned by another 
+     *  request, the transaction is stopped and no assets are issued. 
+     * 
+     *  For every selected asset: 
+     * - Creates a new Asset Issue Register history record. 
+     *  - Sets the Issue Status to "Issued". 
+     *  - Updates the Asset Inventory status to "Assigned". 
+     * 
+     *  A database transaction is used to ensure that all selected assets are 
+     *  issued successfully. If any asset cannot be issued, all changes made 
+     *  during the request are rolled back. 
+     * 
+     *  An event log is created after all assets have been issued successfully. 
+     * 
+     *  @param Request $request Contains custodian, asset, user type, operator, 
+     * and issue date information. 
+     *  @return \Illuminate\Http\RedirectResponse Redirects to the Asset Issue 
+     *  Register list with success or error message. */
 
     public function store(Request $request)
     {
@@ -375,6 +467,32 @@ class AssetIssueRegisterController extends Controller
         }
     }
 
+
+    /** 
+     *  Return an issued asset to the IT Department. 
+     * 
+     *  This function marks an existing Asset Issue Register record as returned 
+     *  and makes the related Asset Inventory record available for future use. 
+     * 
+     * Main operations: 
+     *  - Decrypts the provided Asset Issue Register ID. 
+     *  - Locks the issue record to prevent concurrent return requests. 
+     *  - Checks whether the asset has already been returned. 
+     *  - Updates the Issue Status to "Returned". 
+     *  - Stores the current date as the Returned Date. 
+     *  - Updates the related Asset Inventory status to "Available". 
+     * 
+     *  The row lock prevents multiple users or duplicate requests from 
+     *  processing the return operation simultaneously. 
+     * 
+     *  A database transaction ensures that the Issue Register and Asset 
+     *  Inventory records are updated together. If any operation fails, 
+     *  all database changes are rolled back. 
+     * 
+     *  An event log is created after the asset is returned successfully. 
+     * 
+     *  @param string $id Encrypted Asset Issue Register ID. * @return \Illuminate\Http\JsonResponse Returns the return operation result. */
+
     public function returnAsset($id)
     {
         DB::beginTransaction();
@@ -442,6 +560,27 @@ class AssetIssueRegisterController extends Controller
         }
     }
 
+
+    /** 
+     *  Retrieve basic details of an active custodian. 
+     * 
+     *  This function is generally used through AJAX when a custodian is 
+     *  selected on the Asset Issue Register form. 
+     * 
+     *  The function retrieves the custodian along with related: 
+     *  - Designation 
+     *  - Discipline/Department 
+     *  - Section 
+     *  - Location 
+     * 
+     *  Only custodians with active status are returned. 
+     * 
+     *  If the requested custodian does not exist or is inactive, a 404 JSON 
+     *  response is returned. 
+     * 
+     *  @param int|string $id Custodian ID. 
+     *  @return \Illuminate\Http\JsonResponse Returns custodian details or error message. */
+
     public function custodianDetails($id)
     {
         $custodian = Custodian::with([
@@ -471,7 +610,56 @@ class AssetIssueRegisterController extends Controller
         ]);
     }
 
-    // custodian asset details
+    
+
+    /** 
+     *  Retrieve complete custodianship details and currently issued assets. 
+     * 
+     *  This function provides detailed information about a selected custodian 
+     *  together with all assets that currently have an Issue Status of "Issued". 
+     * 
+     *  Main operations: *
+     * - Decrypts the Custodian ID. 
+     *  - Retrieves custodian profile information. 
+     *  - Retrieves currently issued Asset Issue Register records. 
+     *  - Loads related Asset Inventory, Asset Model, Asset Type, Location, 
+     *  and Station information. 
+     *  - Formats the issued asset data for frontend display. 
+     * 
+     *  The response includes: 
+     * 
+     *  Custodian Information: 
+     *  - Custodian Name 
+     *  - Employee ID 
+     *  - Email 
+     *  - Designation 
+     *  - Department/Discipline 
+     *  - Section 
+     *  - Location 
+     *  - Station 
+     *  - Active/Inactive Status 
+     * 
+     *  Issue Summary: 
+     *  - Total number of currently issued assets 
+     *  - User Type 
+     *  - Operator Name 
+     *  - First issue date 
+     * 
+     *  Asset Details: 
+     *  - Asset Tag Number 
+     *  - Asset Type 
+     *  - Asset Model 
+     *  - Manufacturer 
+     *  - Serial Number 
+     *  - Location 
+     *  - Station 
+     *  - Issued Date 
+     *  - Issue Status 
+     *  - Remarks 
+     * 
+     *  @param string $id Encrypted Custodian ID. 
+     *  @return \Illuminate\Http\JsonResponse Returns custodian and issued asset details. */
+
     public function custodianAssetDetails($id)
     {
         /*
@@ -596,9 +784,23 @@ class AssetIssueRegisterController extends Controller
         ]);
     }
 
-    /**
-     * Download custodian issued asset details as Excel.
-     */
+   /** 
+    *  Export currently issued asset details of a custodian to an Excel file. 
+    * 
+    *  This function decrypts the selected Custodian ID and verifies that 
+    * the custodian exists before generating the Excel download. 
+    * 
+    * The exported file is generated using the CustodianAssetExport class. 
+    * 
+    * The Excel filename is dynamically created using the custodian's name. 
+    * Special characters are replaced to create a safe filename. 
+    * 
+    *  An event log is created to record that custodian asset details were 
+    *  downloaded by the currently authenticated user. 
+    *  @param string $id Encrypted Custodian ID. 
+    *  @return \Symfony\Component\HttpFoundation\BinaryFileResponse| 
+    *  \Illuminate\Http\RedirectResponse */
+
     public function custodianExport($id)
     {
         try {
@@ -619,9 +821,27 @@ class AssetIssueRegisterController extends Controller
         return Excel::download(new CustodianAssetExport($custodianId), $fileName);                         
     }
 
-    /**
-     * Get current custodian details for asset transfer.
-     */
+   /** 
+    * Retrieve current issue details required before transferring an asset. 
+    * 
+    * This function retrieves information about an asset that is currently 
+    * issued to a custodian. 
+    * 
+    * Main operations: 
+    * - Decrypts the Asset Issue Register ID. 
+    * - Verifies that the selected asset currently has "Issued" status. 
+    * - Retrieves Asset Inventory details. * - Retrieves the current custodian information. 
+    * 
+    * The function also retrieves active custodians excluding the current 
+    * custodian. These custodians can be used as possible transfer recipients. 
+    * 
+    * This function is intended to provide the frontend with the information 
+    * required to open and populate an Asset Transfer form. 
+    * 
+    * @param string $id Encrypted Asset Issue Register ID. 
+    * @return \Illuminate\Http\JsonResponse Returns current issue details 
+    * or an error response. */
+
     public function transferDetails($id)
     {
         try {
@@ -697,9 +917,58 @@ class AssetIssueRegisterController extends Controller
         ]);
     }
 
-    /**
-     * Main transfer function.
-     */
+    /** 
+    * Transfer a currently issued asset from one custodian to another. 
+    * 
+    * This function completes the asset transfer workflow while preserving 
+    * the historical ownership records. 
+    * 
+    * Main operations: 
+    * - Validates the encrypted Issue Register ID. 
+    * - Validates the new custodian. 
+    * - Validates the transfer date. 
+    * - Validates optional transfer remarks. 
+    * 
+    * The current Asset Issue Register record is locked using lockForUpdate() 
+    * to prevent multiple transfer requests from processing the same issue 
+    * record simultaneously. 
+    * 
+    * Business rules enforced: 
+    * - Only assets with Issue Status "Issued" can be transferred. 
+    * - An asset cannot be transferred to the same custodian. 
+    * - The destination custodian must exist and have active status. 
+    * 
+    * Transfer workflow: 
+    * 
+    * 1. The existing issue record is updated: 
+    * - Issue Status becomes "Transferred". 
+    * - Transfer Date is recorded. 
+    * - Transfer remarks are stored. 
+    * 
+    * 2. A permanent Asset Transfer history record is created containing: 
+    * - Asset ID 
+    * - Previous Custodian 
+    * - New Custodian 
+    * - Transfer Date 
+    * - User who performed the transfer 
+    * - Remarks 
+    * 
+    * 3. A new Asset Issue Register record is created for the destination 
+    * custodian with Issue Status "Issued". 
+    * 
+    * 4. The Asset Inventory status remains "Assigned" because the asset 
+    * is still under custodianship and has not been returned. 
+    * 
+    * A database transaction ensures that all transfer-related database 
+    * operations succeed together. If any operation fails, all changes 
+    * are rolled back. 
+    * 
+    * An event log records the asset transfer activity. 
+    * 
+    * @param Request $request Contains issue ID, destination custodian, 
+    * transfer date, and remarks. 
+    * @return \Illuminate\Http\JsonResponse Returns transfer success or error details. */
+
     public function transferAsset(Request $request)
     {
         $request->validate([
@@ -910,6 +1179,20 @@ class AssetIssueRegisterController extends Controller
         }
     }
 
+
+    /** 
+    * Export Asset Issue Register records to an Excel file. 
+    * 
+    * This function creates and downloads an Excel report using the 
+    * AssetIssueRegisterExport class. 
+    * 
+    * The current request is passed to the export class so that the export 
+    * can use the same filter parameters submitted by the user, if supported 
+    * by the export implementation. 
+    * 
+    * @param Request $request Contains optional Asset Issue Register filters. 
+    * @return \Symfony\Component\HttpFoundation\BinaryFileResponse */
+
     public function export(Request $request)
     {
         return Excel::download(
@@ -918,6 +1201,37 @@ class AssetIssueRegisterController extends Controller
         );
     }
 
+
+    /** 
+    * Mark a currently issued asset as retained by its custodian. 
+    * 
+    * This function updates both the Asset Issue Register and the related 
+    * Asset Inventory record when an asset is retained. 
+    * 
+    * Main operations: 
+    * - Validates the retained date. 
+    * - Decrypts the Asset Issue Register ID. 
+    * - Retrieves the selected issue record. 
+    * - Verifies that the asset is currently in "Issued" status. 
+    * 
+    * Business rule: 
+    * - Only assets that are currently issued can be marked as retained. 
+    * 
+    * When the retention process succeeds: 
+    * - The Asset Issue Register status becomes "Retained". 
+    * - The Retained Date is stored. 
+    * - The related Asset Inventory status becomes "Retained". 
+    * 
+    * The updates are performed inside a database transaction to ensure that 
+    * the Issue Register and Asset Inventory statuses remain synchronized. 
+    * 
+    * If any validation or database operation fails, the transaction is 
+    * automatically rolled back and an error response is returned. 
+    * 
+    * @param Request $request Contains the retained date. 
+    * @param string $id Encrypted Asset Issue Register ID. 
+    * @return \Illuminate\Http\JsonResponse Returns retention success or error details. */
+    
     public function retain(Request $request, $id)
     {
         $request->validate([

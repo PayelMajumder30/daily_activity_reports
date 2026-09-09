@@ -15,6 +15,18 @@ class AssetInventoryController extends Controller
 {
     //
 
+    /**
+     * Display the Asset Inventory list.
+     *
+     * This method retrieves asset inventory records and applies optional
+     * search filters such as Tag Number, PO Number, Serial Number,
+     * Asset Type, Asset Model, Asset Status, Location, and Installation Date.
+     *
+     * It also loads the required dropdown data for the search filters.
+     *
+     * @param Request $request
+     * @return \Illuminate\View\View
+     */
     public function index(Request $request)
     {
         $query = AssetInventory::with([
@@ -78,6 +90,16 @@ class AssetInventoryController extends Controller
         return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels', 'assetStatuses'));
     }
 
+
+    /**
+     * Display the Asset Inventory creation form.
+     *
+     * This function retrieves active Asset Types, Locations, and
+     * Airport/Station records required to populate the dropdown fields
+     * in the Asset Inventory creation form.
+     *
+     * @return \Illuminate\View\View Returns the Asset Inventory create page.
+    */
     public function create() {
         $assetTypes = AssetType::where('status',1)->orderBy('name')->get();
                     
@@ -87,6 +109,31 @@ class AssetInventoryController extends Controller
         return view('asset-inventory.create',compact('assetTypes', 'locations', 'stations'));
     }
 
+
+    /**
+     * Store one or multiple Asset Inventory records.
+     *
+     * This function validates the submitted asset information and creates
+     * inventory records for each provided Asset Tag and Serial Number.
+     *
+     * Main operations:
+     * - Validates all required asset fields.
+     * - Validates that the selected Asset Model belongs to the selected
+     *   Asset Type.
+     * - Verifies that the number of Asset Tags matches the number of
+     *   Serial Numbers.
+     * - Prevents duplicate Asset Tags.
+     * - Creates an Asset Inventory record for each Tag/Serial Number pair.
+     * - Sets the initial Asset Status to "Available".
+     * - Records the logged-in user as the creator.
+     * - Creates an event log after successful creation.
+     *
+     * A database transaction is used to ensure that all asset records are
+     * saved successfully. If any operation fails, all changes are rolled back.
+     *
+     * @param Request $request Contains asset inventory form data.
+     * @return \Illuminate\Http\JsonResponse Returns success or validation/error response.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -209,6 +256,28 @@ class AssetInventoryController extends Controller
         }
     }
 
+
+    /**
+     * Generate sequential Asset Tag Numbers.
+     *
+     * This function generates asset tag numbers based on the selected:
+     * - Location
+     * - Airport/Station
+     * - Asset Type
+     * - Required Quantity
+     *
+     * The function checks the latest existing Asset Tag for the generated
+     * prefix and starts numbering from the next available sequence number.
+     *
+     * Multiple tags are generated according to the requested quantity and
+     * returned as a JSON response.
+     *
+     * @param int $locationId Selected Location ID.
+     * @param int $stationId Selected Airport/Station ID.
+     * @param int $assetTypeId Selected Asset Type ID.
+     * @param int $quantity Number of tags to generate.
+     * @return \Illuminate\Http\JsonResponse Generated asset tag numbers.
+     */
     public function generateTags($locationId, $stationId, $assetTypeId, $quantity)
     {
         $location = Location::findOrFail($locationId);
@@ -253,12 +322,42 @@ class AssetInventoryController extends Controller
         ]);
     }
   
+
+
+    /**
+     * Retrieve active Asset Models for a selected Asset Type.
+     *
+     * This function is generally called through AJAX when a user selects
+     * an Asset Type. It returns only active Asset Models associated with
+     * the selected Asset Type.
+     *
+     * The returned data can be used to dynamically populate the
+     * Asset Model dropdown.
+     *
+     * @param int $type Asset Type ID.
+     * @return \Illuminate\Http\JsonResponse List of active Asset Models.
+     */
     public function getModels($type){
         $models = AssetModel::where('asset_type_id', $type)->where('status',1)->orderBy('model_name')->get();
         return response()->json($models);
     }
 
-    // for export all inventory data
+    
+    /**
+     * Export Asset Inventory records to an Excel file.
+     *
+     * This function collects the currently applied search filters and
+     * passes them to the AssetInventoryExport class.
+     *
+     * The exported Excel file contains Asset Inventory data based on the
+     * selected filters.
+     *
+     * An event log is created to record the download operation and the
+     * filters used during the export.
+     *
+     * @param Request $request Contains optional inventory filter values.
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
     public function export(Request $request)
     {
         /*
@@ -308,6 +407,28 @@ class AssetInventoryController extends Controller
     }
 
 
+    /**
+     * Generate and download the Asset Inventory Excel import template.
+     *
+     * This function creates an Excel file containing:
+     *
+     * 1. Asset Inventory Worksheet
+     *    - Contains the required column headers.
+     *    - Includes an example row to demonstrate the expected format.
+     *
+     * 2. Reference Data Worksheet
+     *    - Contains active Asset Types and Asset Models.
+     *    - Contains Asset Model IDs required for import.
+     *    - Contains Regions and Airport/Station information.
+     *    - Contains Airport/Station IDs required for import.
+     *
+     * The generated Excel template helps users prepare valid data before
+     * uploading assets through the bulk import functionality.
+     *
+     * An event log is created whenever the template is downloaded.
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
     public function downloadTemplate()
     {
         $spreadsheet = new Spreadsheet();
@@ -539,7 +660,24 @@ class AssetInventoryController extends Controller
       
     }
 
-    // for import all inventory
+    
+    /**
+     * Import Asset Inventory records from an Excel file.
+     *
+     * This function handles bulk uploading of Asset Inventory data.
+     *
+     * Main operations:
+     * - Validates the uploaded Excel file.
+     * - Accepts only XLS and XLSX file formats.
+     * - Passes the file to AssetInventoryImport for processing.
+     * - Checks for row-level validation or import errors.
+     * - Returns the number of successfully imported records.
+     * - Returns detailed errors when some records cannot be imported.
+     * - Creates an event log for successful and failed import operations.
+     *
+     * @param Request $request Contains the uploaded Excel file.
+     * @return \Illuminate\Http\JsonResponse Import success or error details.
+     */
     public function importExcel(Request $request)
     {
         $request->validate([

@@ -13,10 +13,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->tinyInteger('role')
-                    ->default(2)
-                    ->comment('0 = Management, 1 = Uploader, 2 = Engineer')
-                    ->after('password');
+            $table->foreignId('location_id')->nullable()->after('id')->constrained('locations')->nullOnDelete();
+            $table->foreignId('station_id')->nullable()->after('location_id')->constrained('airport_stations')->nullOnDelete();
         });
     }
 
@@ -27,7 +25,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             //
-            $table->dropColumn('role');
+            $table->dropColumn(['location_id', 'station_id']);
         });
     }
 };

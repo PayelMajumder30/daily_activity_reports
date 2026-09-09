@@ -31,10 +31,6 @@
 
             <h4>Add User</h4>
 
-            <a href="{{ route('user-configuration.index') }}" class="btn btn-secondary">
-                Back
-            </a>
-
         </div>
 
         <div class="card-body">
@@ -71,7 +67,46 @@
                     </div>
                 </div>
 
-                <!-- Row 2 -->
+                 <!-- Row 2 -->
+                <div class="row">
+
+                    {{-- Location / Region --}}
+                    <div class="col-md-6 mb-3">
+                        <label>Region <span class="text-danger">*</span>
+                        </label>
+                        <select name="location_id" id="location_id" class="form-select @error('location_id') is-invalid @enderror">
+                            <option value="">Select Region</option>
+
+                            @foreach($locations as $location)
+                                <option value="{{$location->id}}" {{old('location_id') == $location->id ? 'selected' : '' }}>
+                                    {{$location->name}}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        @error('location_id')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+                    {{-- Station --}}
+                    <div class="col-md-6 mb-3">
+                        <label>Airport/station <span class="text-danger">*</span></label>
+
+                        <select name="station_id" id="station_id" class="form-select @error('station_id') is-invalid @enderror">
+                            <option value="">Select Station</option>
+                        </select>
+                        @error('station_id')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Row 3 -->
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <label>Password <span class="text-danger">*</span></label>
@@ -103,7 +138,7 @@
                             </option>
 
                             <option value="2" {{ old('role') == 2 ? 'selected' : '' }}>
-                                Manpower
+                                Engineer
                             </option>
 
                         </select>
@@ -114,9 +149,15 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-circle"></i> Save User
-                </button>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Save User
+                    </button>
+                    <a href="{{ route('user-configuration.index') }}" class="btn btn-secondary">
+                        Back
+                    </a>
+                </div>
+               
             </form>
 
         </div>
@@ -127,20 +168,80 @@
 
 @push('scripts')
 <script>
-    $('#togglePassword').click(function () {
-        
-        let password = $('#password');
-        let icon = $(this).find('i');
 
-        if(password.attr('type') === 'password'){
-            password.attr('type', 'text');
-            console.log('text');
-            icon.removeClass('bi-eye').addClass('bi-eye-slash');
-        } else {
-            password.attr('type', 'password');
-            icon.removeClass('bi-eye-slash').addClass('bi-eye');
-        }
-    })
+    $(document).ready(function () {
+
+        $('#location_id').on('change', function () {
+
+            let locationId = $(this).val();
+            let stationDropdown = $('#station_id');
+
+            stationDropdown.html('<option value="">Loading...</option>');
+
+            if (locationId) {
+                let url = "{{ route('user-configuration.stations', ':locationId') }}".replace(':locationId', locationId);
+                $.ajax({
+                    url: url,
+                    type: "GET",
+
+                    success: function (stations) {
+
+                        stationDropdown.empty();
+
+                        stationDropdown.append(
+                            '<option value="">Select Station</option>'
+                        );
+
+                        $.each(stations, function (key, station) {
+
+                            stationDropdown.append(
+                                '<option value="' + station.id + '">' +
+                                station.station_name +
+                                '</option>'
+                            );
+
+                        });
+
+                    },
+
+                    error: function () {
+
+                        stationDropdown.html(
+                            '<option value="">Unable to load stations</option>'
+                        );
+
+                    }
+                });
+
+            } else {
+
+                stationDropdown.html(
+                    '<option value="">Select Station</option>'
+                );
+
+            }
+
+        });
+
+
+        // Password show/hide
+        $('#togglePassword').click(function () {
+
+            let password = $('#password');
+            let icon = $(this).find('i');
+
+            if (password.attr('type') === 'password') {
+                password.attr('type', 'text');
+                icon.removeClass('bi-eye').addClass('bi-eye-slash');                  
+            } else {
+                password.attr('type', 'password');
+                icon.removeClass('bi-eye-slash').addClass('bi-eye');                  
+            }
+
+        });
+
+    });
+
 </script>
 @endpush
 

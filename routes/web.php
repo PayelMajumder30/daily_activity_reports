@@ -33,6 +33,7 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
             Route::put('/update/{id}', [UserConfigurationController::class,'update'])->name('update');
             Route::delete('/delete/{id}', [UserConfigurationController::class,'destroy'])->name('destroy');
             Route::post('/status/{id}', [UserConfigurationController::class,'changeStatus'])->name('changeStatus');
+            Route::get('/stations/{locationId}', [UserConfigurationController::class,'getStations'])->name('stations');
         });
 
         // Activity Configuration

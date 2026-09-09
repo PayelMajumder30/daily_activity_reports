@@ -223,9 +223,7 @@
 
                                 <option
                                     value="{{ $department->id }}"
-                                    {{ old(
-                                        'discipline_id',
-                                        $custodian->discipline_id
+                                    {{ old('discipline_id', $custodian->discipline_id                                                                               
                                     ) == $department->id ? 'selected' : '' }}>                              
 
                                     {{ ucwords($department->name) }}
@@ -283,7 +281,6 @@
                             <small class="text-danger">
                                 {{ $message }}
                             </small>
-
                         @enderror
 
                     </div>
@@ -390,7 +387,6 @@ $(document).ready(function () {
                 .empty()
                 .append('<option value="">Select Region First</option>')
                 .prop('disabled', true);
-
             return;
         }
 
@@ -404,7 +400,6 @@ $(document).ready(function () {
         let url = "{{ route('location.stations.byLocation', ':id') }}"
             .replace(':id', locationId);
 
-
         /*
         |--------------------------------------------------------------------------
         | Load Stations
@@ -417,9 +412,7 @@ $(document).ready(function () {
             type: 'GET',
 
             success: function (response) {
-
                 stationSelect.empty();
-
 
                 /*
                 |--------------------------------------------------------------------------
@@ -435,9 +428,7 @@ $(document).ready(function () {
 
 
                     $.each(response, function (index, station) {
-
                         let stationName = station.station_name;
-
                         if (station.short_name) {
                             stationName += ' (' + station.short_name + ')';
                         }
@@ -459,13 +450,11 @@ $(document).ready(function () {
                     |--------------------------------------------------------------------------
                     */
 
-                    let oldStation =
-                        "{{ old('station_id', $custodian->station_id) }}";
+                    let oldStation = "{{ old('station_id', $custodian->station_id) }}";                       
 
                     if (oldStation) {
                         stationSelect.val(oldStation);
                     }
-
 
                     stationSelect.prop('disabled', false);
 
@@ -509,13 +498,10 @@ $(document).ready(function () {
     |--------------------------------------------------------------------------
     */
 
-    let oldLocation =
-        "{{ old('location_id', $custodian->location_id) }}";
+    let oldLocation = "{{ old('location_id', $custodian->location_id) }}";       
 
     if (oldLocation) {
-
         $('#location_id').val(oldLocation);
-
         $('#location_id').trigger('change');
 
     }
@@ -573,9 +559,7 @@ $(document).ready(function () {
         let url = "{{ route('custodian.sections', ':id') }}"
             .replace(':id', departmentId);
 
-
         $.ajax({
-
             url: url,
             type: 'GET',
 
@@ -583,13 +567,10 @@ $(document).ready(function () {
 
                 sectionSelect.empty();
 
-
                 if (response.length > 0) {
-
                     sectionSelect.append(
                         '<option value="">Select Section</option>'
                     );
-
 
                     $.each(response, function (index, section) {
 
@@ -609,13 +590,10 @@ $(document).ready(function () {
                     |--------------------------------------------------------------------------
                     */
 
-                    let oldSection =
-                        "{{ old('section_id', $custodian->section_id) }}";
-
+                    let oldSection = "{{ old('section_id', $custodian->section_id) }}";                        
                     if (oldSection) {
                         sectionSelect.val(oldSection);
                     }
-
 
                     sectionSelect.prop('disabled', false);
 
@@ -624,9 +602,7 @@ $(document).ready(function () {
                     sectionSelect
                         .append(
                             '<option value="">No Section Available</option>'
-                        )
-                        .prop('disabled', true);
-
+                        ).prop('disabled', true);                       
                 }
 
             },
@@ -637,9 +613,7 @@ $(document).ready(function () {
                     .empty()
                     .append(
                         '<option value="">Unable to load sections</option>'
-                    )
-                    .prop('disabled', true);
-
+                    ).prop('disabled', true);                   
             }
 
         });
@@ -653,18 +627,15 @@ $(document).ready(function () {
     |--------------------------------------------------------------------------
     */
 
-    let oldDepartment =
-        "{{ old('discipline_id', $custodian->discipline_id) }}";
+    let oldDepartment = "{{ old('discipline_id', $custodian->discipline_id) }}";       
 
     if (oldDepartment) {
-
         $('#discipline_id').val(oldDepartment);
-
         $('#discipline_id').trigger('change');
-
     }
 
 });
+
 </script>
 
 @endpush

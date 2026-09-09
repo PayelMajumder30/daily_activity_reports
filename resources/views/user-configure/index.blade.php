@@ -50,6 +50,8 @@
                         <th width="70">SL</th>
                         <th>Name</th>
                         <th>Email</th>
+                        <th>Region</th>
+                        <th>Airport/Station</th>
                         <th width="150">Role</th>
                         <th>Status</th>
                         <th width="140" class="text-center">Action</th>
@@ -63,13 +65,15 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ ucwords($user->name) }}</td>
                             <td>{{ $user->email }}</td>
+                            <td>{{ $user->location ? ucwords($user->location->name): 'N/A' }}</td> 
+                            <td>{{ $user->station ? ucwords($user->station->station_name): 'N/A' }}</td>  
                             <td>
                                 @if($user->role == 0)
                                     Management
                                 @elseif($user->role == 1)
                                   Uploader
                                 @else
-                                    Manpower
+                                    Engineer
                                 @endif
                             </td>
                             <td class="text-center">
@@ -82,8 +86,7 @@
                             <td class="text-center">
 
                                 <a href="{{ route('user-configuration.edit', encryptId($user->id)) }}"
-                                class="btn btn-warning btn-sm"
-                                title="Edit">
+                                class="btn btn-warning btn-sm" title="Edit">                               
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
 

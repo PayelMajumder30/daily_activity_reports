@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -23,6 +24,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'location_id',
+        'station_id',
         'status',
     ];
 
@@ -77,5 +80,15 @@ class User extends Authenticatable
     public function retainedAssets(): HasMany
     {
         return $this->hasMany(AssetRetainedAsset::class, 'asset_inventory_id');
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'location_id');
+    }
+
+    public function station(): BelongsTo
+    {
+        return $this->belongsTo(AirportStation::class, 'station_id');
     }
 }

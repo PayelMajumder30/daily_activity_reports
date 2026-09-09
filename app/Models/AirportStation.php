@@ -21,6 +21,11 @@ class AirportStation extends Model
         return $this->hasMany(Custodian::class);
     }
 
+    public function user(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+    
     public function assetInventory(): HasMany
     {
         return $this->hasMany(AssetInventory::class);
