@@ -298,13 +298,9 @@
                 let report_date = '-';
                 if(row.upload && row.upload.report_date){
                    
-                let d = new Date(row.upload.report_date);
-
-                let day = String(d.getDate()).padStart(2, '0');
-                let month = String(d.getMonth() + 1).padStart(2, '0');
-                let year = d.getFullYear();
-
-                reportDate = `${day}-${month}-${year}`;
+                let d=new Date(row.upload.report_date);
+                reportDate= String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth() + 1).padStart(2,'0')+'-'+d.getFullYear();
+                
                 }
                 html += `
                     <tr>
@@ -465,10 +461,10 @@
             $.each(res.data,function(i,row){
 
                 let sl = ((res.current_page - 1) * res.per_page) + i + 1;
-                let reportDate='-';
+                let report_date='-';
                 if(row.upload && row.upload.report_date){
                     let d=new Date(row.upload.report_date);
-                    reportDate= String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()).padStart(2,'0')+'-'+d.getFullYear();
+                    reportDate= String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth() + 1).padStart(2,'0')+'-'+d.getFullYear();
                 }
 
                 html +=`

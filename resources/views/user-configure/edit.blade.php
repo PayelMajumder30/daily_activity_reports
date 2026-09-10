@@ -143,7 +143,8 @@
                         <label>Password</label>
 
                         <div class="input-group">
-                            <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror">                                                                                       
+                            <input type="password" id="password" name="password" 
+                                class="form-control @error('password') is-invalid @enderror" autocomplete="new-password">                                                                                       
                             <button class="btn btn-outline-secondary" type="button" id="togglePassword">                                                                    
                                 <i class="bi bi-eye"></i>
                             </button>

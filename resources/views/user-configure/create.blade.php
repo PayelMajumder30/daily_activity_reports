@@ -96,7 +96,7 @@
                         <label>Airport/station <span class="text-danger">*</span></label>
 
                         <select name="station_id" id="station_id" class="form-select @error('station_id') is-invalid @enderror">
-                            <option value="">Select Station</option>
+                            <option value="">Select Region First</option>
                         </select>
                         @error('station_id')
                             <div class="invalid-feedback">

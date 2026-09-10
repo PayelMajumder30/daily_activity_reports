@@ -49,12 +49,9 @@
 
             <form action="{{ route('custodian.update', encryptId($custodian->id)) }}" method="POST" id="custodianForm">
                 @csrf
-
                 @method('PUT')
 
-
                 <div class="row">
-
 
                     {{-- Custodian Name --}}
                     <div class="col-md-3 mb-3">
@@ -207,9 +204,7 @@
                     <div class="col-md-3 mb-3">
 
                         <label class="form-label">
-
                             Department
-
                             <span class="text-danger">*</span>
 
                         </label>
@@ -223,9 +218,7 @@
 
                                 <option
                                     value="{{ $department->id }}"
-                                    {{ old('discipline_id', $custodian->discipline_id                                                                               
-                                    ) == $department->id ? 'selected' : '' }}>                              
-
+                                    {{ old('discipline_id', $custodian->discipline_id) == $department->id ? 'selected' : '' }}>                                                                                                                                              
                                     {{ ucwords($department->name) }}
                                 </option>
                             @endforeach
@@ -262,7 +255,6 @@
 
                                     <option value="{{ $section->id }}" {{ old('section_id', $custodian->section_id) == $section->id ? 'selected' : '' }}>
                                         {{ ucwords($section->section_name) }}
-
                                     </option>
 
                                 @endforeach
@@ -277,14 +269,12 @@
                         </select>
 
                         @error('section_id')
-
                             <small class="text-danger">
                                 {{ $message }}
                             </small>
                         @enderror
 
                     </div>
-
 
                     
                     {{-- Phone --}}
@@ -327,7 +317,6 @@
                         <i class="bi bi-check-circle"></i>
                         Update Custodian
                     </button>
-
 
                     <a href="{{ route('custodian.index') }}" class="btn btn-secondary ms-2">                       
                         Back
@@ -467,11 +456,7 @@ $(document).ready(function () {
                     */
 
                     stationSelect
-                        .append(
-                            '<option value="">No Station Available</option>'
-                        )
-                        .prop('disabled', true);
-
+                        .append('<option value="">No Station Available</option>').prop('disabled', true);                                                                      
                 }
 
             },
@@ -486,7 +471,6 @@ $(document).ready(function () {
                     .prop('disabled', true);
 
             }
-
         });
 
     });
@@ -503,7 +487,6 @@ $(document).ready(function () {
     if (oldLocation) {
         $('#location_id').val(oldLocation);
         $('#location_id').trigger('change');
-
     }
 
 
@@ -517,7 +500,6 @@ $(document).ready(function () {
 
         let departmentId = $(this).val();
         let sectionSelect = $('#section_id');
-
 
         /*
         |--------------------------------------------------------------------------

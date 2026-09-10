@@ -64,6 +64,7 @@ class DashboardController extends Controller
         return response()->json($result);
     }
 
+
     public function barpieChartData(Request $request){
         $query = Complaint::query();
 
@@ -133,12 +134,13 @@ class DashboardController extends Controller
             $query->where('status', $request->status);
         }
 
-        // return response()->json(
-        //     $query->select('complaint_title', 'engineer_name', 'status', 'upload_id', 'resolution_time', 'asset_tag_no')->orderBy('complaint_title')->get()
-        // );
+        // $complaints = $query->select('complaint_title', 'engineer_name', 'status', 'upload_id', 'resolution_time', 'asset_tag_no')
+        //                     ->orderBy('complaint_title')->paginate(20);
 
-        $complaints = $query->select('complaint_title', 'engineer_name', 'status', 'upload_id', 'resolution_time', 'asset_tag_no')
-                            ->orderBy('complaint_title')->paginate(20);
+        $complaints = $query->select('complaints.complaint_title', 'complaints.engineer_name', 'complaints.status', 'complaints.upload_id', 
+                                    'complaints.resolution_time', 'complaints.asset_tag_no')
+                                        ->join('uploads', 'uploads.id', '=', 'complaints.upload_id')
+                                        ->orderBy('uploads.report_date', 'DESC')->paginate(20);
 
         return response()->json($complaints);
     }
