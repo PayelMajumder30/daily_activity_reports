@@ -140,7 +140,7 @@ class ConfigureController extends Controller
         $statususe->status = !$statususe->status;
         $statususe->save();
 
-         eventLog(
+        eventLog(
         'Status Change',
         'Status',
         $statususe->status

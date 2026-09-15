@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Exports\{AssetInventoryExport, AssetInventoryTemplateExport};
+use Illuminate\Validation\Rule;
+use App\Exports\{AssetInventoryExport, AssetInventoryTemplateExport, AssetOutstationHistoryExport};
 use App\Imports\AssetInventoryImport;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Models\{AssetInventory, AssetType, AssetModel, Location, AirportStation};
+use App\Models\{AssetInventory, AssetType, AssetModel, Location, AirportStation, AssetOutstationHistory};
 
 class AssetInventoryController extends Controller
 {
@@ -86,8 +87,11 @@ class AssetInventoryController extends Controller
 
         // asset status
         $assetStatuses = AssetInventory::where('asset_status', '!=', '')->distinct()->orderBy('asset_status')->pluck('asset_status');
+
+        $locations = Location::where('status', 1)->orderBy('name')->get();
+        
             
-        return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels', 'assetStatuses'));
+        return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels', 'assetStatuses', 'locations'));
     }
 
 
@@ -323,7 +327,6 @@ class AssetInventoryController extends Controller
     }
   
 
-
     /**
      * Retrieve active Asset Models for a selected Asset Type.
      *
@@ -372,6 +375,7 @@ class AssetInventoryController extends Controller
             'serial_no',
             'asset_type',
             'asset_model',
+            'asset_status',
             'installation_date',
         ]);
 
@@ -740,6 +744,534 @@ class AssetInventoryController extends Controller
                 'success' => false,
                 'message' => 'Unable to import Excel file.',
                 'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    
+    public function outstation(Request $request)
+    {
+        $request->validate([
+
+            'asset_inventory_id' => [
+                'required',
+                'exists:asset_inventories,id'
+            ],
+
+            'to_location_id' => [
+                'required',
+                'exists:locations,id'
+            ],
+
+            'to_station_id' => [
+                'required',
+
+                Rule::exists('airport_stations', 'id')
+                    ->where(function ($query) use ($request) {
+
+                        $query->where(
+                            'location_id',
+                            $request->to_location_id
+                        )
+                        ->where('status', 1);
+
+                    }),
+            ],
+
+            'outstation_date' => [
+                'required',
+                'date'
+            ],
+
+        ]);
+
+        try {
+
+            DB::beginTransaction();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock Current Inventory
+            |--------------------------------------------------------------------------
+            */
+
+            $asset = AssetInventory::with([
+                'assetModel',
+                'assetType',
+                'location',
+                'station'
+            ])
+            ->where('id', $request->asset_inventory_id)
+            ->lockForUpdate()
+            ->first();
+
+            if (!$asset) {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Asset not found.'
+                ], 404);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Only Available Assets Can Be Moved
+            |--------------------------------------------------------------------------
+            */
+
+            if ($asset->asset_status !== 'Available') {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'Only Available assets can be moved to another station.'
+                ], 422);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Prevent Same Station
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                (int) $asset->station_id ===
+                (int) $request->to_station_id
+            ) {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'Destination station cannot be the current station.'
+                ], 422);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Verify Destination Station
+            |--------------------------------------------------------------------------
+            */
+
+            $destinationStation = AirportStation::where(
+                'id',
+                $request->to_station_id
+            )
+            ->where(
+                'location_id',
+                $request->to_location_id
+            )
+            ->where('status', 1)
+            ->first();
+
+            if (!$destinationStation) {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid destination station.'
+                ], 422);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Save Original Location / Station Before Updating Asset
+            |--------------------------------------------------------------------------
+            */
+
+            $fromLocationId = $asset->location_id;
+
+            $fromStationId = $asset->station_id;
+
+            $fromStationName =
+                $asset->station?->station_name ?? '-';
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update SAME Inventory Record
+            |--------------------------------------------------------------------------
+            */
+
+            $asset->update([
+
+                'location_id' => $request->to_location_id,
+
+                'station_id' => $request->to_station_id,
+
+                'asset_status' => 'Available',
+
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Outstation History
+            |--------------------------------------------------------------------------
+            */
+
+            AssetOutstationHistory::create([
+
+                'asset_inventory_id' => $asset->id,
+
+                'from_location_id' => $fromLocationId,
+
+                'from_station_id' => $fromStationId,
+
+                'to_location_id' => $request->to_location_id,
+
+                'to_station_id' => $request->to_station_id,
+
+                'outstation_date' => $request->outstation_date,
+
+                'remarks' => $request->remarks ?? null,
+
+                'created_by' => auth()->id(),
+
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Event Log
+            |--------------------------------------------------------------------------
+            */
+
+            eventLog(
+
+                'Outstation',
+
+                'Asset Inventory',
+
+                'Asset ' . $asset->tag_no .
+                ' moved from ' .
+                $fromStationName .
+                ' to ' .
+                ($destinationStation->station_name ?? '-')
+
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Commit Transaction
+            |--------------------------------------------------------------------------
+            */
+
+            DB::commit();
+
+
+            return response()->json([
+
+                'success' => true,
+
+                'message' =>
+                    'Asset successfully moved to ' .
+                    $destinationStation->station_name .
+                    '.'
+
+            ]);
+
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+
+                'success' => false,
+
+                'message' => 'Unable to move asset.',
+
+                'error' => $e->getMessage()
+
+            ], 500);
+        }
+    }
+
+    public function getOutstationStations($locationId) {
+
+        $stations = AirportStation::where('location_id', $locationId)
+            ->where('status', 1)
+            ->orderBy('station_name')
+            ->get([
+                'id',
+                'station_name',
+                'short_name'
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'stations' => $stations
+        ]);
+    }
+
+    public function getOutstationDetails($id)
+    {
+        $asset = AssetInventory::with([
+            'assetModel.assetType',
+            'location',
+            'station'
+        ])->find($id);
+
+        if (!$asset) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Asset not found.'
+            ], 404);
+        }
+
+        if ($asset->asset_status !== 'Available') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only Available assets can be moved to another station.'
+            ], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+
+            'asset' => [
+                'id' => $asset->id,
+
+                'tag_no' => $asset->tag_no,
+
+                'asset_type' => $asset->assetModel?->assetType?->name ?? '-',
+
+                'asset_model' => $asset->assetModel?->model_name ?? '-',
+
+                'location_id' => $asset->location_id,
+
+                'location' => $asset->location?->name ?? '-',
+
+                'station_id' => $asset->station_id,
+
+                'station' => $asset->station?->station_name ?? '-',
+            ]
+        ]);
+    }
+
+    public function outstationHistory($id)
+    {
+        $asset = AssetInventory::with([
+            'assetModel.assetType',
+            'location',
+            'station'
+        ])->find($id);
+
+        if (!$asset) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Asset not found.'
+            ], 404);
+        }
+
+        $history = AssetOutstationHistory::with([
+            'fromLocation',
+            'fromStation',
+            'toLocation',
+            'toStation'
+        ])
+        ->where('asset_inventory_id', $asset->id)
+        ->orderByDesc('outstation_date')
+        ->orderByDesc('id')
+        ->get();
+
+        return response()->json([
+
+            'success' => true,
+
+            'asset' => [
+                'id' => $asset->id,
+                'tag_no' => $asset->tag_no,
+                'serial_no' => $asset->serial_no ?? '-',
+
+                'asset_type' =>
+                    $asset->assetModel?->assetType?->name ?? '-',
+
+                'asset_model' =>
+                    $asset->assetModel?->model_name ?? '-',
+
+                'location' =>
+                    $asset->location?->name ?? '-',
+
+                'station' =>
+                    $asset->station?->station_name ?? '-',
+
+                'asset_status' =>
+                    $asset->asset_status ?? '-',
+            ],
+
+            'history' => $history->map(function ($item) {
+
+                return [
+                    'id' => $item->id,
+
+                    'outstation_date' =>
+                        $item->outstation_date?->format('d-m-Y') ?? '-',
+
+                    'from_location' =>
+                        $item->fromLocation?->name ?? '-',
+
+                    'from_station' =>
+                        $item->fromStation?->station_name ?? '-',
+
+                    'to_location' =>
+                        $item->toLocation?->name ?? '-',
+
+                    'to_station' =>
+                        $item->toStation?->station_name ?? '-',
+
+                    'remarks' =>
+                        $item->remarks ?? '-',
+                ];
+
+            })->values()
+
+        ]);
+    }
+
+    public function exportOutstationHistory($id)
+    {
+        $asset = AssetInventory::find($id);
+
+        if (!$asset) {
+            abort(404, 'Asset not found.');
+        }
+
+        $fileName = 'Outstation_History_' .
+            preg_replace('/[^A-Za-z0-9_-]/', '_', $asset->tag_no) .
+            '_' .
+            now()->format('d-m-Y_H-i-s') .
+            '.xlsx';
+
+        return Excel::download(
+            new AssetOutstationHistoryExport($asset->id),
+            $fileName
+        );
+    }
+
+    public function scrap($id)
+    {
+        try {
+
+            DB::beginTransaction();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Lock Asset
+            |--------------------------------------------------------------------------
+            */
+
+            $asset = AssetInventory::where('id', $id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$asset) {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Asset not found.'
+                ], 404);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Already Scrapped
+            |--------------------------------------------------------------------------
+            */
+
+            if ($asset->asset_status === 'Scrapped') {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'Asset is already marked as physically damaged.'
+                ], 422);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Only Available Asset Can Be Scrapped
+            |--------------------------------------------------------------------------
+            */
+
+            if ($asset->asset_status !== 'Available') {
+
+                DB::rollBack();
+
+                return response()->json([
+                    'success' => false,
+                    'message' =>
+                        'Only Available assets can be marked as physically damaged.'
+                ], 422);
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Update Asset Status
+            |--------------------------------------------------------------------------
+            */
+
+            $asset->update([
+                'asset_status' => 'Scrapped',
+            ]);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Event Log
+            |--------------------------------------------------------------------------
+            */
+
+            eventLog(
+                'Scrapped',
+                'Asset Inventory',
+                'Asset marked as physically damaged: ' . $asset->tag_no
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Commit
+            |--------------------------------------------------------------------------
+            */
+
+            DB::commit();
+
+
+            return response()->json([
+                'success' => true,
+                'message' =>
+                    'Asset "' . $asset->tag_no .
+                    '" has been marked as physically damaged.'
+            ]);
+
+
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Unable to update asset status.',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

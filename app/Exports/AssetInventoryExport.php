@@ -81,6 +81,12 @@ class AssetInventoryExport implements FromQuery, WithHeadings, WithMapping
             }
         )
         ->when(
+            $this->filters['asset_status'] ?? null,
+            function(Builder $query, $assetStatus) {
+                $query->where('asset_status', $assetStatus);
+            }
+        )
+        ->when(
             $this->filters['installation_date'] ?? null,
             function (Builder $query, $installationDate) {
 

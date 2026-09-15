@@ -91,11 +91,13 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('/status/{id}', [SettingController::class,'discChangeStatus'])->name('changeStatus');
 
         // section
-        Route::get('/sections/{id}', [SettingController::class, 'sectionIndex'])->name('sections.index');
-        Route::post('/sections/store/{id}', [SettingController::class, 'sectionStore'])->name('sections.store');
-        Route::get('/sections/edit/{id}', [SettingController::class, 'sectionEdit'])->name('sections.edit');
-        Route::put('/sections/update/{id}', [SettingController::class, 'sectionUpdate'])->name('sections.update');       
-        Route::post('/sections/status/{id}', [SettingController::class, 'sectionStatus'])->name('sections.status');
+        Route::prefix('sections')->name('sections.')->group(function() {
+            Route::get('/{id}', [SettingController::class, 'sectionIndex'])->name('index');
+            Route::post('/store/{id}', [SettingController::class, 'sectionStore'])->name('store');
+            Route::get('/edit/{id}', [SettingController::class, 'sectionEdit'])->name('edit');
+            Route::put('/update/{id}', [SettingController::class, 'sectionUpdate'])->name('update');       
+            Route::post('/status/{id}', [SettingController::class, 'sectionStatus'])->name('status');
+        });
     });
 
     // setting/Asset Type
@@ -134,12 +136,14 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('/status/{id}', [SettingController::class,'locationChangeStatus'])->name('changeStatus');
 
         // airport/station
-        Route::get('/stations/{id}', [SettingController::class, 'stationIndex'])->name('stations.index');
-        Route::post('/stations/store/{id}', [SettingController::class, 'stationStore'])->name('stations.store');
-        Route::get('/stations/edit/{id}', [SettingController::class, 'stationEdit'])->name('stations.edit');
-        Route::put('/stations/update/{id}', [SettingController::class, 'stationUpdate'])->name('stations.update');       
-        Route::post('/stations/status/{id}', [SettingController::class, 'stationStatus'])->name('stations.status');
-        Route::get('/stations/by-location/{id}', [SettingController::class, 'stationsByLocation'])->name('stations.byLocation');
+        Route::prefix('stations')->name('stations.')->group(function () {
+            Route::get('/{id}', [SettingController::class, 'stationIndex'])->name('index');
+            Route::post('/store/{id}', [SettingController::class, 'stationStore'])->name('store');
+            Route::get('/edit/{id}', [SettingController::class, 'stationEdit'])->name('edit');
+            Route::put('/update/{id}', [SettingController::class, 'stationUpdate'])->name('update');       
+            Route::post('/status/{id}', [SettingController::class, 'stationStatus'])->name('status');
+            Route::get('/by-location/{id}', [SettingController::class, 'stationsByLocation'])->name('byLocation');
+        });
         
     });
 
@@ -160,14 +164,17 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/create', [AssetInventoryController::class, 'create'])->name('create');
         Route::post('/store', [AssetInventoryController::class, 'store'])->name('store');
         Route::get('/generate-preview', [AssetInventoryController::class, 'generatePreview'])->name('generatePreview');
-        // Route::get('/generate-tags/{location}/{assetType}/{quantity}',[AssetInventoryController::class, 'generateTags'])->name('generateTags');
         Route::get('/generate-tags/{location}/{station}/{assetType}/{quantity}',[AssetInventoryController::class, 'generateTags'])->name('generateTags');
         Route::get('/get-models/{type}', [AssetInventoryController::class,'getModels'])->name('getModels');   
         Route::get('/export', [AssetInventoryController::class, 'export'])->name('export');    
         Route::get('/excel-template', [AssetInventoryController::class, 'downloadTemplate'])->name('downloadTemplate');
-        Route::post('/import-excel', [AssetInventoryController::class, 'importExcel'])->name('importExcel');
-        
-        
+        Route::post('/import-excel', [AssetInventoryController::class, 'importExcel'])->name('importExcel');       
+        Route::post('/outstation', [AssetInventoryController::class, 'outstation'])->name('outstation');       
+        Route::get('/outstation/stations/{location}', [AssetInventoryController::class, 'getOutstationStations'])->name('outstation.stations');
+        Route::get('/outstation/details/{id}', [AssetInventoryController::class, 'getOutstationDetails'])->name('outstation.details');  
+        Route::get('/outstation/history/{id}', [AssetInventoryController::class, 'outstationHistory'])->name('outstation.history');   
+        Route::get('/outstation/history/{id}/export', [AssetInventoryController::class, 'exportOutstationHistory'])->name('outstation.history.export');         
+        Route::post('/scrap/{id}', [AssetInventoryController::class, 'scrap'])->name('scrap');           
     
     });
 
@@ -194,8 +201,7 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
 
         // asset transfer
         Route::get('/transfer-details/{id}', [AssetIssueRegisterController::class, 'transferDetails'])->name('transfer-details');
-        Route::post('/transfer', [AssetIssueRegisterController::class, 'transferAsset'] )->name('transfer');     
-        
+        Route::post('/transfer', [AssetIssueRegisterController::class, 'transferAsset'] )->name('transfer');            
         Route::get('/export', [AssetIssueRegisterController::class, 'export'])->name('export');    
         Route::post('/{id}/retain', [AssetIssueRegisterController::class, 'retain'])->name('retain');   
 

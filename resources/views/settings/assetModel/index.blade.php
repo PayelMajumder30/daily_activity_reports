@@ -172,8 +172,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Model Name</label>
                                 <input type="text" class="form-control" id="model_name" name="model_name"> 
-                                <small class="text-danger" id="model_name_error"></small> 
-            
+                                <small class="text-danger" id="model_name_error"></small>            
                             </div>
 
                             <div class="mb-3">
@@ -321,9 +320,7 @@
                             showConfirmButton:false
 
                         }).then(function(){
-
                             location.reload();
-
                         });
                     },
 

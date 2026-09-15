@@ -206,7 +206,6 @@
                         <label class="form-label">
                             Department
                             <span class="text-danger">*</span>
-
                         </label>
 
                         <select name="discipline_id" id="discipline_id" class="form-select @error('discipline_id') is-invalid @enderror">
@@ -215,7 +214,6 @@
                             </option>
 
                             @foreach($departments as $department)
-
                                 <option
                                     value="{{ $department->id }}"
                                     {{ old('discipline_id', $custodian->discipline_id) == $department->id ? 'selected' : '' }}>                                                                                                                                              
@@ -399,7 +397,6 @@ $(document).ready(function () {
 
             url: url,
             type: 'GET',
-
             success: function (response) {
                 stationSelect.empty();
 
@@ -421,7 +418,6 @@ $(document).ready(function () {
                         if (station.short_name) {
                             stationName += ' (' + station.short_name + ')';
                         }
-
 
                         stationSelect.append(
                             $('<option>', {
@@ -467,9 +463,7 @@ $(document).ready(function () {
                     .empty()
                     .append(
                         '<option value="">Unable to load stations</option>'
-                    )
-                    .prop('disabled', true);
-
+                    ).prop('disabled', true);                   
             }
         });
 

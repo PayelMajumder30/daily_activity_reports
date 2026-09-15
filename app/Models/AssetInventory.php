@@ -56,5 +56,9 @@ class AssetInventory extends Model
         return $this->hasMany(AssetRetainedAsset::class, 'asset_inventory_id');
     }
 
+    public function outstationHistory(): HasMany
+    {
+        return $this->hasMany(AssetOutstation::class, 'asset_inventory_id');                          
+    }
    
 }

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Discipline')
+@section('title', 'Department')
 
 @section('content')
 
@@ -53,8 +53,7 @@
                                 <td>{{ ucwords($discipline->name) }}</td>
                                 <td>
                                     <a href="{{ route('discipline.sections.index', encryptId($discipline->id)) }}" class="btn btn-info btn-sm" title="section">                                        
-                                        <i class="bi bi-list-ul"></i>
-                                       
+                                        <i class="bi bi-list-ul"></i>                                      
                                     </a>
                                 </td>
 
@@ -217,10 +216,7 @@
                             .text('Update Department');
 
                         $('#cancelBtn').removeClass('d-none');
-
-                        $('#disciplineForm')
-                            .attr('action', updateUrl.replace(':id', id));
-
+                        $('#disciplineForm').attr('action', updateUrl.replace(':id', id));                            
                         $('#methodField').html('@method("PUT")');
                     },
 
@@ -240,13 +236,9 @@
             $('#cancelBtn').on('click', function () {
                 clearFormErrors();
                 $('#disciplineForm').attr('action', storeUrl);
-
                 $('#methodField').html('');
-
                 $('#name').val('');
-
                 $('#formTitle').text('Add Department');
-
                 $('#submitBtn')
                     .removeClass('btn-warning')
                     .addClass('btn-primary')

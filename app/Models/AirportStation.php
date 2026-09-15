@@ -31,6 +31,11 @@ class AirportStation extends Model
         return $this->hasMany(AssetInventory::class);
     }
 
+    public function outstationHistory(): HasMany
+    {
+        return $this->hasMany(AssetOutstationHistory::class);
+    }
+
     public function retainedAssets(): HasMany
     {
         return $this->hasMany(AssetRetainedAsset::class, 'asset_inventory_id');

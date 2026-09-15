@@ -201,10 +201,7 @@
                             .html('<i class="bi bi-pencil-square"></i> Update Location');
 
                         $('#cancelBtn').removeClass('d-none');
-
-                        $('#locationForm')
-                            .attr('action', updateUrl.replace(':id', id));
-
+                        $('#locationForm').attr('action', updateUrl.replace(':id', id));                           
                         $('#methodField').html('@method("PUT")');
                     }
                 });

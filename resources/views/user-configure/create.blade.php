@@ -43,10 +43,8 @@
                     <div class="col-md-6 mb-3">
                         <label>Name <span class="text-danger">*</span></label>
 
-                        <input type="text"
-                            name="name"
-                            class="form-control @error('name') is-invalid @enderror"
-                            value="{{ old('name') }}">
+                        <input type="text" name="name"                          
+                            class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}">                         
 
                         @error('name')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -56,11 +54,9 @@
                     <div class="col-md-6 mb-3">
                         <label>Email <span class="text-danger">*</span></label>
 
-                        <input type="email"
-                            name="email"
-                            class="form-control @error('email') is-invalid @enderror"
-                            value="{{ old('email') }}">
-
+                        <input type="email" name="email"                           
+                            class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}">
+                            
                         @error('email')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -124,8 +120,7 @@
                     <div class="col-md-6 mb-4">
                         <label>Role <span class="text-danger">*</span></label>
 
-                        <select name="role"
-                                class="form-select @error('role') is-invalid @enderror">
+                        <select name="role" class="form-select @error('role') is-invalid @enderror">                               
 
                             <option value="">Select Role</option>
 
@@ -134,7 +129,7 @@
                             </option>
 
                             <option value="1" {{ old('role') == 1 ? 'selected' : '' }}>
-                                Uploader
+                                Call Coordinator
                             </option>
 
                             <option value="2" {{ old('role') == 2 ? 'selected' : '' }}>
@@ -218,7 +213,6 @@
                 stationDropdown.html(
                     '<option value="">Select Station</option>'
                 );
-
             }
 
         });

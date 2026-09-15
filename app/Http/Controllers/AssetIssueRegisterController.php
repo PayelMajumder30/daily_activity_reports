@@ -273,6 +273,8 @@ class AssetIssueRegisterController extends Controller
         $custodians = Custodian::with([
             'designation',
             'discipline',
+            'location',
+            'station',
             'section'
         ])->where('status', 1)->orderBy('custodian_name')->get();
         
@@ -588,6 +590,7 @@ class AssetIssueRegisterController extends Controller
             'discipline',
             'section',
             'location',
+            'station',
         ])->where('id', $id)->where('status', 1)->first();
 
         if (!$custodian) {
@@ -604,7 +607,8 @@ class AssetIssueRegisterController extends Controller
                 'designation'   => $custodian->designation?->name ?? '-',                  
                 'department'    => $custodian->discipline?->name ?? '-',                   
                 'section'       => $custodian->section?->section_name ?? '-',                   
-                'loaction'      => $custodian->location?->name ?? '-',                   
+                'location'      => $custodian->location?->name ?? '-',  
+                'station'       => $custodian->station?->station_name ?? '-',                 
             ]
 
         ]);

@@ -53,7 +53,7 @@
                 <div class="row">
 
                     {{-- Custodian --}}
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
 
                         <label class="form-label">
                             Custodian
@@ -100,13 +100,33 @@
 
 
                     {{-- Designation --}}
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-2 mb-3">
 
                         <label class="form-label">
                             Designation
                         </label>
 
                         <input type="text" id="custodian_designation" class="form-control" readonly>
+                    </div>
+
+                    {{-- Region --}}
+                    <div class="col-md-2 mb-3">
+
+                        <label class="form-label">
+                            Region
+                        </label>
+
+                        <input type="text" id="custodian_region" class="form-control" readonly>
+                    </div>
+
+                    {{-- Airport/Station --}}
+                    <div class="col-md-2 mb-3">
+
+                        <label class="form-label">
+                            Airport/Station
+                        </label>
+
+                        <input type="text" id="custodian_station" class="form-control" readonly>
                     </div>
 
 
@@ -425,6 +445,8 @@ $(document).ready(function () {
         if (!custodianId) {
             $('#custodian_emp_id').val('');
             $('#custodian_designation').val('');
+            $('#custodian_region').val('');
+            $('#custodian_station').val('');
             $('#custodian_department').val('');
             $('#custodian_section').val('');
             return;
@@ -451,6 +473,8 @@ $(document).ready(function () {
                 if (!response.status) {
                     $('#custodian_emp_id').val('');
                     $('#custodian_designation').val('');
+                    $('#custodian_region').val('');
+                    $('#custodian_station').val('');
                     $('#custodian_department').val('');
                     $('#custodian_section').val('');
                     return;
@@ -464,6 +488,13 @@ $(document).ready(function () {
                     response.custodian.designation ? response.custodian.designation.toLowerCase().replace(/\b\w/g, char => char.toUpperCase()) : '-'
                 );
 
+                $('#custodian_region').val(
+                    response.custodian.location || '-'
+                );
+
+                $('#custodian_station').val(
+                    response.custodian.station || '-'
+                );
                 $('#custodian_department').val(
                     response.custodian.department || '-'
                 );
@@ -479,6 +510,8 @@ $(document).ready(function () {
 
                 $('#custodian_emp_id').val('');
                 $('#custodian_designation').val('');
+                $('#custodian_region').val('');
+                $('#custodian_station').val('');
                 $('#custodian_department').val('');
                 $('#custodian_section').val('');
 
@@ -1040,11 +1073,8 @@ $(document).ready(function () {
             */
 
             if (!selectedValue) {
-
                 refreshModalAssetOptions();
-
                 return;
-
             }
 
 
@@ -1055,7 +1085,6 @@ $(document).ready(function () {
             */
 
             let duplicate = false;
-
 
             $('.modal-asset-tag')
                 .each(function () {
@@ -1086,11 +1115,8 @@ $(document).ready(function () {
                 Swal.fire({
 
                     icon: 'warning',
-
                     title: 'Asset Already Selected',
-
-                    text:
-                        'This asset tag has already been selected in another row.'
+                    text: 'This asset tag has already been selected in another row.'                       
 
                 });
 
@@ -1098,8 +1124,6 @@ $(document).ready(function () {
                 currentSelect
                     .val('')
                     .trigger('change');
-
-
                 return;
 
             }
@@ -1136,9 +1160,7 @@ $(document).ready(function () {
 
             if (rows.length > 0) {
 
-                let lastRow =
-                    rows.last();
-
+                let lastRow = rows.last();                 
 
                 let lastValue =
                     lastRow
@@ -1155,11 +1177,8 @@ $(document).ready(function () {
                 if (!lastValue) {
 
                     Swal.fire({
-
                         icon: 'warning',
-
                         title: 'Asset Tag Required',
-
                         text:
                             'Please select an asset tag before adding another row.'
 
@@ -1179,7 +1198,6 @@ $(document).ready(function () {
             */
 
             createAssetRow();
-
 
             /*
             |----------------------------------------------------------
@@ -1289,15 +1307,11 @@ $(document).ready(function () {
             $('#assetRows .asset-row')
                 .each(function () {
 
-                    let row =
-                        $(this);
-
-
+                    let row = $(this);                       
                     let select =
                         row.find(
                             '.modal-asset-tag'
                         );
-
 
                     let assetId =
                         select.val();
@@ -1312,7 +1326,6 @@ $(document).ready(function () {
                     if (!assetId) {
 
                         hasEmptyRow = true;
-
                         return false;
 
                     }
@@ -1381,11 +1394,8 @@ $(document).ready(function () {
                     selectedAssets.push({
 
                         id: assetId,
-
                         tag_no: tagNo,
-
                         asset_type: assetType,
-
                         asset_model: assetModel
 
                     });

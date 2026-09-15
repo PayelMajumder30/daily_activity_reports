@@ -192,7 +192,6 @@
                             @foreach($departments as $department)
 
                                 <option value="{{ $department->id }}" {{ old('discipline_id') == $department->id ? 'selected' : '' }}>
-
                                     {{ ucwords($department->name) }}
                                 </option>
 
@@ -425,23 +424,19 @@
                         stationSelect.prop('disabled', false);
 
                     } else {
-
                         stationSelect
                             .append(
                                 '<option value="">No Station Available</option>'
-                            )
-                            .prop('disabled', true);
+                            ).prop('disabled', true);                           
                     }
                 },
 
                 error: function () {
-
                     stationSelect
                         .empty()
                         .append(
                             '<option value="">Unable to load stations</option>'
-                        )
-                        .prop('disabled', true);
+                        ).prop('disabled', true);                       
                 }
             });
         });

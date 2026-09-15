@@ -181,7 +181,7 @@
 
                             <option value="1"
                                 {{ old('role', $user->role) == 1 ? 'selected' : '' }}>
-                                Uploader
+                                Call Coordinator
                             </option>
 
                             <option value="2"
@@ -334,7 +334,6 @@
             } else {
                 password.attr('type', 'password');
                 icon.removeClass('bi-eye-slash').addClass('bi-eye');                   
-
             }
 
         });

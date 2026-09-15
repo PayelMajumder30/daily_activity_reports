@@ -17,6 +17,11 @@ class Location extends Model
         return $this->hasMany(AssetInventory::class);
     }
 
+    public function outstationHistory(): HasMany
+    {
+        return $this->hasMany(AssetOutstationHistory::class);
+    }
+
     public function custodian(): HasMany
     {
         return $this->hasMany(Custodian::class);

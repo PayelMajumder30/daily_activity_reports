@@ -91,4 +91,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(AirportStation::class, 'station_id');
     }
+
+    public function outstationHistory(): HasMany
+    {
+        return $this->hasMany(AssetOutstationHistory::class);
+    }
 }
