@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class AirportStation extends Model
+{
+    //
+    public $table = 'airport_stations';
+    protected $fillable = ['location_id','station_name','short_name', 'status'];
+
+    public function location(): BelongsTo {
+        return $this->belongsTo(Location::class, 'location_id');
+    }
+
+    public function custodian(): HasMany
+    {
+        return $this->hasMany(Custodian::class);
+    }
+
+    public function user(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
+    
+    public function assetInventory(): HasMany
+    {
+        return $this->hasMany(AssetInventory::class);
+    }
+
+    public function outstationHistory(): HasMany
+    {
+        return $this->hasMany(AssetOutstationHistory::class);
+    }
+
+    public function retainedAssets(): HasMany
+    {
+        return $this->hasMany(AssetRetainedAsset::class, 'asset_inventory_id');
+    }
+
+}

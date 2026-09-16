@@ -20,9 +20,46 @@ class ComplaintImport implements ToModel, WithHeadingRow, WithChunkReading, With
         $this->uploadId = $uploadId;
     }
 
+    // public function model(array $row)
+    // {
+    //     if (
+    //         empty($row['complainttitle']) &&
+    //         empty($row['activity_details']) &&
+    //         empty($row['engg_name']) &&
+    //         empty($row['status'])
+    //     ) {
+    //         return null;
+    //     }
+
+    //     return new Complaint([
+    //         'upload_id'        => $this->uploadId,
+
+    //         // Old Excel: ComplaintTitle
+    //         // New Excel: Activity Details
+    //         // 'complaint_title'  => trim($row['complainttitle'] ?? ''),
+    //         'complaint_title'  => trim($row['activity_details'] ?? $row['complainttitle'] ?? ''),
+    //         'type_of_activity' => trim($row['type_of_activity'] ?? ''),
+    //         'asset_tag_no'     => trim($row['asset_tag_no'] ?? ''),
+    //         'engineer_name'    => trim($row['engg_name'] ?? ''),
+    //         'status'           => trim($row['status'] ?? ''),
+    //         // Old: Actual Resolution Time
+    //         // New: Activity Duration
+    //         // 'resolution_time'  => trim($row['actual_resolution_time'] ?? ''),
+    //         'resolution_time'  => trim($row['activity_duration'] ?? $row['actual_resolution_time'] ?? ''),
+    //     ]);
+    // }
+
     public function model(array $row)
     {
         if (
+            !isset($row['activity_details']) &&
+            !isset($row['complainttitle'])
+        ) {
+            throw new \Exception('Invalid Excel format. Please use the sample template.');
+        }
+
+        if (
+            empty($row['activity_details']) &&
             empty($row['complainttitle']) &&
             empty($row['engg_name']) &&
             empty($row['status'])
@@ -30,12 +67,14 @@ class ComplaintImport implements ToModel, WithHeadingRow, WithChunkReading, With
             return null;
         }
 
-        return new Complaint([
+        return new ComplaintTemp([
             'upload_id'        => $this->uploadId,
-            'complaint_title'  => trim($row['complainttitle'] ?? ''),
+            'complaint_title'  => trim($row['activity_details'] ?? $row['complainttitle'] ?? ''),
+            'type_of_activity' => trim($row['type_of_activity'] ?? ''),
+            'asset_tag_no'     => trim($row['asset_tag_no'] ?? ''),
             'engineer_name'    => trim($row['engg_name'] ?? ''),
             'status'           => trim($row['status'] ?? ''),
-            'resolution_time'  => trim($row['actual_resolution_time'] ?? ''),
+            'resolution_time'  => trim($row['activity_duration'] ?? $row['actual_resolution_time'] ?? ''),
         ]);
     }
 

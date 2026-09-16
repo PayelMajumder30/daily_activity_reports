@@ -4,7 +4,26 @@
 
 @section('content')
 
+
 <div class="container-fluid py-4">
+
+   <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold">
+                <i class="bi bi-file-earmark-text"></i>
+                Total Complaints
+            </h2>
+            <p class="text-muted">
+                View, search, and manage complaint records with engineer-wise details, status, and report information.
+            </p>
+        </div>
+
+        <div class="col-md-4 text-end">
+            <h6 class="text-secondary">
+                {{ now()->format('d M Y') }}
+            </h6>
+        </div>
+    </div>
       {{-- Upload Card --}}
 
     <div class="card shadow border-0 mb-4">
@@ -15,6 +34,7 @@
             </h5>
         </div>
 
+        
         <div class="card-body">
             <form id="uploadForm" action="{{ route('upload.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -61,8 +81,6 @@
         </div>
     </div>
 
-
-
     {{-- Search Card --}}
 
     <div class="card shadow border-0 mb-4">
@@ -84,33 +102,40 @@
                         <option value="">
                             All Engineers
                         </option>
-
                         @foreach($engineers as $eng)
                             <option value="{{ $eng->engineer_name }}">
                                 {{ $eng->engineer_name }}
                             </option>
-
                         @endforeach
-
                     </select>
-
                 </div>
 
-                <div class="col-md-3">
+                <!-- <div class="col-md-3">
                     <label>Date</label>
                     <input type="text" id="date" class="form-control datepicker">
+                </div> -->
+                <div class="col-md-2">
+                    <label>From date</label>
+                    <input type="text" id="from_date" class="form-control datepicker">
+                    <small id="from_date_error" class="text-danger"></small>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label>To date</label>
+                    <input type="text" id="to_date" class="form-control datepicker">
+                    <small id="to_date_error" class="text-danger"></small>
+                </div>
 
+                <div class="col-md-2">
                     <label>Status</label>
-
                     <select id="status" class="form-select">
-                        <option value="">All</option>
-                        <option>Open</option>
-                        <option>Closed</option>
+                        <option value="">All status</option>
+                        @foreach($statuses as $status)
+                            <option value="{{$status}}">
+                                {{ $status}}
+                            </option>
+                        @endforeach
                     </select>
-
                 </div>
 
                 <div class="col-md-3">
@@ -145,16 +170,17 @@
         </div>
 
         <div class="card-body">
-            <table class="table table-bordered table-hover"
-                   id="complaintTable">
+            <table class="table table-bordered table-hover" id="complaintTable">                  
                 <thead class="table-dark">
 
                     <tr>
                         <th>SL</th>
-                        <th>Complaint</th>
+                        <th>Activity Details</th>
+                        <th>Type of Activity</th>
+                        <th class="asset-tag-column">Asset Tag No</th>
                         <th>Engineer</th>
                         <th>Status</th>
-                        <th>Resolution Time</th>
+                        <th>Activity Duration</th>
                         <th>Report Date</th>
                     </tr>
 
@@ -168,6 +194,10 @@
 
                                 <td>{{ $row->complaint_title }}</td>
 
+                                <td>{{ !empty($row->type_of_activity) ? $row->type_of_activity : 'NA' }}</td>
+
+                                <td class="asset-tag-column">{{ !empty($row->asset_tag_no) ? $row->asset_tag_no : 'NA'}}</td>
+
                                 <td>{{ $row->engineer_name }}</td>
 
                                 <td>
@@ -178,7 +208,7 @@
                                     @endif
                                 </td>
 
-                                <td>{{ $row->resolution_time }}</td>
+                                <td>{{ !empty($row->resolution_time) ? $row->resolution_time : 'NA' }}</td>
 
                                 <td>
                                     {{ optional($row->upload?->report_date)->format('d-m-Y') ?? '-' }}
@@ -201,7 +231,7 @@
 @push('scripts')
 <script>
     $(document).ready(function(){
-
+    
         $('#uploadBtn').prop('disabled', true);
 
         function checkFields(){
@@ -221,6 +251,25 @@
 
         $('#btnSearch').click(function (e) {
             e.preventDefault();
+            //Clear previous validation
+            $('#from_date_error').text('');
+            $('#to_date_error').text('');
+
+            let fromDate = $('#from_date').val();
+            let toDate = $('#to_date').val();
+
+            //Validate only both dates are selected
+            if(fromDate !== '' && toDate !== ''){
+                let from = new Date(fromDate);
+                let to = new Date(toDate);
+
+                if(from > to){
+                    $('#from_date_error').text('From Date must be less than or equal to To Date.');
+                    $('#to_date_error').text('To Date must be greater than or equal to From Date.');
+
+                    return;
+                }
+            }
             $.ajax({
                 url: "{{ route('complaints.search') }}",
                 type: "GET",
@@ -228,12 +277,15 @@
                     engineer: $('#engineer').val(),
                     status: $('#status').val(),
                     complaint: $('#complaint').val(),
-                    date: $('#date').val()
+                    from_date: $('#from_date').val(),
+                    to_date: $('#to_date').val()
                 },
 
                 success: function (response) {
                     let table = $('#complaintTable').DataTable();
+
                     table.clear();
+
                     $.each(response, function (index, item) {
                         let badge = '';
                         if(item.status == 'Closed'){
@@ -247,9 +299,11 @@
                         table.row.add([
                             index + 1,
                             item.complaint_title,
+                            item.type_of_activity ?? '-',
+                            item.asset_tag_no ?? '-',
                             item.engineer_name,
                             badge,
-                            item.resolution_time,
+                            item.resolution_time ?? '-',
                             item.report_date
 
                         ]);
@@ -267,7 +321,11 @@
             $('#engineer').val('');
             $('#status').val('');
             $('#complaint').val('');
-            $('#date').val('');
+            $('#from_date').val('');
+            $('#to_date').val('');
+
+            $('#from_date_error').text('');
+            $('#to_date_error').text('');
             location.reload();
 
         });

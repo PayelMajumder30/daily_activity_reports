@@ -15,7 +15,7 @@ return new class extends Migration
             //
             $table->tinyInteger('role')
                     ->default(2)
-                    ->comment('0 = Management, 1 = Uploader, 2 = Manpower')
+                    ->comment('0 = Management, 1 = Uploader, 2 = Engineer')
                     ->after('password');
         });
     }

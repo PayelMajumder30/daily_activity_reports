@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -22,7 +23,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role'
+        'role',
+        'location_id',
+        'station_id',
+        'status',
     ];
 
     protected $casts = [
@@ -56,5 +60,40 @@ class User extends Authenticatable
     public function uploads(): HasMany
     {
         return $this->hasMany(Upload::class);
+    }
+
+    public function eventlogs(): HasMany
+    {
+        return $this->hasMany(EventLog::class);
+    }
+
+    public function assetAssigned(): Hasmany
+    {
+        return $this->hasMany(AssetAssigned::class, 'created_by');
+    }
+
+    public function assetTransfers(): HasMany
+    {
+        return $this->hasMany(AssetTransfer::class, 'created_by');
+    }
+
+    public function retainedAssets(): HasMany
+    {
+        return $this->hasMany(AssetRetainedAsset::class, 'asset_inventory_id');
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'location_id');
+    }
+
+    public function station(): BelongsTo
+    {
+        return $this->belongsTo(AirportStation::class, 'station_id');
+    }
+
+    public function outstationHistory(): HasMany
+    {
+        return $this->hasMany(AssetOutstationHistory::class);
     }
 }

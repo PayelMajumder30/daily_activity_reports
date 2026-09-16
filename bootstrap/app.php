@@ -12,9 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         //
-        // $middleware->alias([
-        //     'role' => \App\Http\Middleware\RoleMiddleware::class,
-        // ]);
+        $middleware->alias([
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'prevent-back-history'  => \App\Http\Middleware\PreventBackHistory::class,
+            'prevent-back-history'  => \App\Http\Middleware\PreventBackHistory::class,
+            'user.status'   => \App\Http\Middleware\CheckUserStatus::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
