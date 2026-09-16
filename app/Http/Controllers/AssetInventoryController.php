@@ -35,6 +35,11 @@ class AssetInventoryController extends Controller
             'location'
         ]);
 
+         if (auth()->user()->role == 1) {
+            $query->where('location_id', auth()->user()->location_id)
+                ->where('station_id', auth()->user()->station_id);
+        }
+
         // Tag No.
         if ($request->filled('tag_no')) {
             $query->where('tag_no', 'LIKE', '%' . $request->tag_no . '%' );     
@@ -1042,19 +1047,12 @@ class AssetInventoryController extends Controller
 
             'asset' => [
                 'id' => $asset->id,
-
                 'tag_no' => $asset->tag_no,
-
                 'asset_type' => $asset->assetModel?->assetType?->name ?? '-',
-
                 'asset_model' => $asset->assetModel?->model_name ?? '-',
-
                 'location_id' => $asset->location_id,
-
                 'location' => $asset->location?->name ?? '-',
-
                 'station_id' => $asset->station_id,
-
                 'station' => $asset->station?->station_name ?? '-',
             ]
         ]);
@@ -1091,48 +1089,27 @@ class AssetInventoryController extends Controller
             'success' => true,
 
             'asset' => [
-                'id' => $asset->id,
-                'tag_no' => $asset->tag_no,
-                'serial_no' => $asset->serial_no ?? '-',
-
-                'asset_type' =>
-                    $asset->assetModel?->assetType?->name ?? '-',
-
-                'asset_model' =>
-                    $asset->assetModel?->model_name ?? '-',
-
-                'location' =>
-                    $asset->location?->name ?? '-',
-
-                'station' =>
-                    $asset->station?->station_name ?? '-',
-
-                'asset_status' =>
-                    $asset->asset_status ?? '-',
+                'id'            => $asset->id,
+                'tag_no'        => $asset->tag_no,
+                'serial_no'     => $asset->serial_no ?? '-',
+                'asset_type'    => $asset->assetModel?->assetType?->name ?? '-',                 
+                'asset_model'   => $asset->assetModel?->model_name ?? '-',                
+                'location'      => $asset->location?->name ?? '-',               
+                'station'       => $asset->station?->station_name ?? '-',                  
+                'asset_status'  => $asset->asset_status ?? '-',
+                    
             ],
 
             'history' => $history->map(function ($item) {
 
                 return [
                     'id' => $item->id,
-
-                    'outstation_date' =>
-                        $item->outstation_date?->format('d-m-Y') ?? '-',
-
-                    'from_location' =>
-                        $item->fromLocation?->name ?? '-',
-
-                    'from_station' =>
-                        $item->fromStation?->station_name ?? '-',
-
-                    'to_location' =>
-                        $item->toLocation?->name ?? '-',
-
-                    'to_station' =>
-                        $item->toStation?->station_name ?? '-',
-
-                    'remarks' =>
-                        $item->remarks ?? '-',
+                    'outstation_date' => $item->outstation_date?->format('d-m-Y') ?? '-',                       
+                    'from_location' => $item->fromLocation?->name ?? '-',                       
+                    'from_station' => $item->fromStation?->station_name ?? '-',                       
+                    'to_location' => $item->toLocation?->name ?? '-',                        
+                    'to_station' => $item->toStation?->station_name ?? '-',                                            
+                        
                 ];
 
             })->values()
@@ -1189,11 +1166,11 @@ class AssetInventoryController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Already Scrapped
+            | Already Damaged
             |--------------------------------------------------------------------------
             */
 
-            if ($asset->asset_status === 'Scrapped') {
+            if ($asset->asset_status === 'Damaged') {
 
                 DB::rollBack();
 
@@ -1207,7 +1184,7 @@ class AssetInventoryController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Only Available Asset Can Be Scrapped
+            | Only Available Asset Can Be Damaged
             |--------------------------------------------------------------------------
             */
 
@@ -1230,7 +1207,7 @@ class AssetInventoryController extends Controller
             */
 
             $asset->update([
-                'asset_status' => 'Scrapped',
+                'asset_status' => 'Damaged',
             ]);
 
 
@@ -1241,7 +1218,7 @@ class AssetInventoryController extends Controller
             */
 
             eventLog(
-                'Scrapped',
+                'Damaged',
                 'Asset Inventory',
                 'Asset marked as physically damaged: ' . $asset->tag_no
             );

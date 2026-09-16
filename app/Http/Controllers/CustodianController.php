@@ -37,6 +37,11 @@ class CustodianController extends Controller
 
         $query = Custodian::with(['designation', 'discipline', 'section']);
 
+        if (auth()->user()->role == 1) {
+            $query->where('location_id', auth()->user()->location_id)
+                ->where('station_id', auth()->user()->station_id);
+        }
+
         /* search custodian name*/
         if($request->filled('custodian_name')){
             $query->where('custodian_name', 'LIKE', '%' . $request->custodian_name . '%');
@@ -159,8 +164,7 @@ class CustodianController extends Controller
 
             'custodian_name'    => ['required', 'string', 'max:255',],
             'designation_id'    => ['required', 'exists:designations,id',],                                  
-            'discipline_id'     => ['required', Rule::exists('disciplines', 'id')                              
-                                        ->where(function ($query) {$query->where('status', 1); }),],                                                                                                              
+            'discipline_id'     => ['required', Rule::exists('disciplines', 'id')->where(function ($query) {$query->where('status', 1); }),],                                                                                                                                                                             
             'location_id'       => ['required', 'exists:locations,id',],
             'station_id'        => ['required', 'exists:airport_stations,id',],     
             'emp_id'            => ['required', 'digits:8', 'unique:custodians,emp_id',],
@@ -262,10 +266,7 @@ class CustodianController extends Controller
                     'discipline_id' => 'Invalid department selected.'                       
                 ])->withInput();               
         }
-
-
-     
-
+    
 
         /*
         |--------------------------------------------------------------------------
@@ -314,15 +315,18 @@ class CustodianController extends Controller
 
         ]);
 
+        eventLog(
+            'Create',
+            'Custodian',
+            'Created custodian: ' . $request->custodian_name
+        );
         /*
         |--------------------------------------------------------------------------
         | Redirect
         |--------------------------------------------------------------------------
         */
 
-        return redirect()
-            ->route('custodian.index')
-            ->with('success', 'Custodian added successfully.');
+        return redirect()->route('custodian.index')->with('success', 'Custodian added successfully.');                      
                                          
     }
 
@@ -598,10 +602,7 @@ class CustodianController extends Controller
 
                 return back()
                     ->withErrors([
-                        'section_id' =>
-                            'Section is required.'
-                    ])
-                    ->withInput();
+                        'section_id' => 'Section is required.'])->withInput();                                                           
             }
 
 
@@ -631,7 +632,6 @@ class CustodianController extends Controller
                     ->withInput();
             }
 
-
             $sectionId = $request->section_id;
 
         } else {
@@ -653,10 +653,8 @@ class CustodianController extends Controller
 
             return back()
                 ->withErrors([
-                    'station_id' =>
-                        'Selected station does not belong to the selected region.'
-                ])
-                ->withInput();
+                    'station_id' => 'Selected station does not belong to the selected region.'])->withInput();                                     
+                
         }
         /*
         |--------------------------------------------------------------------------
@@ -664,34 +662,6 @@ class CustodianController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        // $custodian->update([
-
-        //     'custodian_name' =>
-        //         $request->custodian_name,
-
-        //     'designation_id' =>
-        //         $request->designation_id,
-
-                
-        //     'location_id' =>
-        //         $request->location_id,
-
-        //     'discipline_id' =>
-        //         $request->discipline_id,
-
-        //     'section_id' =>
-        //         $sectionId,
-
-        //     'emp_id' =>
-        //         $request->emp_id,
-
-        //     'email' =>
-        //         $request->email,
-
-        //     'phone' =>
-        //         $request->phone,
-
-        // ]);
         $custodian->update([
 
             'custodian_name' => $request->custodian_name,
@@ -706,6 +676,7 @@ class CustodianController extends Controller
 
         ]);
 
+        eventLog('Update', 'Custodian', 'Updated custodian:'.$custodian->custodian_name);
 
         /*
         |--------------------------------------------------------------------------

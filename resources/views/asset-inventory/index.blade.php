@@ -227,7 +227,7 @@
                             <!-- <td>{{ $item->asset_status}}</td> -->
                              <td>
 
-                                @if($item->asset_status === 'Scrapped')
+                                @if($item->asset_status === 'Damaged')
 
                                     <span class="badge bg-danger">
                                         Physically Damaged
@@ -276,7 +276,7 @@
                                 {{-- Outstation --}}
                                 @if($item->asset_status === 'Available')
 
-                                   <button type="button" class="btn btn-sm btn-primary outstation-asset" data-id="{{ $item->id }}" title="Outstation">                                                                    
+                                <button type="button" class="btn btn-sm btn-primary outstation-asset" data-id="{{ $item->id }}" title="Outstation">                                                                    
                                                                      
                                     <i class="bi bi-arrow-left-right"></i>
                                 </button>
@@ -284,12 +284,12 @@
                                 @endif
 
                                 {{-- Physically Damaged --}}
-                                @if($item->asset_status !== 'Scrapped')
+                                @if($item->asset_status !== 'Damaged')
 
                                     <button type="button" class="btn btn-sm btn-danger scrap-asset"                                                                         
                                         data-id="{{ $item->id }}" title="Physically Damaged">
                                                                                
-                                        <i class="bi bi-trash3-fill"></i>
+                                        <i class="bi bi-tools text-warning"></i>
 
                                     </button>
 

@@ -171,7 +171,7 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow, WithMultiple
             }
 
             // Status Validation
-            $allowedStatuses = ['Available', 'Assigned', 'Repair', 'Scrapped'];
+            $allowedStatuses = ['Available', 'Assigned', 'Repair', 'Damaged'];
             if (empty($assetStatus)) {
                 $assetStatus = 'Available';
             }

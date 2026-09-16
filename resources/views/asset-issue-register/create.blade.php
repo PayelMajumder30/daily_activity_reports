@@ -678,11 +678,7 @@ $(document).ready(function () {
                         Asset Type
                     </label>
 
-
-                    <input
-                        type="text"
-                        class="form-control modal-asset-type"
-                        readonly>
+                    <input type="text" class="form-control modal-asset-type" readonly>                        
 
                 </div>
 
@@ -693,11 +689,7 @@ $(document).ready(function () {
                         Asset Model
                     </label>
 
-
-                    <input
-                        type="text"
-                        class="form-control modal-asset-model"
-                        readonly>
+                    <input type="text" class="form-control modal-asset-model" readonly>                       
 
                 </div>
 
@@ -705,13 +697,8 @@ $(document).ready(function () {
                 <div
                     class="col-md-1 d-flex align-items-end">
 
-                    <button
-                        type="button"
-                        class="btn btn-danger remove-asset-row"
-                        title="Remove">
-
+                    <button type="button" class="btn btn-danger remove-asset-row" title="Remove">                                                            
                         <i class="bi bi-trash"></i>
-
                     </button>
 
                 </div>

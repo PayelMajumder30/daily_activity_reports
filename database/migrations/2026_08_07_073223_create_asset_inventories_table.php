@@ -45,7 +45,7 @@ return new class extends Migration
                 'Available',
                 'Assigned',
                 'Repair',
-                'Scrapped',
+                'Damaged',
                 'Retained',
                 'Outstation'
             ])->default('Available');

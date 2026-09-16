@@ -185,7 +185,7 @@
             </li>
         @endif
 
-        @if(auth()->user()->role == 0 )     
+        @if(auth()->user()->role == 0 || auth()->user()->role == 1 )     
             <li class="nav-item">
                 <a href="{{ route('custodian.index') }}" class="nav-link text-white {{ request()->routeIs('custodian.*') ? 'active bg-primary' : '' }}">                
                     <i class="bi bi-person-workspace"></i>

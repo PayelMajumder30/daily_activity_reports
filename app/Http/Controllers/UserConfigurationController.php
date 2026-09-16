@@ -34,29 +34,6 @@ class UserConfigurationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    // public function store(Request $request)
-    // {
-    //     //
-    //     $request->validate([
-    //         'name'      =>'required',
-    //         'email'     =>'required|email|unique:users,email',
-    //         'password'  =>'required|min:6',
-    //         'role'      =>'required|in:0,1,2'
-    //     ],[
-    //         'email.unique' => 'This email already registered',
-    //     ]);
-
-    //     User::create([
-    //         'name'      =>$request->name,
-    //         'email'     =>$request->email,
-    //         'password'  =>Hash::make($request->password),
-    //         'role'      =>$request->role
-    //     ]);
-
-    //     eventLog('Create', 'User', 'Created user: '.$request->name);
-
-    //     return redirect()->route('user-configuration.index')->with('success', 'User added successfully.');
-    // }
 
     public function store(Request $request)
     {

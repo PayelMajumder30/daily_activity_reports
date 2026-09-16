@@ -337,280 +337,280 @@
 
 <script>
 
-$(document).ready(function () {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Region -> Station
-    |--------------------------------------------------------------------------
-    */
-
-    $('#location_id').on('change', function () {
-
-        let locationId = $(this).val();
-        let stationSelect = $('#station_id');
+    $(document).ready(function () {
 
         /*
         |--------------------------------------------------------------------------
-        | Reset Station
+        | Region -> Station
         |--------------------------------------------------------------------------
         */
 
-        stationSelect
-            .empty()
-            .append('<option value="">Loading stations...</option>')
-            .prop('disabled', true);
+        $('#location_id').on('change', function () {
 
+            let locationId = $(this).val();
+            let stationSelect = $('#station_id');
 
-        /*
-        |--------------------------------------------------------------------------
-        | No Region Selected
-        |--------------------------------------------------------------------------
-        */
-
-        if (!locationId) {
+            /*
+            |--------------------------------------------------------------------------
+            | Reset Station
+            |--------------------------------------------------------------------------
+            */
 
             stationSelect
                 .empty()
-                .append('<option value="">Select Region First</option>')
+                .append('<option value="">Loading stations...</option>')
                 .prop('disabled', true);
-            return;
-        }
 
 
-        /*
-        |--------------------------------------------------------------------------
-        | Station API URL
-        |--------------------------------------------------------------------------
-        */
+            /*
+            |--------------------------------------------------------------------------
+            | No Region Selected
+            |--------------------------------------------------------------------------
+            */
 
-        let url = "{{ route('location.stations.byLocation', ':id') }}"
-            .replace(':id', locationId);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Load Stations
-        |--------------------------------------------------------------------------
-        */
-
-        $.ajax({
-
-            url: url,
-            type: 'GET',
-            success: function (response) {
-                stationSelect.empty();
-
-                /*
-                |--------------------------------------------------------------------------
-                | Stations Found
-                |--------------------------------------------------------------------------
-                */
-
-                if (response.length > 0) {
-
-                    stationSelect.append(
-                        '<option value="">Select Station</option>'
-                    );
-
-
-                    $.each(response, function (index, station) {
-                        let stationName = station.station_name;
-                        if (station.short_name) {
-                            stationName += ' (' + station.short_name + ')';
-                        }
-
-                        stationSelect.append(
-                            $('<option>', {
-                                value: station.id,
-                                text: stationName
-                            })
-                        );
-
-                    });
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Select Existing / Old Station
-                    |--------------------------------------------------------------------------
-                    */
-
-                    let oldStation = "{{ old('station_id', $custodian->station_id) }}";                       
-
-                    if (oldStation) {
-                        stationSelect.val(oldStation);
-                    }
-
-                    stationSelect.prop('disabled', false);
-
-                } else {
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | No Station Found
-                    |--------------------------------------------------------------------------
-                    */
-
-                    stationSelect
-                        .append('<option value="">No Station Available</option>').prop('disabled', true);                                                                      
-                }
-
-            },
-
-            error: function () {
+            if (!locationId) {
 
                 stationSelect
                     .empty()
-                    .append(
-                        '<option value="">Unable to load stations</option>'
-                    ).prop('disabled', true);                   
+                    .append('<option value="">Select Region First</option>')
+                    .prop('disabled', true);
+                return;
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Station API URL
+            |--------------------------------------------------------------------------
+            */
+
+            let url = "{{ route('location.stations.byLocation', ':id') }}"
+                .replace(':id', locationId);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Load Stations
+            |--------------------------------------------------------------------------
+            */
+
+            $.ajax({
+
+                url: url,
+                type: 'GET',
+                success: function (response) {
+                    stationSelect.empty();
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Stations Found
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (response.length > 0) {
+
+                        stationSelect.append(
+                            '<option value="">Select Station</option>'
+                        );
+
+
+                        $.each(response, function (index, station) {
+                            let stationName = station.station_name;
+                            if (station.short_name) {
+                                stationName += ' (' + station.short_name + ')';
+                            }
+
+                            stationSelect.append(
+                                $('<option>', {
+                                    value: station.id,
+                                    text: stationName
+                                })
+                            );
+
+                        });
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Select Existing / Old Station
+                        |--------------------------------------------------------------------------
+                        */
+
+                        let oldStation = "{{ old('station_id', $custodian->station_id) }}";                       
+
+                        if (oldStation) {
+                            stationSelect.val(oldStation);
+                        }
+
+                        stationSelect.prop('disabled', false);
+
+                    } else {
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | No Station Found
+                        |--------------------------------------------------------------------------
+                        */
+
+                        stationSelect
+                            .append('<option value="">No Station Available</option>').prop('disabled', true);                                                                      
+                    }
+
+                },
+
+                error: function () {
+
+                    stationSelect
+                        .empty()
+                        .append(
+                            '<option value="">Unable to load stations</option>'
+                        ).prop('disabled', true);                   
+                }
+            });
+
         });
 
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Load Existing Region's Stations Automatically
-    |--------------------------------------------------------------------------
-    */
-
-    let oldLocation = "{{ old('location_id', $custodian->location_id) }}";       
-
-    if (oldLocation) {
-        $('#location_id').val(oldLocation);
-        $('#location_id').trigger('change');
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Department -> Section
-    |--------------------------------------------------------------------------
-    */
-
-    $('#discipline_id').on('change', function () {
-
-        let departmentId = $(this).val();
-        let sectionSelect = $('#section_id');
 
         /*
         |--------------------------------------------------------------------------
-        | Reset Section
+        | Load Existing Region's Stations Automatically
         |--------------------------------------------------------------------------
         */
 
-        sectionSelect
-            .empty()
-            .append('<option value="">Loading...</option>')
-            .prop('disabled', true);
+        let oldLocation = "{{ old('location_id', $custodian->location_id) }}";       
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | No Department
-        |--------------------------------------------------------------------------
-        */
-
-        if (!departmentId) {
-
-            sectionSelect
-                .empty()
-                .append(
-                    '<option value="">Select Department First</option>'
-                )
-                .prop('disabled', true);
-
-            return;
+        if (oldLocation) {
+            $('#location_id').val(oldLocation);
+            $('#location_id').trigger('change');
         }
 
 
         /*
         |--------------------------------------------------------------------------
-        | Section API
+        | Department -> Section
         |--------------------------------------------------------------------------
         */
 
-        let url = "{{ route('custodian.sections', ':id') }}"
-            .replace(':id', departmentId);
+        $('#discipline_id').on('change', function () {
 
-        $.ajax({
-            url: url,
-            type: 'GET',
+            let departmentId = $(this).val();
+            let sectionSelect = $('#section_id');
 
-            success: function (response) {
+            /*
+            |--------------------------------------------------------------------------
+            | Reset Section
+            |--------------------------------------------------------------------------
+            */
 
-                sectionSelect.empty();
-
-                if (response.length > 0) {
-                    sectionSelect.append(
-                        '<option value="">Select Section</option>'
-                    );
-
-                    $.each(response, function (index, section) {
-
-                        sectionSelect.append(
-                            $('<option>', {
-                                value: section.id,
-                                text: section.section_name
-                            })
-                        );
-
-                    });
+            sectionSelect
+                .empty()
+                .append('<option value="">Loading...</option>')
+                .prop('disabled', true);
 
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Restore Existing / Old Section
-                    |--------------------------------------------------------------------------
-                    */
+            /*
+            |--------------------------------------------------------------------------
+            | No Department
+            |--------------------------------------------------------------------------
+            */
 
-                    let oldSection = "{{ old('section_id', $custodian->section_id) }}";                        
-                    if (oldSection) {
-                        sectionSelect.val(oldSection);
-                    }
-
-                    sectionSelect.prop('disabled', false);
-
-                } else {
-
-                    sectionSelect
-                        .append(
-                            '<option value="">No Section Available</option>'
-                        ).prop('disabled', true);                       
-                }
-
-            },
-
-            error: function () {
+            if (!departmentId) {
 
                 sectionSelect
                     .empty()
                     .append(
-                        '<option value="">Unable to load sections</option>'
-                    ).prop('disabled', true);                   
+                        '<option value="">Select Department First</option>'
+                    )
+                    .prop('disabled', true);
+
+                return;
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Section API
+            |--------------------------------------------------------------------------
+            */
+
+            let url = "{{ route('custodian.sections', ':id') }}"
+                .replace(':id', departmentId);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+
+                success: function (response) {
+
+                    sectionSelect.empty();
+
+                    if (response.length > 0) {
+                        sectionSelect.append(
+                            '<option value="">Select Section</option>'
+                        );
+
+                        $.each(response, function (index, section) {
+
+                            sectionSelect.append(
+                                $('<option>', {
+                                    value: section.id,
+                                    text: section.section_name
+                                })
+                            );
+
+                        });
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Restore Existing / Old Section
+                        |--------------------------------------------------------------------------
+                        */
+
+                        let oldSection = "{{ old('section_id', $custodian->section_id) }}";                        
+                        if (oldSection) {
+                            sectionSelect.val(oldSection);
+                        }
+
+                        sectionSelect.prop('disabled', false);
+
+                    } else {
+
+                        sectionSelect
+                            .append(
+                                '<option value="">No Section Available</option>'
+                            ).prop('disabled', true);                       
+                    }
+
+                },
+
+                error: function () {
+
+                    sectionSelect
+                        .empty()
+                        .append(
+                            '<option value="">Unable to load sections</option>'
+                        ).prop('disabled', true);                   
+                }
+
+            });
 
         });
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Load Existing Department's Sections Automatically
+        |--------------------------------------------------------------------------
+        */
+
+        let oldDepartment = "{{ old('discipline_id', $custodian->discipline_id) }}";       
+
+        if (oldDepartment) {
+            $('#discipline_id').val(oldDepartment);
+            $('#discipline_id').trigger('change');
+        }
+
     });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Load Existing Department's Sections Automatically
-    |--------------------------------------------------------------------------
-    */
-
-    let oldDepartment = "{{ old('discipline_id', $custodian->discipline_id) }}";       
-
-    if (oldDepartment) {
-        $('#discipline_id').val(oldDepartment);
-        $('#discipline_id').trigger('change');
-    }
-
-});
 
 </script>
 
