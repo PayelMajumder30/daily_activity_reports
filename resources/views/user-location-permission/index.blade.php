@@ -104,10 +104,8 @@
                 </div>
 
 
-                <form method="POST" action="{{ route('user-location-permission.store') }}">
-                      
+                <form method="POST" action="{{ route('user-location-permission.store') }}">                      
                     @csrf
-
                     <input type="hidden" name="user_id" value="{{ $selectedUser->id }}">
 
                     <div class="row">
@@ -196,10 +194,8 @@
                 <div class="alert alert-info">
 
                     <i class="bi bi-info-circle"></i>
-
                     Please select a Call Coordinator to configure
                     Location and Station permissions.
-
                 </div>
 
             @endif
