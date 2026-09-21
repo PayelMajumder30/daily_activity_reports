@@ -41,4 +41,9 @@ class Location extends Model
     {
         return $this->hasMany(AssetRetainedAsset::class, 'asset_inventory_id');
     }
+
+    public function locationPermissions(): HasMany
+    {
+        return $this->hasMany(UserLocationPermission::class, 'station_id');
+    }
 }

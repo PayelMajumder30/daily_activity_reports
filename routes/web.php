@@ -3,7 +3,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController, EventLogController,
-                            SettingController, AssetInventoryController, IssueRegController, CustodianController, AssetIssueRegisterController, AssetRetainedController};
+                            SettingController, AssetInventoryController, IssueRegController, CustodianController, AssetIssueRegisterController, AssetRetainedController, UserPermissionController};
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -145,6 +145,12 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
             Route::get('/by-location/{id}', [SettingController::class, 'stationsByLocation'])->name('byLocation');
         });
         
+    });
+
+    // user location permission
+    Route::prefix('user-location-permission')->name('user-location-permission.')->group(function() {
+        Route::get('/', [UserPermissionController::class, 'index'])->name('index');
+        Route::post('/', [UserPermissionController::class, 'store'])->name('store');
     });
 
     // Custodian

@@ -559,8 +559,8 @@ $(document).ready(function () {
         */
 
         if (select.hasClass('select2-hidden-accessible'))
-          {
-            select.select2('destroy');
+            {
+                select.select2('destroy');
             }
 
 

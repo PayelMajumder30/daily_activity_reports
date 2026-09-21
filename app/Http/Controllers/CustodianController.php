@@ -33,54 +33,146 @@ class CustodianController extends Controller
     * @param Request $request Contains optional search and filter parameters. 
     * @return \Illuminate\View\View Returns the Custodian listing page. */
 
-    public function index(Request $request){
+    // public function index(Request $request){
 
-        $query = Custodian::with(['designation', 'discipline', 'section']);
+    //     $query = Custodian::with(['designation', 'discipline', 'section']);
 
+    //     /* search custodian name*/
+    //     if($request->filled('custodian_name')){
+    //         $query->where('custodian_name', 'LIKE', '%' . $request->custodian_name . '%');
+    //     }
+
+    //     /* search Employee ID*/
+    //     if($request->filled('emp_id')){
+    //         $query->where('emp_id', 'LIKE', '%' . $request->emp_id . '%');
+    //     }
+
+    //     /* search by department*/
+    //     if($request->filled('discipline_id')) {
+    //         $query->where('discipline_id', 'LIKE', '%' . $request->discipline_id . '%');
+    //     }
+
+    //     /* search by designation*/
+    //     if($request->filled('designation_id')) {
+    //         $query->where('designation_id', 'LIKE', '%' . $request->designation_id . '%');
+    //     }
+
+    //     /* search by airport/station*/
+    //     if($request->filled('station_id')) {
+    //         $query->where('station_id', 'LIKE', '%' . $request->station_id . '%');
+    //     }
+
+    //     $custodians = $query->latest()->get();
+
+    //     /* Departments*/
+    //     $departments = Discipline::where('status', 1)->orderBy('name')->get();
+
+    //     /* Designations*/
+    //     $designations = Designation::where('status', 1)->orderBy('name')->get();
+
+    //     /* Airport/Station*/
+    //     $stations = AirportStation::where('status', 1)->orderBy('station_name')->get();
+        
+    //     return view('custodian.index', compact('custodians', 'departments', 'designations', 'stations'));
+    // }
+
+    public function index(Request $request)
+    {
+        $query = Custodian::with([
+            'designation',
+            'discipline',
+            'section'
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Call Coordinator Permission
+        |--------------------------------------------------------------------------
+        | Management (role 0) = all stations
+        | Call Coordinator (role 1) = permitted stations only
+        |--------------------------------------------------------------------------
+        */
         if (auth()->user()->role == 1) {
-            $query->where('location_id', auth()->user()->location_id)
-                ->where('station_id', auth()->user()->station_id);
+
+            $stationIds = permittedStationIds();
+
+            $query->whereIn('station_id', $stationIds);
         }
 
-        /* search custodian name*/
-        if($request->filled('custodian_name')){
-            $query->where('custodian_name', 'LIKE', '%' . $request->custodian_name . '%');
+        /* Search Custodian Name */
+        if ($request->filled('custodian_name')) {
+            $query->where(
+                'custodian_name',
+                'LIKE',
+                '%' . $request->custodian_name . '%'
+            );
         }
 
-        /* search Employee ID*/
-        if($request->filled('emp_id')){
-            $query->where('emp_id', 'LIKE', '%' . $request->emp_id . '%');
+        /* Search Employee ID */
+        if ($request->filled('emp_id')) {
+            $query->where(
+                'emp_id',
+                'LIKE',
+                '%' . $request->emp_id . '%'
+            );
         }
 
-        /* search by department*/
-        if($request->filled('discipline_id')) {
-            $query->where('discipline_id', 'LIKE', '%' . $request->discipline_id . '%');
+        /* Search by Department */
+        if ($request->filled('discipline_id')) {
+            $query->where(
+                'discipline_id',
+                $request->discipline_id
+            );
         }
 
-        /* search by designation*/
-        if($request->filled('designation_id')) {
-            $query->where('designation_id', 'LIKE', '%' . $request->designation_id . '%');
+        /* Search by Designation */
+        if ($request->filled('designation_id')) {
+            $query->where(
+                'designation_id',
+                $request->designation_id
+            );
         }
 
-        /* search by airport/station*/
-        if($request->filled('station_id')) {
-            $query->where('station_id', 'LIKE', '%' . $request->station_id . '%');
+        /* Search by Airport / Station */
+        if ($request->filled('station_id')) {
+            $query->where(
+                'station_id',
+                $request->station_id
+            );
         }
 
         $custodians = $query->latest()->get();
 
-        /* Departments*/
-        $departments = Discipline::where('status', 1)->orderBy('name')->get();
+        /* Departments */
+        $departments = Discipline::where('status', 1)
+            ->orderBy('name')
+            ->get();
 
-        /* Designations*/
-        $designations = Designation::where('status', 1)->orderBy('name')->get();
+        /* Designations */
+        $designations = Designation::where('status', 1)
+            ->orderBy('name')
+            ->get();
 
-        /* Airport/Station*/
-        $stations = AirportStation::where('status', 1)->orderBy('station_name')->get();
+        /*
+        |--------------------------------------------------------------------------
+        | Airport / Station Dropdown
+        |--------------------------------------------------------------------------
+        */
+        $stationsQuery = AirportStation::where('status', 1);
+
+        if (auth()->user()->role == 1) {
+
+            $stationIds = permittedStationIds();
+            $stationsQuery->whereIn('id', $stationIds);
+        }
+
+        $stations = $stationsQuery
+            ->orderBy('station_name')
+            ->get();
+
+        return view('custodian.index', compact('custodians', 'departments', 'designations', 'stations'));       
         
-        return view('custodian.index', compact('custodians', 'departments', 'designations', 'stations'));
     }
-
 
     /** 
     * Display the form used to create a new Custodian. 

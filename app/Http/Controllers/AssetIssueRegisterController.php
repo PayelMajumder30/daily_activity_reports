@@ -36,121 +36,28 @@ class AssetIssueRegisterController extends Controller
      * @param Request $request Contains optional search and filter parameters. 
      * @return \Illuminate\View\View Returns the Asset Issue Register listing page. */
 
-    // public function index(Request $request){
+    public function index(Request $request){
 
-    //     $query = AssetIssueRegister::with(['assetInventory.assetModel.assetType', 'assetInventory.location', 'assetInventory.assetTransfers.fromCustodian',
-    //                                         'assetInventory.assetTransfers.toCustodian', 'custodian.designation', 'custodian.discipline', 'custodian.section']);
+        $query = AssetIssueRegister::with(['assetInventory.assetModel.assetType', 'assetInventory.location', 'assetInventory.assetTransfers.fromCustodian',
+                                            'assetInventory.assetTransfers.toCustodian', 'custodian.designation', 'custodian.discipline', 'custodian.section']);
 
                                             
                                         
-    //     /*
-    //     | Search Employee ID
-    //     */
-    //     if ($request->filled('emp_id')) {
-    //         $query->whereHas('custodian', function ($q) use ($request) {
-    //             $q->where('emp_id', 'LIKE', '%' . $request->emp_id . '%');
-    //         });
-    //     }  
-        
-    //     /*
-    //     | Search Custodian
-    //     */
-    //     if ($request->filled('custodian_name')) {
-    //         $query->whereHas('custodian', function ($q) use ($request) {
-    //             $q->where('custodian_name', 'LIKE', '%' . $request->custodian_name . '%');
-    //         });
-    //     }
-
-    //     /*
-    //     | Search Tag
-    //     */
-    //     if ($request->filled('tag_no')) {
-    //         $query->whereHas('assetInventory', function ($q) use ($request) {
-    //             $q->where('tag_no','LIKE','%' . $request->tag_no . '%');
-    //         });
-    //     }
-
-    //     /*
-    //     | Search asset type
-    //     */ 
-
-    //     if($request->filled('asset_type')) {
-    //         $query->whereHas('assetInventory.assetModel.assetType', function($q) use($request) {
-    //             $q->where('id', $request->asset_type);
-    //         });
-    //     }
-
-    //     /*
-    //     | Issue Status
-    //     */
-    //     if ($request->filled('issue_status')) {
-    //         $query->where('issue_status', $request->issue_status);
-    //     }
-
-    //     $issueRegisters = $query->latest()->get();
-
-    //      /*
-    //     |--------------------------------------------------------------------------
-    //     | Get Available Issue Statuses From Database
-    //     |--------------------------------------------------------------------------
-    //     */
-    //     $issueStatuses = AssetIssueRegister::query()->whereNotNull('issue_status')->where('issue_status', '!=', '')->distinct()
-    //                                                 ->orderBy('issue_status')->pluck('issue_status');
-
-    //     $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();      
-        
-    //     $custodians = Custodian::with(['designation', 'discipline', 'section', 'location'])->where('status', 1)->orderBy('custodian_name')->get();
-
-    //     return view('asset-issue-register.index', compact('issueRegisters', 'issueStatuses', 'custodians', 'assetTypes'));
-    // }
-
-    public function index(Request $request)
-    {
-        $query = AssetIssueRegister::with([
-            'assetInventory.assetModel.assetType',
-            'assetInventory.location',
-            'assetInventory.assetTransfers.fromCustodian',
-            'assetInventory.assetTransfers.toCustodian',
-            'custodian.designation',
-            'custodian.discipline',
-            'custodian.section'
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Uploader / Call Coordinator Access Restriction
-        |--------------------------------------------------------------------------
-        */
-        if (auth()->user()->role == 1) {
-            $query->whereHas('custodian', function ($q) {
-                $q->where('location_id', auth()->user()->location_id)
-                ->where('station_id', auth()->user()->station_id);
-            });
-        }
-
         /*
         | Search Employee ID
         */
         if ($request->filled('emp_id')) {
             $query->whereHas('custodian', function ($q) use ($request) {
-                $q->where(
-                    'emp_id',
-                    'LIKE',
-                    '%' . $request->emp_id . '%'
-                );
+                $q->where('emp_id', 'LIKE', '%' . $request->emp_id . '%');
             });
-        }
-
+        }  
+        
         /*
         | Search Custodian
         */
         if ($request->filled('custodian_name')) {
             $query->whereHas('custodian', function ($q) use ($request) {
-                $q->where(
-                    'custodian_name',
-                    'LIKE',
-                    '%' . $request->custodian_name . '%'
-                );
+                $q->where('custodian_name', 'LIKE', '%' . $request->custodian_name . '%');
             });
         }
 
@@ -159,24 +66,18 @@ class AssetIssueRegisterController extends Controller
         */
         if ($request->filled('tag_no')) {
             $query->whereHas('assetInventory', function ($q) use ($request) {
-                $q->where(
-                    'tag_no',
-                    'LIKE',
-                    '%' . $request->tag_no . '%'
-                );
+                $q->where('tag_no','LIKE','%' . $request->tag_no . '%');
             });
         }
 
         /*
-        | Search Asset Type
-        */
-        if ($request->filled('asset_type')) {
-            $query->whereHas(
-                'assetInventory.assetModel.assetType',
-                function ($q) use ($request) {
-                    $q->where('id', $request->asset_type);
-                }
-            );
+        | Search asset type
+        */ 
+
+        if($request->filled('asset_type')) {
+            $query->whereHas('assetInventory.assetModel.assetType', function($q) use($request) {
+                $q->where('id', $request->asset_type);
+            });
         }
 
         /*
@@ -188,45 +89,144 @@ class AssetIssueRegisterController extends Controller
 
         $issueRegisters = $query->latest()->get();
 
-        /*
-        | Get Available Issue Statuses
-        */
-        $issueStatuses = AssetIssueRegister::query()
-            ->whereNotNull('issue_status')
-            ->where('issue_status', '!=', '')
-            ->distinct()
-            ->orderBy('issue_status')
-            ->pluck('issue_status');
-
-        $assetTypes = AssetType::where('status', 1)
-            ->orderBy('name')
-            ->get();
-
-        /*
+         /*
         |--------------------------------------------------------------------------
-        | Custodian Dropdown
+        | Get Available Issue Statuses From Database
         |--------------------------------------------------------------------------
         */
-        $custodianQuery = Custodian::with([
-            'designation',
-            'discipline',
-            'section',
-            'location',
-            'station'
-        ])
-        ->where('status', 1);
+        $issueStatuses = AssetIssueRegister::query()->whereNotNull('issue_status')->where('issue_status', '!=', '')->distinct()
+                                                    ->orderBy('issue_status')->pluck('issue_status');
 
-        if (auth()->user()->role == 1) {
-            $custodianQuery->where('location_id', auth()->user()->location_id)
-                        ->where('station_id', auth()->user()->station_id);
-        }
+        $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();      
+        
+        $custodians = Custodian::with(['designation', 'discipline', 'section', 'location'])->where('status', 1)->orderBy('custodian_name')->get();
 
-        $custodians = $custodianQuery
-            ->orderBy('custodian_name')
-            ->get();
-
-        return view('asset-issue-register.index', compact('issueRegisters', 'issueStatuses', 'custodians', 'assetTypes'));     
+        return view('asset-issue-register.index', compact('issueRegisters', 'issueStatuses', 'custodians', 'assetTypes'));
     }
+
+    // public function index(Request $request)
+    // {
+    //     $query = AssetIssueRegister::with([
+    //         'assetInventory.assetModel.assetType',
+    //         'assetInventory.location',
+    //         'assetInventory.assetTransfers.fromCustodian',
+    //         'assetInventory.assetTransfers.toCustodian',
+    //         'custodian.designation',
+    //         'custodian.discipline',
+    //         'custodian.section'
+    //     ]);
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Uploader / Call Coordinator Access Restriction
+    //     |--------------------------------------------------------------------------
+    //     */
+    //     if (auth()->user()->role == 1) {
+    //         $query->whereHas('custodian', function ($q) {
+    //             $q->where('location_id', auth()->user()->location_id)
+    //             ->where('station_id', auth()->user()->station_id);
+    //         });
+    //     }
+
+    //     /*
+    //     | Search Employee ID
+    //     */
+    //     if ($request->filled('emp_id')) {
+    //         $query->whereHas('custodian', function ($q) use ($request) {
+    //             $q->where(
+    //                 'emp_id',
+    //                 'LIKE',
+    //                 '%' . $request->emp_id . '%'
+    //             );
+    //         });
+    //     }
+
+    //     /*
+    //     | Search Custodian
+    //     */
+    //     if ($request->filled('custodian_name')) {
+    //         $query->whereHas('custodian', function ($q) use ($request) {
+    //             $q->where(
+    //                 'custodian_name',
+    //                 'LIKE',
+    //                 '%' . $request->custodian_name . '%'
+    //             );
+    //         });
+    //     }
+
+    //     /*
+    //     | Search Tag
+    //     */
+    //     if ($request->filled('tag_no')) {
+    //         $query->whereHas('assetInventory', function ($q) use ($request) {
+    //             $q->where(
+    //                 'tag_no',
+    //                 'LIKE',
+    //                 '%' . $request->tag_no . '%'
+    //             );
+    //         });
+    //     }
+
+    //     /*
+    //     | Search Asset Type
+    //     */
+    //     if ($request->filled('asset_type')) {
+    //         $query->whereHas(
+    //             'assetInventory.assetModel.assetType',
+    //             function ($q) use ($request) {
+    //                 $q->where('id', $request->asset_type);
+    //             }
+    //         );
+    //     }
+
+    //     /*
+    //     | Issue Status
+    //     */
+    //     if ($request->filled('issue_status')) {
+    //         $query->where('issue_status', $request->issue_status);
+    //     }
+
+    //     $issueRegisters = $query->latest()->get();
+
+    //     /*
+    //     | Get Available Issue Statuses
+    //     */
+    //     $issueStatuses = AssetIssueRegister::query()
+    //         ->whereNotNull('issue_status')
+    //         ->where('issue_status', '!=', '')
+    //         ->distinct()
+    //         ->orderBy('issue_status')
+    //         ->pluck('issue_status');
+
+    //     $assetTypes = AssetType::where('status', 1)
+    //         ->orderBy('name')
+    //         ->get();
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Custodian Dropdown
+    //     |--------------------------------------------------------------------------
+    //     */
+    //     $custodianQuery = Custodian::with([
+    //         'designation',
+    //         'discipline',
+    //         'section',
+    //         'location',
+    //         'station'
+    //     ])
+    //     ->where('status', 1);
+
+    //     if (auth()->user()->role == 1) {
+    //         $custodianQuery->where('location_id', auth()->user()->location_id)
+    //                     ->where('station_id', auth()->user()->station_id);
+    //     }
+
+    //     $custodians = $custodianQuery
+    //         ->orderBy('custodian_name')
+    //         ->get();
+
+    //     return view('asset-issue-register.index', compact('issueRegisters', 'issueStatuses', 'custodians', 'assetTypes'));     
+    // }
 
     /** * Generate a human-readable history description for an asset issue record. 
      * 
@@ -372,138 +372,138 @@ class AssetIssueRegisterController extends Controller
      * 
      *  @return \Illuminate\View\View Returns the Asset Issue Register creation page. */
 
-    // public function create()
-    // {
-    //     /*
-    //     |----------------------------------------------------------------------
-    //     | Only Available Assets
-    //     |----------------------------------------------------------------------
-    //     */
-
-    //     $assets = AssetInventory::with([
-    //         'assetModel.assetType',
-    //         'location', 'station'
-    //     ])->where('status', 1)->where('asset_status', 'Available')->orderBy('tag_no')->get();
-        
-    //     /*
-    //     |----------------------------------------------------------------------
-    //     | Active Custodians
-    //     |----------------------------------------------------------------------
-    //     */
-
-    //     $custodians = Custodian::with([
-    //                                 'designation',
-    //                                 'discipline',
-    //                                 'location',
-    //                                 'station',
-    //                                 'section'
-    //     ])->where('status', 1)->orderBy('custodian_name')->get();
-        
-    //     /*
-    //     |----------------------------------------------------------------------
-    //     | Asset Data For JavaScript
-    //     |----------------------------------------------------------------------
-    //     */
-
-    //     $assetData = $assets->map(function ($asset) {
-
-    //         return [
-    //             'id'            => $asset->id,
-    //             'tag_no'        => $asset->tag_no,
-    //             'asset_type'    => $asset->assetModel?->assetType?->name,                  
-    //             'asset_model'   => $asset->assetModel?->model_name,                  
-    //             'location_id'   => $asset->location_id,                 
-    //             'station_id'    => $asset->station_id,                 
-    //         ];
-
-    //     })->values();
-
-    //     return view('asset-issue-register.create', compact('assets', 'custodians', 'assetData'));
-        
-    // }
     public function create()
     {
         /*
-        |--------------------------------------------------------------------------
-        | Available Assets
-        |--------------------------------------------------------------------------
-        | Management can see all available assets.
-        |
-        | Uploader / Call Coordinator can only see available assets
-        | from their own Region and Airport/Station.
-        |--------------------------------------------------------------------------
+        |----------------------------------------------------------------------
+        | Only Available Assets
+        |----------------------------------------------------------------------
         */
 
-        $assetQuery = AssetInventory::with([
+        $assets = AssetInventory::with([
             'assetModel.assetType',
-            'location',
-            'station'
-        ])
-        ->where('status', 1)
-        ->where('asset_status', 'Available');
-
-        if (auth()->user()->role == 1) {
-            $assetQuery->where('location_id', auth()->user()->location_id)
-                    ->where('station_id', auth()->user()->station_id);
-        }
-
-        $assets = $assetQuery
-            ->orderBy('tag_no')
-            ->get();
-
-
+            'location', 'station'
+        ])->where('status', 1)->where('asset_status', 'Available')->orderBy('tag_no')->get();
+        
         /*
-        |--------------------------------------------------------------------------
+        |----------------------------------------------------------------------
         | Active Custodians
-        |--------------------------------------------------------------------------
-        | Management can see all active custodians.
-        |
-        | Uploader / Call Coordinator can only see active custodians
-        | from their own Region and Airport/Station.
-        |--------------------------------------------------------------------------
+        |----------------------------------------------------------------------
         */
 
-        $custodianQuery = Custodian::with([
-            'designation',
-            'discipline',
-            'location',
-            'station',
-            'section'
-        ])
-        ->where('status', 1);
-
-        if (auth()->user()->role == 1) {
-            $custodianQuery->where('location_id', auth()->user()->location_id)
-                        ->where('station_id', auth()->user()->station_id);
-        }
-
-        $custodians = $custodianQuery
-            ->orderBy('custodian_name')
-            ->get();
-
-
+        $custodians = Custodian::with([
+                                    'designation',
+                                    'discipline',
+                                    'location',
+                                    'station',
+                                    'section'
+        ])->where('status', 1)->orderBy('custodian_name')->get();
+        
         /*
-        |--------------------------------------------------------------------------
+        |----------------------------------------------------------------------
         | Asset Data For JavaScript
-        |--------------------------------------------------------------------------
+        |----------------------------------------------------------------------
         */
 
         $assetData = $assets->map(function ($asset) {
 
             return [
-                'id'          => $asset->id,
-                'tag_no'      => $asset->tag_no,
-                'asset_type'  => $asset->assetModel?->assetType?->name,
-                'asset_model' => $asset->assetModel?->model_name,
-                'location_id' => $asset->location_id,
-                'station_id'  => $asset->station_id,
+                'id'            => $asset->id,
+                'tag_no'        => $asset->tag_no,
+                'asset_type'    => $asset->assetModel?->assetType?->name,                  
+                'asset_model'   => $asset->assetModel?->model_name,                  
+                'location_id'   => $asset->location_id,                 
+                'station_id'    => $asset->station_id,                 
             ];
 
         })->values();
 
-
-        return view('asset-issue-register.create', compact('assets', 'custodians', 'assetData'));    
+        return view('asset-issue-register.create', compact('assets', 'custodians', 'assetData'));
+        
     }
+    // public function create()
+    // {
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Available Assets
+    //     |--------------------------------------------------------------------------
+    //     | Management can see all available assets.
+    //     |
+    //     | Uploader / Call Coordinator can only see available assets
+    //     | from their own Region and Airport/Station.
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     $assetQuery = AssetInventory::with([
+    //         'assetModel.assetType',
+    //         'location',
+    //         'station'
+    //     ])
+    //     ->where('status', 1)
+    //     ->where('asset_status', 'Available');
+
+    //     if (auth()->user()->role == 1) {
+    //         $assetQuery->where('location_id', auth()->user()->location_id)
+    //                 ->where('station_id', auth()->user()->station_id);
+    //     }
+
+    //     $assets = $assetQuery
+    //         ->orderBy('tag_no')
+    //         ->get();
+
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Active Custodians
+    //     |--------------------------------------------------------------------------
+    //     | Management can see all active custodians.
+    //     |
+    //     | Uploader / Call Coordinator can only see active custodians
+    //     | from their own Region and Airport/Station.
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     $custodianQuery = Custodian::with([
+    //         'designation',
+    //         'discipline',
+    //         'location',
+    //         'station',
+    //         'section'
+    //     ])
+    //     ->where('status', 1);
+
+    //     if (auth()->user()->role == 1) {
+    //         $custodianQuery->where('location_id', auth()->user()->location_id)
+    //                     ->where('station_id', auth()->user()->station_id);
+    //     }
+
+    //     $custodians = $custodianQuery
+    //         ->orderBy('custodian_name')
+    //         ->get();
+
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Asset Data For JavaScript
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     $assetData = $assets->map(function ($asset) {
+
+    //         return [
+    //             'id'          => $asset->id,
+    //             'tag_no'      => $asset->tag_no,
+    //             'asset_type'  => $asset->assetModel?->assetType?->name,
+    //             'asset_model' => $asset->assetModel?->model_name,
+    //             'location_id' => $asset->location_id,
+    //             'station_id'  => $asset->station_id,
+    //         ];
+
+    //     })->values();
+
+
+    //     return view('asset-issue-register.create', compact('assets', 'custodians', 'assetData'));    
+    // }
 
     /** 
      *  Issue one or multiple assets to a selected custodian. 
@@ -856,8 +856,8 @@ class AssetIssueRegisterController extends Controller
                 'emp_id'        => $custodian->emp_id ?? '-',                   
                 'designation'   => $custodian->designation?->name ?? '-',                  
                 'department'    => $custodian->discipline?->name ?? '-',                   
-                'section'       => $custodian->section?->section_name ?? '-',  
-                'location_id'   => $custodian->location_id,                 
+                // 'section'       => $custodian->section?->section_name ?? '-',  
+                // 'location_id'   => $custodian->location_id,                 
                 'location'      => $custodian->location?->name ?? '-',  
                 'station_id'    => $custodian->station_id,
                 'station'       => $custodian->station?->station_name ?? '-',                 
@@ -958,18 +958,18 @@ class AssetIssueRegisterController extends Controller
             ], 404);
         }
 
-        if (
-            auth()->user()->role == 1 &&
-            (
-                (int) $custodian->location_id !== (int) auth()->user()->location_id ||
-                (int) $custodian->station_id !== (int) auth()->user()->station_id
-            )
-        ) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'You are not authorized to access this custodian.'
-            ], 403);
-        }
+        // if (
+        //     auth()->user()->role == 1 &&
+        //     (
+        //         (int) $custodian->location_id !== (int) auth()->user()->location_id ||
+        //         (int) $custodian->station_id !== (int) auth()->user()->station_id
+        //     )
+        // ) {
+        //     return response()->json([
+        //         'status'  => false,
+        //         'message' => 'You are not authorized to access this custodian.'
+        //     ], 403);
+        // }
 
 
         /*
@@ -1029,9 +1029,7 @@ class AssetIssueRegisterController extends Controller
         return response()->json([
 
             'status' => true,
-
             'custodian' => [
-
                 'custodian_name'    => $custodian->custodian_name ?? '-',                   
                 'emp_id'            => $custodian->emp_id ?? '-',                   
                 'email'             => $custodian->email ?? '-',                    

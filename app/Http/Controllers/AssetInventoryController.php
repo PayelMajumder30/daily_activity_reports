@@ -28,31 +28,114 @@ class AssetInventoryController extends Controller
      * @param Request $request
      * @return \Illuminate\View\View
      */
+    // public function index(Request $request)
+    // {
+    //     $query = AssetInventory::with([
+    //         'assetModel.assetType',
+    //         'location'
+    //     ]);
+
+    //     // Tag No.
+    //     if ($request->filled('tag_no')) {
+    //         $query->where('tag_no', 'LIKE', '%' . $request->tag_no . '%' );     
+    //     }
+
+    //     // PO Number
+    //     if ($request->filled('po_number')) {
+    //         $query->where('po_number', 'LIKE','%' . $request->po_number . '%');
+    //     }
+
+    //     // Serial Number
+    //     if ($request->filled('serial_no')) {
+    //         $query->where('serial_no', 'LIKE', '%' . $request->serial_no . '%');
+    //     }
+
+    //     // Asset Type
+    //     if ($request->filled('asset_type')) {
+    //         $query->whereHas('assetModel', function ($q) use ($request) {
+    //             $q->where('asset_type_id', $request->asset_type);
+    //         });
+    //     }
+
+    //     // Asset Model
+    //     if ($request->filled('asset_model')) {
+    //         $query->where('asset_model_id', $request->asset_model);
+    //     }
+
+    //     //Asset status
+    //     if($request->filled('asset_status')) {
+    //         $query->where('asset_status', $request->asset_status);
+    //     } 
+
+    //     // Location
+    //     if ($request->filled('location')) {
+    //         $query->where('location_id', $request->location);
+    //     }
+
+    //     // Installation Date
+    //     if ($request->filled('installation_date')) {
+    //         $query->whereDate('installation_date', $request->installation_date);
+    //     }
+
+    //     $inventories = $query->latest()->get();
+            
+    //     // Asset Type dropdown
+    //     $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();
+
+    //     // Asset model dropdown
+    //     $assetModels = AssetModel::where('status', 1)->orderBy('model_name')->get();
+
+    //     // asset status
+    //     $assetStatuses = AssetInventory::where('asset_status', '!=', '')->distinct()->orderBy('asset_status')->pluck('asset_status');
+
+    //     $locations = Location::where('status', 1)->orderBy('name')->get();
+        
+            
+    //     return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels', 'assetStatuses', 'locations'));
+    // }
+
     public function index(Request $request)
     {
-        $query = AssetInventory::with([
-            'assetModel.assetType',
-            'location'
-        ]);
-
-         if (auth()->user()->role == 1) {
-            $query->where('location_id', auth()->user()->location_id)
-                ->where('station_id', auth()->user()->station_id);
+        $query = AssetInventory::with(['assetModel.assetType', 'location']);
+                      
+        /*
+        |--------------------------------------------------------------------------
+        | Call Coordinator Permission
+        |--------------------------------------------------------------------------
+        | Management (role 0) = all stations
+        | Call Coordinator (role 1) = permitted stations only
+        |--------------------------------------------------------------------------
+        */
+        if (auth()->user()->role == 1) {
+            $stationIds = permittedStationIds();
+            $query->whereIn('station_id', $stationIds);
         }
 
         // Tag No.
         if ($request->filled('tag_no')) {
-            $query->where('tag_no', 'LIKE', '%' . $request->tag_no . '%' );     
+            $query->where(
+                'tag_no',
+                'LIKE',
+                '%' . $request->tag_no . '%'
+            );
         }
 
         // PO Number
         if ($request->filled('po_number')) {
-            $query->where('po_number', 'LIKE','%' . $request->po_number . '%');
+            $query->where(
+                'po_number',
+                'LIKE',
+                '%' . $request->po_number . '%'
+            );
         }
 
         // Serial Number
         if ($request->filled('serial_no')) {
-            $query->where('serial_no', 'LIKE', '%' . $request->serial_no . '%');
+            $query->where(
+                'serial_no',
+                'LIKE',
+                '%' . $request->serial_no . '%'
+            );
         }
 
         // Asset Type
@@ -64,39 +147,64 @@ class AssetInventoryController extends Controller
 
         // Asset Model
         if ($request->filled('asset_model')) {
-            $query->where('asset_model_id', $request->asset_model);
+            $query->where(
+                'asset_model_id',
+                $request->asset_model
+            );
         }
 
-        //Asset status
-        if($request->filled('asset_status')) {
-            $query->where('asset_status', $request->asset_status);
-        } 
+        // Asset Status
+        if ($request->filled('asset_status')) {
+            $query->where(
+                'asset_status',
+                $request->asset_status
+            );
+        }
 
         // Location
         if ($request->filled('location')) {
-            $query->where('location_id', $request->location);
+            $query->where(
+                'location_id',
+                $request->location
+            );
         }
 
         // Installation Date
         if ($request->filled('installation_date')) {
-            $query->whereDate('installation_date', $request->installation_date);
+            $query->whereDate(
+                'installation_date',
+                $request->installation_date
+            );
         }
 
         $inventories = $query->latest()->get();
-            
+
         // Asset Type dropdown
-        $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();
+        $assetTypes = AssetType::where('status', 1)
+            ->orderBy('name')
+            ->get();
 
-        // Asset model dropdown
-        $assetModels = AssetModel::where('status', 1)->orderBy('model_name')->get();
+        // Asset Model dropdown
+        $assetModels = AssetModel::where('status', 1)
+            ->orderBy('model_name')
+            ->get();
 
-        // asset status
-        $assetStatuses = AssetInventory::where('asset_status', '!=', '')->distinct()->orderBy('asset_status')->pluck('asset_status');
+        // Asset Status
+        $assetStatuses = AssetInventory::where(
+            'asset_status',
+            '!=',
+            ''
+        )
+        ->distinct()
+        ->orderBy('asset_status')
+        ->pluck('asset_status');
 
-        $locations = Location::where('status', 1)->orderBy('name')->get();
-        
-            
-        return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels', 'assetStatuses', 'locations'));
+        // Locations
+        $locations = Location::where('status', 1)
+            ->orderBy('name')
+            ->get();
+
+        return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels', 'assetStatuses', 'locations'));  
     }
 
 
@@ -895,12 +1003,9 @@ class AssetInventoryController extends Controller
             */
 
             $fromLocationId = $asset->location_id;
-
             $fromStationId = $asset->station_id;
-
-            $fromStationName =
-                $asset->station?->station_name ?? '-';
-
+            $fromStationName = $asset->station?->station_name ?? '-';
+                
 
             /*
             |--------------------------------------------------------------------------
@@ -909,13 +1014,9 @@ class AssetInventoryController extends Controller
             */
 
             $asset->update([
-
                 'location_id' => $request->to_location_id,
-
                 'station_id' => $request->to_station_id,
-
                 'asset_status' => 'Available',
-
             ]);
 
 
@@ -928,19 +1029,12 @@ class AssetInventoryController extends Controller
             AssetOutstationHistory::create([
 
                 'asset_inventory_id' => $asset->id,
-
                 'from_location_id' => $fromLocationId,
-
                 'from_station_id' => $fromStationId,
-
                 'to_location_id' => $request->to_location_id,
-
                 'to_station_id' => $request->to_station_id,
-
                 'outstation_date' => $request->outstation_date,
-
                 'remarks' => $request->remarks ?? null,
-
                 'created_by' => auth()->id(),
 
             ]);
@@ -955,9 +1049,7 @@ class AssetInventoryController extends Controller
             eventLog(
 
                 'Outstation',
-
                 'Asset Inventory',
-
                 'Asset ' . $asset->tag_no .
                 ' moved from ' .
                 $fromStationName .
@@ -975,11 +1067,9 @@ class AssetInventoryController extends Controller
 
             DB::commit();
 
-
             return response()->json([
 
                 'success' => true,
-
                 'message' =>
                     'Asset successfully moved to ' .
                     $destinationStation->station_name .
@@ -994,11 +1084,8 @@ class AssetInventoryController extends Controller
             return response()->json([
 
                 'success' => false,
-
                 'message' => 'Unable to move asset.',
-
                 'error' => $e->getMessage()
-
             ], 500);
         }
     }

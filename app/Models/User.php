@@ -96,4 +96,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(AssetOutstationHistory::class);
     }
+
+    public function locationPermissions(): HasMany
+    {
+        return $this->hasMany(UserLocationPermission::class, 'user_id');
+    }
 }

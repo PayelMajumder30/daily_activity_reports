@@ -183,9 +183,18 @@
                     </ul>
                 </div>
             </li>
+
+            <li class="nav-item">
+               <a href="{{ route('user-location-permission.index') }}" class="nav-link text-white     
+                {{ request()->routeIs('user-location-permission.*') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-shield-check"></i>
+                    User Location Permission
+                </a>
+            </li>
         @endif
 
-        @if(auth()->user()->role == 0 || auth()->user()->role == 1 )     
+       
+        @if(in_array(auth()->user()->role, [0, 1]))    
             <li class="nav-item">
                 <a href="{{ route('custodian.index') }}" class="nav-link text-white {{ request()->routeIs('custodian.*') ? 'active bg-primary' : '' }}">                
                     <i class="bi bi-person-workspace"></i>
