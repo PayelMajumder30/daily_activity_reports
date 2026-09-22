@@ -162,8 +162,7 @@
                             @foreach($locations as $location)
 
                                 <option
-                                    value="{{ $location->id }}" {{ old('location_id', $custodian->location_id) == $location->id ? 'selected' : '' }}>
-                                                                 
+                                    value="{{ $location->id }}" {{ old('location_id', $custodian->location_id) == $location->id ? 'selected' : '' }}>                                                                
                                     {{ ucwords($location->name) }}
                                 </option>
 
@@ -384,8 +383,10 @@
             |--------------------------------------------------------------------------
             */
 
-            let url = "{{ route('location.stations.byLocation', ':id') }}"
-                .replace(':id', locationId);
+            // let url = "{{ route('location.stations.byLocation', ':id') }}"
+            //     .replace(':id', locationId);
+
+            let url = "{{ route('custodian.stationsByLocation', ':locationId') }}".replace(':locationId', locationId);
 
             /*
             |--------------------------------------------------------------------------

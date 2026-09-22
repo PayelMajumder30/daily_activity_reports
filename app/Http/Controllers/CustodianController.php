@@ -95,7 +95,6 @@ class CustodianController extends Controller
         if (auth()->user()->role == 1) {
 
             $stationIds = permittedStationIds();
-
             $query->whereIn('station_id', $stationIds);
         }
 
@@ -193,9 +192,16 @@ class CustodianController extends Controller
 
     public function create(){
 
+        $locationsQuery = Location::where('status', 1);
+        if(auth()->user()->role == 1) {
+            $locationIds = permittedLocationIds();
+            $locationsQuery->whereIn('id', $locationIds);
+        }
+
         $designations   = Designation::where('status', 1)->orderBy('name')->get();
         $departments    = Discipline::where('status', 1)->orderBy('name')->get();
-        $locations      = Location::where('status', 1)->orderBy('name')->get();     
+        // $locations      = Location::where('status', 1)->orderBy('name')->get();   
+        $locations      =   $locationsQuery->orderBy('name')->get();
         $stations       = AirportStation::where('status', 1)->orderBy('station_name')->get();
         return view('custodian.create', compact('designations', 'departments', 'locations', 'stations'));
     }
@@ -312,11 +318,7 @@ class CustodianController extends Controller
             ->first();
 
         if (!$location) {
-
-            return back()
-                ->withErrors([
-                    'location_id' => 'Invalid location selected.'
-                ])->withInput();               
+            return back()->withErrors(['location_id' => 'Invalid location selected.'])->withInput();                                                        
         }
 
 
@@ -332,12 +334,7 @@ class CustodianController extends Controller
             ->first();
 
         if (!$station) {
-
-            return back()
-                ->withErrors([
-                    'station_id' =>
-                        'Selected station does not belong to the selected location.'
-                ])->withInput();              
+            return back()->withErrors(['station_id' => 'Selected station does not belong to the selected location.'])->withInput();                                                              
         }
 
 
@@ -352,11 +349,7 @@ class CustodianController extends Controller
             ->first();
 
         if (!$discipline) {
-
-            return back()
-                ->withErrors([
-                    'discipline_id' => 'Invalid department selected.'                       
-                ])->withInput();               
+            return back()->withErrors(['discipline_id' => 'Invalid department selected.'])->withInput();                                                                                  
         }
     
 
@@ -376,10 +369,7 @@ class CustodianController extends Controller
                 ->exists();
 
             if (!$sectionExists) {
-                return back()
-                    ->withErrors([
-                        'section_id' => 'Selected section does not belong to the selected department.'                           
-                    ])->withInput();                  
+                return back()->withErrors(['section_id' => 'Selected section does not belong to the selected department.'])->withInput();                                                                                       
             }
 
             $sectionId = $request->section_id;
@@ -454,6 +444,7 @@ class CustodianController extends Controller
 
     public function edit(Request $request, $id)
     {
+        
         $request->session()->forget('success');
 
         try {
@@ -474,17 +465,38 @@ class CustodianController extends Controller
             'station',
         ])->findOrFail($custodianId);
 
-        $designations = Designation::where('status', 1)
-            ->orderBy('name')
-            ->get();
+        if(auth()->user()->role == 1 && !hasStationPermission((int) $custodian->station_id)) {
+            abort(403, 'You do not have permission to edit this custodian.');
+        }
 
-        $departments = Discipline::where('status', 1)
-            ->orderBy('name')
-            ->get();
+        $designations   = Designation::where('status', 1)->orderBy('name')->get();                    
+        $departments    = Discipline::where('status', 1)->orderBy('name')->get();    
 
-        $locations = Location::where('status', 1)
-            ->orderBy('name')
-            ->get();
+        /*
+        |--------------------------------------------------------------------------
+        | Permitted Locations
+        |--------------------------------------------------------------------------
+        */
+
+        $locationsQuery = Location::where('status', 1);
+
+        if (auth()->user()->role == 1) {
+
+            $locationIds = permittedLocationIds();
+            $locationsQuery->whereIn('id', $locationIds);
+        }                 
+        $locations      = $locationsQuery->orderBy('name')->get();
+        // $stations       = AirportStation::where('status', 1)->orderBy('station_name')->get();
+         /*
+        |--------------------------------------------------------------------------
+        | Stations
+        |--------------------------------------------------------------------------
+        |
+        | Stations are loaded through the Custodian AJAX endpoint.
+        |
+        */
+
+        $stations = collect();
 
         /*
         |--------------------------------------------------------------------------
@@ -497,14 +509,8 @@ class CustodianController extends Controller
             $custodian->discipline_id
         )->where('status', 1)->orderBy('section_name')->get();
                      
-
-        return view('custodian.edit', compact(
-            'custodian',
-            'designations',
-            'departments',
-            'locations',
-            'sections'
-        ));
+        return view('custodian.edit', compact('custodian', 'designations', 'departments', 'locations', 'sections', 'stations'));          
+        
     }
 
     /** 
@@ -736,18 +742,82 @@ class CustodianController extends Controller
             $sectionId = null;
         }
 
+        // $station = AirportStation::where('id', $request->station_id)
+        //     ->where('location_id', $request->location_id)
+        //     ->where('status', 1)
+        //     ->first();
+
+        // if (!$station) {
+
+        //     return back()
+        //         ->withErrors([
+        //             'station_id' => 'Selected station does not belong to the selected region.'])->withInput();                                     
+                
+        // }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Active Location
+        |--------------------------------------------------------------------------
+        */
+
+        $location = Location::where('id', $request->location_id)
+            ->where('status', 1)
+            ->first();
+
+        if (!$location) {
+            return back()->withErrors(['location_id' => 'Invalid region selected.'])->withInput();       
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Location Permission
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            auth()->user()->role == 1 &&
+            !hasLocationPermission((int) $location->id)
+        ) {
+            return back()->withErrors(['location_id' => 'You do not have permission to use the selected region.'])->withInput();             
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Station Belongs to Selected Location
+        |--------------------------------------------------------------------------
+        */
+
         $station = AirportStation::where('id', $request->station_id)
             ->where('location_id', $request->location_id)
             ->where('status', 1)
             ->first();
 
         if (!$station) {
-
             return back()
                 ->withErrors([
-                    'station_id' => 'Selected station does not belong to the selected region.'])->withInput();                                     
+                    'station_id' => 'Selected station does not belong to the selected region.'
+                ])
+                ->withInput();
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Station Permission
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+            auth()->user()->role == 1 &&
+            !hasStationPermission((int) $station->id)
+        ) {
+            return back()->withErrors(['station_id' => 'You do not have permission to use the selected station.'])->withInput();      
                 
         }
+
         /*
         |--------------------------------------------------------------------------
         | Update Custodian
@@ -756,15 +826,15 @@ class CustodianController extends Controller
 
         $custodian->update([
 
-            'custodian_name' => $request->custodian_name,
-            'designation_id' => $request->designation_id,
-            'location_id' => $request->location_id,
-            'station_id' => $request->station_id,       
-            'discipline_id' => $request->discipline_id,
-            'section_id' => $sectionId,
-            'emp_id' => $request->emp_id,
-            'email' => $request->email,
-            'phone' => $request->phone,
+            'custodian_name'    => $request->custodian_name,
+            'designation_id'    => $request->designation_id,
+            'location_id'       => $request->location_id,
+            'station_id'        => $request->station_id,       
+            'discipline_id'     => $request->discipline_id,
+            'section_id'        => $sectionId,
+            'emp_id'            => $request->emp_id,
+            'email'             => $request->email,
+            'phone'             => $request->phone,
 
         ]);
 
@@ -776,12 +846,8 @@ class CustodianController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        return redirect()
-            ->route('custodian.index')
-            ->with(
-                'success',
-                'Custodian updated successfully.'
-            );
+        return redirect()->route('custodian.index')->with('success', 'Custodian updated successfully.');            
+            
     }
 
 
@@ -842,5 +908,79 @@ class CustodianController extends Controller
             'status'  => $custodian->status
         ]);
     }  
+
+    public function stationsByLocation($locationId)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Location
+        |--------------------------------------------------------------------------
+        */
+
+        $location = Location::where('id', $locationId)
+            ->where('status', 1)
+            ->first();
+
+        if (!$location) {
+            return response()->json([], 404);
+        }
+
+         // Check Region permission
+        if (
+            auth()->user()->role == 1 &&
+            !hasLocationPermission((int) $locationId)
+        ) {
+            return response()->json([], 403);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Station Query
+        |--------------------------------------------------------------------------
+        */
+
+        $query = AirportStation::where('location_id', $locationId)->where('status', 1);         
+
+        /*
+        |--------------------------------------------------------------------------
+        | Restrict Stations for Call Coordinator / Uploader
+        |--------------------------------------------------------------------------
+        */
+
+        if (auth()->user()->role == 1) {
+
+            $stationIds = permittedStationIds();
+            $query->whereIn('id', $stationIds);
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Get Stations
+        |--------------------------------------------------------------------------
+        */
+
+        $stations = $query
+            ->orderBy('station_name')
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Return JSON
+        |--------------------------------------------------------------------------
+        */
+
+        return response()->json(
+            $stations->map(function ($station) {
+
+                return [
+                    'id'          => $station->id,
+                    'station_name'=> $station->station_name,
+                    'short_name'  => $station->short_name,
+                ];
+
+            })
+        );
+    }
     
 }

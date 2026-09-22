@@ -70,7 +70,7 @@
 
                             @foreach($users as $user)
 
-                                <option value="{{ $user->id }}" {{ $selectedUser && $selectedUser->id == $user->id ? 'selected' : '' }}>                                   
+                                <option value="{{ encryptId($user->id) }}" {{ $selectedUser && $selectedUser->id == $user->id ? 'selected' : '' }}>                                   
                                     {{ ucwords($user->name) }}
                                     ({{ $user->email }})
                                 </option>
@@ -106,7 +106,7 @@
 
                 <form method="POST" action="{{ route('user-location-permission.store') }}">                      
                     @csrf
-                    <input type="hidden" name="user_id" value="{{ $selectedUser->id }}">
+                    <input type="hidden" name="user_id" value="{{ encryptId($selectedUser->id) }}">
 
                     <div class="row">
 
@@ -218,9 +218,7 @@
         function updateLocationCheckbox(locationId) {
 
             let stations = $('.station-checkbox[data-location="' + locationId + '"]');
-
             let checkedStations = stations.filter(':checked');
-
             let locationCheckbox = $('.location-checkbox[data-location="' + locationId + '"]');
                 
             if (stations.length === 0) {
@@ -267,12 +265,8 @@
         $('.location-checkbox').on('change', function () {
 
             let locationId = $(this).data('location');
-
             let checked = $(this).is(':checked');
-
-            $('.station-checkbox[data-location="' + locationId + '"]')
-                .prop('checked', checked);
-
+            $('.station-checkbox[data-location="' + locationId + '"]').prop('checked', checked);              
             $(this).prop('indeterminate', false);
         });
 
@@ -286,7 +280,6 @@
         $('.station-checkbox').on('change', function () {
 
             let locationId = $(this).data('location');
-
             updateLocationCheckbox(locationId);
         });
 
@@ -300,7 +293,6 @@
         $('.location-checkbox').each(function () {
 
             let locationId = $(this).data('location');
-
             updateLocationCheckbox(locationId);
         });
 

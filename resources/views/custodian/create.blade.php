@@ -388,8 +388,11 @@
                 return;
             }
 
-            let url = "{{ route('location.stations.byLocation', ':id') }}"
-                .replace(':id', locationId);
+            // let url = "{{ route('location.stations.byLocation', ':id') }}"
+            //     .replace(':id', locationId);
+
+            let url = "{{ route('custodian.stationsByLocation', ':locationId') }}".replace(':locationId', locationId);
+        
 
             $.ajax({
                 url: url,

@@ -162,6 +162,7 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::put('/update/{id}', [CustodianController::class,'update'])->name('update');
         Route::get('/sections/{id}', [CustodianController::class, 'sections'])->name('sections');    
         Route::post('/status/{id}', [CustodianController::class,'changeStatus'])->name('changeStatus');        
+        Route::get('/stations/{locationId}', [CustodianController::class,'stationsByLocation'])->name('stationsByLocation');        
     });
 
     // asset inventory

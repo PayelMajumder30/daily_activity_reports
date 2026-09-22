@@ -83,7 +83,6 @@ if (!function_exists('permittedStationIds')) {
     function permittedStationIds(?int $userId = null)
     {
         $user = auth()->user();
-
         if (!$user) {
             return collect();
         }
