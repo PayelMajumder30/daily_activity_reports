@@ -20,84 +20,155 @@ class AssetInventoryExport implements FromQuery, WithHeadings, WithMapping
     /**
      * Query for Excel export
      */
+    // public function query()
+    // {
+    //     return AssetInventory::with([
+    //         'assetModel.assetType',
+    //         'location',
+    //         'station'
+    //     ])
+    //     ->when(
+    //         $this->filters['tag_no'] ?? null,
+    //         function (Builder $query, $tagNo) {
+    //             $query->where(
+    //                 'tag_no',
+    //                 'LIKE',
+    //                 '%' . $tagNo . '%'
+    //             );
+    //         }
+    //     )
+    //     ->when(
+    //         $this->filters['po_number'] ?? null,
+    //         function (Builder $query, $poNumber) {
+    //             $query->where(
+    //                 'po_number',
+    //                 'LIKE',
+    //                 '%' . $poNumber . '%'
+    //             );
+    //         }
+    //     )
+    //     ->when(
+    //         $this->filters['serial_no'] ?? null,
+    //         function (Builder $query, $serialNo) {
+    //             $query->where(
+    //                 'serial_no',
+    //                 'LIKE',
+    //                 '%' . $serialNo . '%'
+    //             );
+    //         }
+    //     )
+    //     ->when(
+    //         $this->filters['asset_type'] ?? null,
+    //         function (Builder $query, $assetType) {
+    //             $query->whereHas(
+    //                 'assetModel',
+    //                 function ($q) use ($assetType) {
+    //                     $q->where(
+    //                         'asset_type_id',
+    //                         $assetType
+    //                     );
+    //                 }
+    //             );
+    //         }
+    //     )
+    //     ->when(
+    //         $this->filters['asset_model'] ?? null,
+    //         function (Builder $query, $assetModel) {
+    //             $query->where(
+    //                 'asset_model_id',
+    //                 $assetModel
+    //             );
+    //         }
+    //     )
+    //     ->when(
+    //         $this->filters['asset_status'] ?? null,
+    //         function(Builder $query, $assetStatus) {
+    //             $query->where('asset_status', $assetStatus);
+    //         }
+    //     )
+    //     ->when(
+    //         $this->filters['installation_date'] ?? null,
+    //         function (Builder $query, $installationDate) {
+
+    //             $query->whereDate(
+    //                 'installation_date',
+    //                 $this->convertDate($installationDate)
+    //             );
+
+    //         }
+    //     )
+    //     ->latest('id');
+    // }
     public function query()
     {
-        return AssetInventory::with([
+        $query = AssetInventory::with([
             'assetModel.assetType',
             'location',
             'station'
-        ])
-        ->when(
-            $this->filters['tag_no'] ?? null,
-            function (Builder $query, $tagNo) {
-                $query->where(
-                    'tag_no',
-                    'LIKE',
-                    '%' . $tagNo . '%'
-                );
-            }
-        )
-        ->when(
-            $this->filters['po_number'] ?? null,
-            function (Builder $query, $poNumber) {
-                $query->where(
-                    'po_number',
-                    'LIKE',
-                    '%' . $poNumber . '%'
-                );
-            }
-        )
-        ->when(
-            $this->filters['serial_no'] ?? null,
-            function (Builder $query, $serialNo) {
-                $query->where(
-                    'serial_no',
-                    'LIKE',
-                    '%' . $serialNo . '%'
-                );
-            }
-        )
-        ->when(
-            $this->filters['asset_type'] ?? null,
-            function (Builder $query, $assetType) {
-                $query->whereHas(
-                    'assetModel',
-                    function ($q) use ($assetType) {
-                        $q->where(
-                            'asset_type_id',
-                            $assetType
-                        );
-                    }
-                );
-            }
-        )
-        ->when(
-            $this->filters['asset_model'] ?? null,
-            function (Builder $query, $assetModel) {
-                $query->where(
-                    'asset_model_id',
-                    $assetModel
-                );
-            }
-        )
-        ->when(
-            $this->filters['asset_status'] ?? null,
-            function(Builder $query, $assetStatus) {
-                $query->where('asset_status', $assetStatus);
-            }
-        )
-        ->when(
-            $this->filters['installation_date'] ?? null,
-            function (Builder $query, $installationDate) {
+        ]);
 
-                $query->whereDate(
-                    'installation_date',
-                    $this->convertDate($installationDate)
-                );
+        /*
+        |--------------------------------------------------------------------------
+        | Call Coordinator Permission Filter
+        |--------------------------------------------------------------------------
+        */
 
-            }
-        )
-        ->latest('id');
+        if (auth()->user()->role == 1) {
+
+            $permittedStations = permittedStationIds();
+            $query->whereIn('station_id', $permittedStations);
+        }
+
+        // Keep all your existing filters below
+        return $query
+            ->when(
+                $this->filters['tag_no'] ?? null,
+                function (Builder $query, $tagNo) {
+                    $query->where('tag_no', 'LIKE', '%' . $tagNo . '%');
+                }
+            )
+            ->when(
+                $this->filters['po_number'] ?? null,
+                function (Builder $query, $poNumber) {
+                    $query->where('po_number', 'LIKE', '%' . $poNumber . '%');
+                }
+            )
+            ->when(
+                $this->filters['serial_no'] ?? null,
+                function (Builder $query, $serialNo) {
+                    $query->where('serial_no', 'LIKE', '%' . $serialNo . '%');
+                }
+            )
+            ->when(
+                $this->filters['asset_type'] ?? null,
+                function (Builder $query, $assetType) {
+                    $query->whereHas('assetModel', function ($q) use ($assetType) {
+                        $q->where('asset_type_id', $assetType);
+                    });
+                }
+            )
+            ->when(
+                $this->filters['asset_model'] ?? null,
+                function (Builder $query, $assetModel) {
+                    $query->where('asset_model_id', $assetModel);
+                }
+            )
+            ->when(
+                $this->filters['asset_status'] ?? null,
+                function (Builder $query, $assetStatus) {
+                    $query->where('asset_status', $assetStatus);
+                }
+            )
+            ->when(
+                $this->filters['installation_date'] ?? null,
+                function (Builder $query, $installationDate) {
+                    $query->whereDate(
+                        'installation_date',
+                        $this->convertDate($installationDate)
+                    );
+                }
+            )
+            ->latest('id');
     }
 
     /**
@@ -128,26 +199,20 @@ class AssetInventoryExport implements FromQuery, WithHeadings, WithMapping
     {
         return [
             $item->id,
-
             $item->tag_no ?? '-',
-
             $item->po_number ?? '-',
 
             // Asset Type
-            ucwords(
-                $item->assetModel?->assetType?->name ?? 'N/A'
-            ),
-
-             // Asset Model
+            ucwords($item->assetModel?->assetType?->name ?? 'N/A'),
+                       
+            // Asset Model
             $item->assetModel?->model_name ?? 'N/A',
 
             // Serial No.
             $item->serial_no ?? 'N/A',
 
-             // Region
-            ucwords(
-                $item->location?->name ?? 'N/A'
-            ),
+            // Region
+            ucwords($item->location?->name ?? 'N/A'),                          
 
             // Airport / Station
             $item->station ? ucwords($item->station->station_name) : 'N/A',

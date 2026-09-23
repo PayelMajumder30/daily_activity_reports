@@ -185,84 +185,6 @@
 
         });
 
-        // $('#asset_type_id').change(function () {
-
-        //     let typeId = $(this).val();
-        //     let modelSelect = $('#asset_model_id');
-
-        //     modelSelect
-        //         .empty()
-        //         .append('<option value="">Loading Asset models...</option>')
-        //         .prop('disabled', true);
-
-        //     if (typeId === '') {
-
-        //         modelSelect
-        //             .empty()
-        //             .append('<option value="">Select Asset type First</option>')
-        //             .prop('disabled', true);
-
-        //         return;
-        //     }
-
-        //     let url = "{{ route('asset-inventory.getModels', ':id') }}".replace(':id', typeId);             
-        //     $.ajax({
-
-        //         url: url,
-        //         type: "GET",
-
-        //         success: function (response) {
-        //             modelSelect.empty();
-        //             if (response.length > 0) {
-
-        //                 modelSelect.append(
-        //                     '<option value="">Select Asset models</option>'
-        //                 );
-
-        //                 $.each(response, function (index, assetModel) {
-
-        //                     let modelName = assetModel.model_name;
-
-        //                     if (assetModel.short_name) {
-        //                         modelName += ' (' + assetModel.short_name + ')';
-        //                     }
-
-        //                     modelSelect.append(
-        //                         $('<option>', {
-        //                             value: assetModel.id,
-        //                             text: modelName
-        //                         })
-        //                     );
-
-        //                 });
-
-        //                 modelSelect.prop('disabled', false);
-
-        //             } else {
-
-        //                 modelSelect
-        //                     .append(
-        //                         '<option value="">No Station Available</option>'
-        //                     ).prop('disabled', true);
-                            
-        //             }
-
-        //         },
-
-        //         error: function () {
-
-        //             stationSelect
-        //                 .empty()
-        //                 .append(
-        //                     '<option value="">Unable to load stations</option>'
-        //                 )
-        //                 .prop('disabled', true);
-        //         }
-
-        //     });
-
-        // });
-
         // ==========================
         // Region -> Station
         // ==========================
@@ -287,16 +209,17 @@
                 return;
             }
 
-            let url = "{{ route('location.stations.byLocation', ':id') }}".replace(':id', locationId);             
+            // let url = "{{ route('location.stations.byLocation', ':id') }}".replace(':id', locationId);      
+              
+            let url = "{{ route('asset-inventory.stationsByLocation', ':locationId') }}".replace(':locationId', locationId);
+        
             $.ajax({
-
                 url: url,
                 type: "GET",
 
                 success: function (response) {
 
                     stationSelect.empty();
-
                     if (response.length > 0) {
 
                         stationSelect.append(
@@ -306,7 +229,6 @@
                         $.each(response, function (index, station) {
 
                             let stationName = station.station_name;
-
                             if (station.short_name) {
                                 stationName += ' (' + station.short_name + ')';
                             }
@@ -323,12 +245,7 @@
                         stationSelect.prop('disabled', false);
 
                     } else {
-
-                        stationSelect
-                            .append(
-                                '<option value="">No Station Available</option>'
-                            )
-                            .prop('disabled', true);
+                        stationSelect.append('<option value="">No Station Available</option>').prop('disabled', true);       
                     }
 
                 },
@@ -339,8 +256,8 @@
                         .empty()
                         .append(
                             '<option value="">Unable to load stations</option>'
-                        )
-                        .prop('disabled', true);
+                        ).prop('disabled', true);
+                        
                 }
 
             });
@@ -360,9 +277,7 @@
             $('#asset_type_id').change(function () {
 
                 let type = $(this).val();
-
                 $('#asset_model_id').html('<option value="">Loading...</option>');
-
                 if (type == '') {
 
                     $('#asset_model_id').html(
@@ -374,9 +289,8 @@
 
                 $.ajax({
 
-                    url: "{{ route('asset-inventory.getModels', ':id') }}"
-                        .replace(':id', type),
-
+                    url: "{{ route('asset-inventory.getModels', ':id') }}".replace(':id', type),
+                        
                     type: "GET",
 
                     success: function (res) {
@@ -426,13 +340,9 @@
             $('#generateRows').click(function () {
 
                 clearErrors();
-
                 let valid = true;
-
                 function error(id, msg) {
-
                     $('#' + id + '_error').text(msg);
-
                     valid = false;
                 }
 
@@ -469,21 +379,6 @@
                         'Asset Type is required.'
                     );
                 }
-
-
-                // if (
-                //     $('#asset_model_id').val() == '' ||
-                //     $('#asset_model_id option:selected')
-                //         .text()
-                //         .trim() == 'No Model Available'
-                // ) {
-
-                //     error(
-                //         'asset_model',
-                //         'Asset Model is required.'
-                //     );
-                // }
-
 
                 if ($('#location_id').val() == '') {
 
@@ -543,10 +438,10 @@
                 $.ajax({
 
                     url: "{{ route('asset-inventory.generateTags', [
-                        'location' => ':location',
-                        'station' => ':station',
+                        'location'  => ':location',
+                        'station'   => ':station',
                         'assetType' => ':assetType',
-                        'quantity' => ':quantity'
+                        'quantity'  => ':quantity'
                     ]) }}"
                     .replace(':location', locationId)
                     .replace(':station', stationId)
@@ -620,22 +515,12 @@
                 let assetModelId = $('#asset_model_id').val();                    
                 let locationId = $('#location_id').val();     
                 let stationId = $('#station_id').val();               
-                let assetType =
-                    $('#asset_type_id option:selected').text().trim();
-                                                
-                let assetModel =
-                    $('#asset_model_id option:selected').text().trim();
-                                               
-                let location =
-                    $('#location_id option:selected').text().trim();
-
-                let station =
-                    $('#station_id option:selected').text().trim();
-                                               
-                let po = $('#po_number').val();
-                    
-                let installationDateDb = $('#installation_date').val();
-                    
+                let assetType = $('#asset_type_id option:selected').text().trim();                                               
+                let assetModel = $('#asset_model_id option:selected').text().trim();                                                          
+                let location = $('#location_id option:selected').text().trim();                  
+                let station = $('#station_id option:selected').text().trim();                                                            
+                let po = $('#po_number').val();            
+                let installationDateDb = $('#installation_date').val();             
                 let warrantyYears = parseInt($('#warranty_years').val());
                     
                 // ==========================
@@ -769,13 +654,9 @@
 
                             <div class="text-end">
 
-                                <button
-                                    type="submit"
-                                    class="btn btn-primary">
-
+                                <button type="submit" class="btn btn-primary">                                                                
                                     <i class="bi bi-check-circle"></i>
                                     Final Submit
-
                                 </button>
 
                             </div>
@@ -868,7 +749,6 @@
                     let form = this;
                     let valid = true;
 
-
                     // Check Serial Numbers
                     // $(form).find('.serial-no')
                         
@@ -895,7 +775,6 @@
                             valid = false;
 
                         } else {
-
                             $(this).removeClass('is-invalid');
                         }
 
@@ -919,11 +798,8 @@
                     $.ajax({
 
                         url: "{{ route('asset-inventory.store') }}",
-
                         type: "POST",
-
                         data: $(form).serialize(),
-
                         beforeSend: function () {
 
                             $(form)
@@ -937,16 +813,12 @@
                         success: function (res) {
 
                             if (res.success) {
-
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Success',
                                     text: res.message 
                                 }).then(function () {
-
-                                    window.location.href =
-                                        "{{ route('asset-inventory.index') }}";
-
+                                    window.location.href = "{{ route('asset-inventory.index') }}";                                        
                                 });
 
                             }
@@ -995,9 +867,7 @@
             function clearErrors() {
 
                 $('.text-danger').text('');
-
-                $('.form-control, .form-select')
-                    .removeClass('is-invalid');
+                $('.form-control, .form-select').removeClass('is-invalid');                    
 
             }
 

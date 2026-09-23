@@ -725,13 +725,9 @@
         |--------------------------------------------------------------------------
         */
 
-        let url =
-            "{{ route('asset-issue-register.custodian-asset-details', ':id') }}"
-            .replace(':id', id);
-
-
+        let url = "{{ route('asset-issue-register.custodian-asset-details', ':id') }}".replace(':id', id);
+                       
         console.log('Custodian Details URL:', url);
-
 
         /*
         |--------------------------------------------------------------------------
@@ -754,9 +750,7 @@
 
                 console.log('Custodian Details Response:', response);
 
-
                 if (!response.status) {
-
                     $('#issueDetailsContent').html(`
 
                         <div class="alert alert-warning">
@@ -792,9 +786,7 @@
                         assetRows += `
                             <tr>
                                 <td>${index + 1}</td>
-                                    
-                                
-
+                                                                   
                                 <td>
                                     <strong>
                                         ${asset.tag_no ?? '-'}
@@ -1799,9 +1791,8 @@
                 |--------------------------------------------------------------------------
                 */
 
-                $('#confirmTransferBtn')
-                    .prop('disabled', true);
-
+                $('#confirmTransferBtn').prop('disabled', true);
+                    
                 /*
                 |--------------------------------------------------------------------------
                 | AJAX

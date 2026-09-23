@@ -31,6 +31,20 @@ class AssetIssueRegisterExport implements FromCollection, WithHeadings, ShouldAu
 
         /*
         |--------------------------------------------------------------------------
+        | Call Coordinator Location / Station Permission
+        |--------------------------------------------------------------------------
+        */
+
+        if (auth()->user()->role == 1) {
+
+            $permittedStations = permittedStationIds();
+            $query->whereHas('assetInventory', function ($q) use ($permittedStations) {
+                $q->whereIn('station_id', $permittedStations);
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Employee ID
         |--------------------------------------------------------------------------
         */
@@ -105,66 +119,24 @@ class AssetIssueRegisterExport implements FromCollection, WithHeadings, ShouldAu
             );
         }
 
-        return $query
-            ->latest()
-            ->get()
-            ->map(function ($issue) {
-
-                return [
-                    'Tag No.' => $issue->assetInventory->tag_no ?? 'N/A',
-
-                    'Asset Type' => ucwords(
-                        $issue->assetInventory
-                            ->assetModel
-                            ->assetType
-                            ->name ?? 'N/A'
-                    ),
-
-                    'Asset Model' => $issue->assetInventory
-                        ->assetModel
-                        ->model_name ?? 'N/A',
-
-                    'Custodian' => ucwords(
-                        $issue->custodian->custodian_name ?? 'N/A'
-                    ),
-
-                    'Employee ID' => $issue->custodian->emp_id ?? 'N/A',
-
-                    'Department' => ucwords(
-                        $issue->custodian->discipline->name ?? 'N/A'
-                    ),
-
-                    'Section' => ucwords(
-                        $issue->custodian->section->name ?? 'N/A'
-                    ),
-
-                    'Designation' => ucwords(
-                        $issue->custodian->designation->name ?? 'N/A'
-                    ),
-
-                    'User Type' => ucfirst(
-                        $issue->user_type ?? 'N/A'
-                    ),
-
-                    'Issued Date' => $issue->issued_date
-                        ? $issue->issued_date->format('d-m-Y')
-                        : 'N/A',
-
-                    'Transfer Date' => $issue->transfer_date
-                        ? $issue->transfer_date->format('d-m-Y')
-                        : '-',
-
-                    'Returned Date' => $issue->returned_date
-                        ? $issue->returned_date->format('d-m-Y')
-                        : '-',
-
-                    'Retained Date' => $issue->retained_date
-                        ? $issue->retained_date->format('d-m-Y')
-                        : '-',
-
-                    'Status' => $issue->issue_status ?? 'N/A',
-                ];
-            });
+        return $query->latest()->get()->map(function ($issue) {
+            return [
+                'Tag No.'       => $issue->assetInventory->tag_no ?? 'N/A',
+                'Asset Type'    => ucwords($issue->assetInventory->assetModel->assetType->name ?? 'N/A'),
+                'Asset Model'   => $issue->assetInventory->assetModel->model_name ?? 'N/A',                                                                                    
+                'Custodian'     => ucwords($issue->custodian->custodian_name ?? 'N/A'),                                          
+                'Employee ID'   => $issue->custodian->emp_id ?? 'N/A',
+                'Department'    => ucwords($issue->custodian->discipline->name ?? 'N/A'),                                           
+                'Section'       => ucwords($issue->custodian->section->name ?? 'N/A'),                                          
+                'Designation'   => ucwords($issue->custodian->designation->name ?? 'N/A'),                                           
+                'User Type'     => ucfirst($issue->user_type ?? 'N/A'),                                           
+                'Issued Date'   => $issue->issued_date ? $issue->issued_date->format('d-m-Y') : 'N/A',                                                                            
+                'Transfer Date' => $issue->transfer_date ? $issue->transfer_date->format('d-m-Y') : '-',                                                
+                'Returned Date' => $issue->returned_date ? $issue->returned_date->format('d-m-Y') : '-',                                              
+                'Retained Date' => $issue->retained_date ? $issue->retained_date->format('d-m-Y') : '-',                                               
+                'Status'        => $issue->issue_status ?? 'N/A',
+            ];
+        });
     }
 
     public function headings(): array

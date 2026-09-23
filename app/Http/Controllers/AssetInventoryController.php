@@ -219,8 +219,16 @@ class AssetInventoryController extends Controller
     */
     public function create() {
         $assetTypes = AssetType::where('status',1)->orderBy('name')->get();
-                    
-        $locations = Location::where('status',1)->orderBy('name')->get();
+               
+         // Active Regions
+        $locationsQuery = Location::where('status', 1);
+
+        // Call Coordinator: permitted Regions only
+        if (auth()->user()->role == 1) {
+            $locationsQuery->whereIn('id', permittedLocationIds());
+        }
+        // $locations = Location::where('status',1)->orderBy('name')->get();
+        $locations = $locationsQuery->orderBy('name')->get();
         $stations = AirportStation::where('status', 1)->orderBy('station_name')->get();
         // dd($locations);
         return view('asset-inventory.create',compact('assetTypes', 'locations', 'stations'));
@@ -267,6 +275,47 @@ class AssetInventoryController extends Controller
             'serial_no'         => 'required|array|min:1',
             'serial_no.*'       => 'required|string|max:255',
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validate Region and Station Permission
+        |--------------------------------------------------------------------------
+        */
+
+        $location = Location::where('id', $request->location_id)
+            ->where('status', 1)
+            ->first();
+
+        $station = AirportStation::where('id', $request->station_id)
+            ->where('status', 1)
+            ->where('location_id', $request->location_id)
+            ->first();
+
+        // Verify active Region and Station belong together
+        if (!$location || !$station) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid Region or Station selected.'
+            ], 422);
+        }
+
+        // Call Coordinator permission validation
+        if (auth()->user()->role == 1) {
+
+            if (!hasLocationPermission((int) $location->id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission for this Region.'
+                ], 403);
+            }
+
+            if (!hasStationPermission((int) $station->id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission for this Station.'
+                ], 403);
+            }
+        }
 
         /*
         |--------------------------------------------------------------------------
@@ -331,7 +380,6 @@ class AssetInventoryController extends Controller
                 }
 
                 $assetModel = AssetModel::findOrFail($request->asset_model_id);
-
                 $station = AirportStation::findOrFail($request->station_id);
 
                 AssetInventory::create([
@@ -373,6 +421,36 @@ class AssetInventoryController extends Controller
         }
     }
 
+    public function stationsByLocation($locationId) {
+
+        // Check whether the Region exists and is active
+        $location = Location::where('id', $locationId)->where('status', 1)->first();
+
+        if(!$location){
+            return response()->json([
+                'message'   => 'Invalid region selected.'
+            ],404);
+        }
+
+        //Call Coordinator: verify Region permission
+        if(auth()->user()->role == 1 && !hasLocationPermission((int) $locationId)) {
+            return response()->json([
+                'message' => 'You do not have permission to access this Region.'
+            ], 403);
+        }
+
+        // Fetch active Stations under selected Region
+        $stationsQuery = AirportStation::where('location_id', $locationId)->where('status', 1);
+
+        // Call Coordinator: permitted Stations only
+        if (auth()->user()->role == 1) {
+            $stationsQuery->whereIn('id', permittedStationIds());
+        }
+
+        $stations = $stationsQuery->orderBy('station_name')->get(['id', 'station_name', 'short_name']);
+               
+        return response()->json($stations);
+    }
 
     /**
      * Generate sequential Asset Tag Numbers.
@@ -1310,7 +1388,6 @@ class AssetInventoryController extends Controller
                 'Asset marked as physically damaged: ' . $asset->tag_no
             );
 
-
             /*
             |--------------------------------------------------------------------------
             | Commit
@@ -1318,7 +1395,6 @@ class AssetInventoryController extends Controller
             */
 
             DB::commit();
-
 
             return response()->json([
                 'success' => true,
