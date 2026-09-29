@@ -22,10 +22,8 @@ class DashboardController extends Controller
                         ->orderBy('status')
                         ->get();
 
-        return view('dashboard.dashboard', compact(
-            'engineers',
-            'statuses'
-        ));
+        return view('dashboard.dashboard', compact('engineers', 'statuses'));           
+        
     }
 
     public function pieChartData(Request $request)
@@ -133,9 +131,6 @@ class DashboardController extends Controller
         if($request->filled('status')){
             $query->where('status', $request->status);
         }
-
-        // $complaints = $query->select('complaint_title', 'engineer_name', 'status', 'upload_id', 'resolution_time', 'asset_tag_no')
-        //                     ->orderBy('complaint_title')->paginate(20);
 
         $complaints = $query->select('complaints.complaint_title', 'complaints.engineer_name', 'complaints.status', 'complaints.upload_id', 
                                     'complaints.resolution_time', 'complaints.asset_tag_no')

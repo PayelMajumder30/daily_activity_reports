@@ -46,6 +46,16 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow, WithMultiple
             $assetModelId = trim((string) ($row['asset_model'] ?? ''));
             $serialNo     = trim((string) ($row['asset_serial_no'] ?? ''));
             $tagNo        = trim((string) ($row['asset_tag'] ?? ''));
+
+            if (empty($serialNo) && !$this->isNotApplicableValue($serialNo)) {
+                $this->errors[] = "Row {$rowNumber}: Asset Serial No. is required.";
+                continue;
+            }
+
+            if (empty($tagNo) && !$this->isNotApplicableValue($tagNo)) {
+                $this->errors[] = "Row {$rowNumber}: Asset Tag is required.";
+                continue;
+            }
             
             // Checks 'airport_station' or fallback to 'airportstation' if slash was removed
             $stationId    = trim((string) ($row['airport_station'] ?? $row['airportstation'] ?? ''));
@@ -73,12 +83,28 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow, WithMultiple
                 continue;
             }
 
-            if (empty($serialNo)) {
+            // if (empty($serialNo)) {
+            //     $this->errors[] = "Row {$rowNumber}: Asset Serial No. is required.";
+            //     continue;
+            // }
+
+            // if (empty($tagNo)) {
+            //     $this->errors[] = "Row {$rowNumber}: Asset Tag is required.";
+            //     continue;
+            // }
+
+            if (
+                empty($serialNo) &&
+                !$this->isNotApplicableValue($serialNo)
+            ) {
                 $this->errors[] = "Row {$rowNumber}: Asset Serial No. is required.";
                 continue;
             }
 
-            if (empty($tagNo)) {
+            if (
+                empty($tagNo) &&
+                !$this->isNotApplicableValue($tagNo)
+            ) {
                 $this->errors[] = "Row {$rowNumber}: Asset Tag is required.";
                 continue;
             }
@@ -129,31 +155,71 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow, WithMultiple
             }
 
             // Database Duplicate Tag Check
-            if (AssetInventory::where('tag_no', $tagNo)->exists()) {
+            // if (AssetInventory::where('tag_no', $tagNo)->exists()) {
+            //     $this->errors[] = "Row {$rowNumber}: Asset Tag '{$tagNo}' already exists in database.";
+            //     continue;
+            // }
+
+            if (
+                !$this->isNotApplicableValue($tagNo) &&
+                AssetInventory::where('tag_no', $tagNo)->exists()
+            ) {
                 $this->errors[] = "Row {$rowNumber}: Asset Tag '{$tagNo}' already exists in database.";
                 continue;
             }
 
             // Excel Duplicate Tag Check
-            if (in_array($tagNo, $this->excelTags)) {
+            // if (in_array($tagNo, $this->excelTags)) {
+            //     $this->errors[] = "Row {$rowNumber}: Asset Tag '{$tagNo}' is duplicated in this Excel file.";
+            //     continue;
+            // }
+
+            if (
+                !$this->isNotApplicableValue($tagNo) &&
+                in_array($tagNo, $this->excelTags)
+            ) {
                 $this->errors[] = "Row {$rowNumber}: Asset Tag '{$tagNo}' is duplicated in this Excel file.";
                 continue;
             }
 
              // Database Duplicate Serial no. Check
-            if (AssetInventory::where('serial_no', $serialNo)->exists()) {
+            // if (AssetInventory::where('serial_no', $serialNo)->exists()) {
+            //     $this->errors[] = "Row {$rowNumber}: Serial No. '{$serialNo}' already exists in database.";
+            //     continue;
+            // }
+
+            if (
+                !$this->isNotApplicableValue($serialNo) &&
+                AssetInventory::where('serial_no', $serialNo)->exists()
+            ) {
                 $this->errors[] = "Row {$rowNumber}: Serial No. '{$serialNo}' already exists in database.";
                 continue;
             }
 
             // Excel Duplicate Serial No Check
-            if (in_array($serialNo, $this->excelSerials)) {
+            // if (in_array($serialNo, $this->excelSerials)) {
+            //     $this->errors[] = "Row {$rowNumber}: Serial No. '{$serialNo}' is duplicated in this Excel file.";
+            //     continue;
+            // }
+
+            if (
+                !$this->isNotApplicableValue($serialNo) &&
+                in_array($serialNo, $this->excelSerials)
+            ) {
                 $this->errors[] = "Row {$rowNumber}: Serial No. '{$serialNo}' is duplicated in this Excel file.";
                 continue;
             }
 
-            $this->excelTags[] = $tagNo;
-            $this->excelSerials[] = $serialNo;
+            // $this->excelTags[] = $tagNo;
+            // $this->excelSerials[] = $serialNo;
+
+            if (!$this->isNotApplicableValue($tagNo)) {
+                $this->excelTags[] = $tagNo;
+            }
+
+            if (!$this->isNotApplicableValue($serialNo)) {
+                $this->excelSerials[] = $serialNo;
+            }
 
             // Validate Warranty Years
             if (!is_numeric($warrantyYear) || $warrantyYear < 0) {
@@ -181,6 +247,13 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow, WithMultiple
                 continue;
             }
 
+            if ($this->isNotApplicableValue($tagNo)) {
+                $tagNo = null;
+            }
+
+            if ($this->isNotApplicableValue($serialNo)) {
+                $serialNo = null;
+            }
             // Create Inventory
             AssetInventory::create([
                 'tag_no'            => $tagNo,
@@ -225,5 +298,29 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow, WithMultiple
         }
 
         throw new \Exception('Invalid date format');
+    }
+
+    private function isNotApplicableValue($value): bool
+    {
+        if ($value === null) {
+            return false;
+        }
+
+        $value = strtolower(trim((string) $value));
+
+        return in_array($value, [
+            '',
+            'na',
+            'n/a',
+            'n.a',
+            'n.a.',
+            'not applicable',
+            'not-applicable',
+            'not available',
+            'not-available',
+            'not found',
+            'not-found',
+            '-',
+        ], true);
     }
 }

@@ -742,19 +742,6 @@ class CustodianController extends Controller
             $sectionId = null;
         }
 
-        // $station = AirportStation::where('id', $request->station_id)
-        //     ->where('location_id', $request->location_id)
-        //     ->where('status', 1)
-        //     ->first();
-
-        // if (!$station) {
-
-        //     return back()
-        //         ->withErrors([
-        //             'station_id' => 'Selected station does not belong to the selected region.'])->withInput();                                     
-                
-        // }
-
         /*
         |--------------------------------------------------------------------------
         | Validate Active Location
@@ -974,9 +961,9 @@ class CustodianController extends Controller
             $stations->map(function ($station) {
 
                 return [
-                    'id'          => $station->id,
-                    'station_name'=> $station->station_name,
-                    'short_name'  => $station->short_name,
+                    'id'            => $station->id,
+                    'station_name'  => $station->station_name,
+                    'short_name'    => $station->short_name,
                 ];
 
             })

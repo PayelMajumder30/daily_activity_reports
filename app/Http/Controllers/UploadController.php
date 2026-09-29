@@ -43,15 +43,11 @@ class UploadController extends Controller
                 ]);
         }
 
-        // $fileName = time().'_'.$file->getClientOriginalName();
-
-        // $file->move(public_path('uploads'),$fileName);
 
         $upload = Upload::create([
-            'user_id'       => auth()->id(),
-            'report_date'   =>$request->report_date,
-            // 'file_name'=>$fileName
-            'file_name'     =>$file->getClientOriginalName(),
+            'user_id'       =>  auth()->id(),
+            'report_date'   =>  $request->report_date,
+            'file_name'     =>  $file->getClientOriginalName(),
         ]);
 
         Excel::import(
@@ -62,8 +58,7 @@ class UploadController extends Controller
 
         eventLog('Upload', 'Complaint', 'Uploaded complaint report for '.$upload->report_date);
 
-        return redirect()
-                ->route('complaints.index')
-                ->with('success','Excel uploaded successfully.');
+        return redirect()->route('complaints.index')->with('success','Excel uploaded successfully.');               
+                
     }
 }

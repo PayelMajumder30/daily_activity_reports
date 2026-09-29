@@ -963,8 +963,7 @@ class AssetInventoryController extends Controller
                         $query->where(
                             'location_id',
                             $request->to_location_id
-                        )
-                        ->where('status', 1);
+                        )->where('status', 1);                        
 
                     }),
             ],
@@ -1019,8 +1018,7 @@ class AssetInventoryController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' =>
-                        'Only Available assets can be moved to another station.'
+                    'message' => 'Only Available assets can be moved to another station.'                       
                 ], 422);
             }
 
@@ -1040,8 +1038,7 @@ class AssetInventoryController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' =>
-                        'Destination station cannot be the current station.'
+                    'message' => 'Destination station cannot be the current station.'                       
                 ], 422);
             }
 
@@ -1080,9 +1077,9 @@ class AssetInventoryController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $fromLocationId = $asset->location_id;
-            $fromStationId = $asset->station_id;
-            $fromStationName = $asset->station?->station_name ?? '-';
+            $fromLocationId     = $asset->location_id;
+            $fromStationId      = $asset->station_id;
+            $fromStationName    = $asset->station?->station_name ?? '-';
                 
 
             /*
@@ -1092,9 +1089,9 @@ class AssetInventoryController extends Controller
             */
 
             $asset->update([
-                'location_id' => $request->to_location_id,
-                'station_id' => $request->to_station_id,
-                'asset_status' => 'Available',
+                'location_id'   => $request->to_location_id,
+                'station_id'    => $request->to_station_id,
+                'asset_status'  => 'Available',
             ]);
 
 
@@ -1106,14 +1103,14 @@ class AssetInventoryController extends Controller
 
             AssetOutstationHistory::create([
 
-                'asset_inventory_id' => $asset->id,
-                'from_location_id' => $fromLocationId,
-                'from_station_id' => $fromStationId,
-                'to_location_id' => $request->to_location_id,
-                'to_station_id' => $request->to_station_id,
-                'outstation_date' => $request->outstation_date,
-                'remarks' => $request->remarks ?? null,
-                'created_by' => auth()->id(),
+                'asset_inventory_id'    => $asset->id,
+                'from_location_id'      => $fromLocationId,
+                'from_station_id'       => $fromStationId,
+                'to_location_id'        => $request->to_location_id,
+                'to_station_id'         => $request->to_station_id,
+                'outstation_date'       => $request->outstation_date,
+                'remarks'               => $request->remarks ?? null,
+                'created_by'            => auth()->id(),
 
             ]);
 
@@ -1161,9 +1158,9 @@ class AssetInventoryController extends Controller
 
             return response()->json([
 
-                'success' => false,
-                'message' => 'Unable to move asset.',
-                'error' => $e->getMessage()
+                'success'   => false,
+                'message'   => 'Unable to move asset.',
+                'error'     => $e->getMessage()
             ], 500);
         }
     }
@@ -1180,8 +1177,8 @@ class AssetInventoryController extends Controller
             ]);
 
         return response()->json([
-            'success' => true,
-            'stations' => $stations
+            'success'   => true,
+            'stations'  => $stations
         ]);
     }
 
@@ -1211,14 +1208,14 @@ class AssetInventoryController extends Controller
             'success' => true,
 
             'asset' => [
-                'id' => $asset->id,
-                'tag_no' => $asset->tag_no,
-                'asset_type' => $asset->assetModel?->assetType?->name ?? '-',
-                'asset_model' => $asset->assetModel?->model_name ?? '-',
-                'location_id' => $asset->location_id,
-                'location' => $asset->location?->name ?? '-',
-                'station_id' => $asset->station_id,
-                'station' => $asset->station?->station_name ?? '-',
+                'id'            => $asset->id,
+                'tag_no'        => $asset->tag_no,
+                'asset_type'    => $asset->assetModel?->assetType?->name ?? '-',
+                'asset_model'   => $asset->assetModel?->model_name ?? '-',
+                'location_id'   => $asset->location_id,
+                'location'      => $asset->location?->name ?? '-',
+                'station_id'    => $asset->station_id,
+                'station'       => $asset->station?->station_name ?? '-',
             ]
         ]);
     }
@@ -1341,8 +1338,7 @@ class AssetInventoryController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' =>
-                        'Asset is already marked as physically damaged.'
+                    'message' => 'Asset is already marked as physically damaged.'                     
                 ], 422);
             }
 
@@ -1359,8 +1355,7 @@ class AssetInventoryController extends Controller
 
                 return response()->json([
                     'success' => false,
-                    'message' =>
-                        'Only Available assets can be marked as physically damaged.'
+                    'message' => 'Only Available assets can be marked as physically damaged.'                      
                 ], 422);
             }
 

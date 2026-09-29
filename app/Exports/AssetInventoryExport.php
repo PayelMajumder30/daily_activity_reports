@@ -20,85 +20,7 @@ class AssetInventoryExport implements FromQuery, WithHeadings, WithMapping
     /**
      * Query for Excel export
      */
-    // public function query()
-    // {
-    //     return AssetInventory::with([
-    //         'assetModel.assetType',
-    //         'location',
-    //         'station'
-    //     ])
-    //     ->when(
-    //         $this->filters['tag_no'] ?? null,
-    //         function (Builder $query, $tagNo) {
-    //             $query->where(
-    //                 'tag_no',
-    //                 'LIKE',
-    //                 '%' . $tagNo . '%'
-    //             );
-    //         }
-    //     )
-    //     ->when(
-    //         $this->filters['po_number'] ?? null,
-    //         function (Builder $query, $poNumber) {
-    //             $query->where(
-    //                 'po_number',
-    //                 'LIKE',
-    //                 '%' . $poNumber . '%'
-    //             );
-    //         }
-    //     )
-    //     ->when(
-    //         $this->filters['serial_no'] ?? null,
-    //         function (Builder $query, $serialNo) {
-    //             $query->where(
-    //                 'serial_no',
-    //                 'LIKE',
-    //                 '%' . $serialNo . '%'
-    //             );
-    //         }
-    //     )
-    //     ->when(
-    //         $this->filters['asset_type'] ?? null,
-    //         function (Builder $query, $assetType) {
-    //             $query->whereHas(
-    //                 'assetModel',
-    //                 function ($q) use ($assetType) {
-    //                     $q->where(
-    //                         'asset_type_id',
-    //                         $assetType
-    //                     );
-    //                 }
-    //             );
-    //         }
-    //     )
-    //     ->when(
-    //         $this->filters['asset_model'] ?? null,
-    //         function (Builder $query, $assetModel) {
-    //             $query->where(
-    //                 'asset_model_id',
-    //                 $assetModel
-    //             );
-    //         }
-    //     )
-    //     ->when(
-    //         $this->filters['asset_status'] ?? null,
-    //         function(Builder $query, $assetStatus) {
-    //             $query->where('asset_status', $assetStatus);
-    //         }
-    //     )
-    //     ->when(
-    //         $this->filters['installation_date'] ?? null,
-    //         function (Builder $query, $installationDate) {
 
-    //             $query->whereDate(
-    //                 'installation_date',
-    //                 $this->convertDate($installationDate)
-    //             );
-
-    //         }
-    //     )
-    //     ->latest('id');
-    // }
     public function query()
     {
         $query = AssetInventory::with([
@@ -252,4 +174,7 @@ class AssetInventoryExport implements FromQuery, WithHeadings, WithMapping
 
         }
     }
+
+    
+
 }

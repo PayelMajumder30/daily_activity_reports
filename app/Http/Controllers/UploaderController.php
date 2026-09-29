@@ -14,10 +14,6 @@ class UploaderController extends Controller
     //
 
     public function index(){
-        // return view('uploader.index', [
-        //     'preview'=>collect(),
-        //     'uploadId'=>null
-        // ]);
 
         $upload = Upload::where('user_id', auth()->id())
             ->whereDoesntHave('complaints') // not permanently saved

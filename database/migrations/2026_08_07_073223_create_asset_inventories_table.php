@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             // Auto-generated tag number
-            $table->string('tag_no')->unique();
+            $table->string('tag_no')->nullable()->unique();
 
             // Asset Model
             $table->foreignId('asset_model_id')

@@ -40,12 +40,6 @@ class ComplaintController extends Controller
             $query->where('complaint_title', 'LIKE', '%' . $request->complaint . '%');
         }
 
-        // if ($request->filled('date')) {
-        //     $query->whereHas('upload', function ($q) use ($request) {
-        //         $q->whereDate('report_date', $request->date);
-        //     });
-        // }
-
         if($request->filled('from_date')){
             $query->whereHas('upload', function($q) use($request){
 
@@ -56,7 +50,6 @@ class ComplaintController extends Controller
 
         if($request->filled('to_date')){
             $query->whereHas('upload', function($q) use($request){
-
                 $q->whereDate('report_date', '<=', $request->to_date);
 
             });
@@ -75,8 +68,7 @@ class ComplaintController extends Controller
                     'engineer_name'     => $row->engineer_name,
                     'status'            => $row->status,
                     'resolution_time'   => $row->resolution_time ?: 'NA',
-                    'report_date'       => optional($row->upload?->report_date)
-                                            ->format('d-m-Y')
+                    'report_date'       => optional($row->upload?->report_date)->format('d-m-Y')                                         
 
                 ];
 

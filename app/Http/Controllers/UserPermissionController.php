@@ -162,12 +162,8 @@ class UserPermissionController extends Controller
         ) {
 
             // Remove old permissions
-            UserLocationPermission::where(
-                'user_id',
-                $user->id
-            )->delete();
-
-
+            UserLocationPermission::where('user_id', $user->id)->delete();
+  
             /*
             |--------------------------------------------------------------------------
             | Insert new permissions
