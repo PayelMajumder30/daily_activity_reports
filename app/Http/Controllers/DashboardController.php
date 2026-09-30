@@ -10,27 +10,133 @@ class DashboardController extends Controller
 {
     //
 
-    public function dashboard(){
-        $totalComplaints = Complaint::count();
+    public function dashboard()
+    {
+        $engineers = Complaint::select('engineer_name')
+                        ->distinct()
+                        ->orderBy('engineer_name')
+                        ->get();
 
-        $totalEngineers = Complaint::distinct('engineer_name')->count();
+        $statuses = Complaint::select('status')
+                        ->distinct()
+                        ->orderBy('status')
+                        ->get();
 
-        $openComplaints = Complaint::where('status', 'Open')->count();
+        return view('dashboard.dashboard', compact('engineers', 'statuses'));           
+        
+    }
 
-        $closedComplaints = Complaint::where('status', 'Closed')->count();
+    public function pieChartData(Request $request)
+    {
+        $query = Complaint::query();
 
-        $resolved = Complaint::where('status','Resolved')->count();
+        if($request->filled('from_date')){
+            $query->whereHas('upload', function($q) use($request){
+                $q->whereDate('report_date','>=',$request->from_date);
+            });
+        }
 
-        $pending = Complaint::where('status','!=','Resolved')->count();
+        if($request->filled('to_date')){
+            $query->whereHas('upload', function($q) use($request){
+                $q->whereDate('report_date','<=',$request->to_date);
+            });
+        }
 
-        $latestUpload = Upload::latest()->first();
+        if($request->filled('engineer')){
+            $query->where('engineer_name',$request->engineer);
+        }
 
-        return view('dashboard.dashboard',compact(
-            'totalComplaints',
-            'totalEngineers',
-            'resolved',
-            'pending',
-            'latestUpload', 'openComplaints', 'closedComplaints'
-        ));
+        if($request->filled('asset_tag_no')){
+            $query->where('asset_tag_no',$request->asset_tag_no);
+        }
+
+        if($request->filled('status')){
+            $query->where('status',$request->status);
+        }
+
+        $result = $query
+                ->selectRaw('status, COUNT(*) as total')
+                ->groupBy('status')
+                ->get();
+
+        return response()->json($result);
+    }
+
+
+    public function barpieChartData(Request $request){
+        $query = Complaint::query();
+
+        if($request->filled('from_date')){
+            $query->whereHas('upload', function ($q) use ($request){
+                $q->wheredate('report_date', '>=',$request->from_date);
+            });
+        }
+
+        
+        if($request->filled('to_date')){
+            $query->whereHas('upload', function ($q) use ($request){
+                $q->wheredate('report_date', '<=',$request->to_date);
+            });
+        }
+
+        if($request->filled('engineer')){
+            $query->where('engineer_name', $request->engineer);
+        }
+
+        if($request->filled('asset_tag_no')){
+            $query->where('asset_tag_no',$request->asset_tag_no);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        return response()->json(
+            $query->selectRaw('engineer_name, status, COUNT(*) total')
+                    ->groupBy('engineer_name','status')
+                    ->orderBy('engineer_name')
+                    ->get()
+        );
+    }
+
+    public function statusDetails(Request $request){
+        // $query = Complaint::query();
+        $query = Complaint::with('upload');
+
+        if($request->filled('from_date')){
+            $query->whereHas('upload', function($q) use ($request){
+                $q->whereDate('report_date', '>=',$request->from_date);
+            });
+        }
+
+        if($request->filled('to_date')){
+            $query->whereHas('upload', function($q) use ($request){
+                $q->whereDate('report_date', '<=',$request->to_date);
+            });
+        }
+
+        if($request->filled('engineer')){
+            $query->where('engineer_name', $request->engineer);
+        }
+
+        if($request->filled('resolution_time')){
+            $query->where('resolution_time', $request->resolution_time);
+        }
+
+        if($request->filled('asset_tag_no')){
+            $query->where('asset_tag_no',$request->asset_tag_no);
+        }
+
+        // Status selected from Pie Slice
+        if($request->filled('status')){
+            $query->where('status', $request->status);
+        }
+
+        $complaints = $query->select('complaints.complaint_title', 'complaints.engineer_name', 'complaints.status', 'complaints.upload_id', 
+                                    'complaints.resolution_time', 'complaints.asset_tag_no')
+                                        ->join('uploads', 'uploads.id', '=', 'complaints.upload_id')
+                                        ->orderBy('uploads.report_date', 'DESC')->paginate(20);
+
+        return response()->json($complaints);
     }
 }

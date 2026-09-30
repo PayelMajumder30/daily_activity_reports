@@ -7,6 +7,9 @@
 
     <title>@yield('title', 'Complaint Dashboard')</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ asset('assets/images/favicon.ico') }}">
+
     <!-- Bootstrap -->
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
 
@@ -21,6 +24,15 @@
 
     <!-- SweetAlert -->
     <link rel="stylesheet" href="{{ asset('assets/css/sweetalert2.min.css') }}">
+
+    <!-- Select2 -->
+    <link rel="stylesheet" href="{{ asset('assets/css/select2.min.css') }}">
+
+    <!-- custom css -->
+    <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
+
+    <!-- toastr css -->
+    <link rel="stylesheet" href="{{ asset('assets/css/toastr.min.css') }}">
 
     @stack('styles')
 
@@ -51,6 +63,9 @@
     <!-- SweetAlert -->
     <script src="{{ asset('assets/js/sweetalert2@11.min.js') }}"></script>
 
+    <!-- SweetAlert -->
+    <script src="{{ asset('assets/js/select2.min.js') }}"></script>
+
     <!-- Common JS -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
 
@@ -59,6 +74,13 @@
 
     <!-- DataTable -->
     <script src="{{ asset('assets/js/datatable.js') }}"></script>
+
+    <!-- PieChart -->
+    <script src="{{ asset('assets/js/chart.js') }}"></script>
+
+    <!-- toastr js -->
+    <script src="{{ asset('assets/css/toastr.min.js') }}"></script>
+    
 
     @stack('scripts')
 

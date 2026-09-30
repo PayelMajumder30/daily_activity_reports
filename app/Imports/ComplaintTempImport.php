@@ -21,6 +21,7 @@ class ComplaintTempImport implements ToModel, WithHeadingRow, WithChunkReading, 
     {
         if (
             empty($row['complainttitle']) &&
+            empty($row['activity_details']) &&
             empty($row['engg_name']) &&
             empty($row['status'])
         ) {
@@ -29,10 +30,17 @@ class ComplaintTempImport implements ToModel, WithHeadingRow, WithChunkReading, 
 
         return new ComplaintTemp([
             'upload_id'        => $this->uploadId,
-            'complaint_title'  => trim($row['complainttitle'] ?? ''),
+
+            // Old Excel: ComplaintTitle
+            // New Excel: Activity Details
+            'complaint_title'  => trim($row['activity_details'] ?? $row['complainttitle'] ?? ''),
+            'type_of_activity' => trim($row['type_of_activity'] ?? ''),
+            'asset_tag_no'     => trim($row['asset_tag_no'] ?? ''),
             'engineer_name'    => trim($row['engg_name'] ?? ''),
             'status'           => trim($row['status'] ?? ''),
-            'resolution_time'  => trim($row['actual_resolution_time'] ?? ''),
+            // Old: Actual Resolution Time
+            // New: Activity Duration
+            'resolution_time'  => trim($row['activity_duration'] ?? $row['actual_resolution_time'] ?? ''),
         ]);
     }
 
