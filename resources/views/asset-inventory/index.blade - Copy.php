@@ -299,7 +299,7 @@
                                         <button type="button" class="btn btn-sm btn-warning btnRepair"                                               
                                                 data-id="{{ encryptId($item->id) }}"  title="Repair">
                                                
-                                            <i class="bi bi-tools repair"></i>
+                                            <i class="fas fa-tools"></i>
                                         </button>
 
                                     @endif
@@ -704,138 +704,151 @@
 
             {{-- =========================================================
              Repair Modal 
-             ========================================================= --}}        
+             ========================================================= --}}
+          
+<div class="modal fade" id="repairModal" tabindex="-1" aria-labelledby="repairModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
 
-            <div class="modal fade" id="repairModal" tabindex="-1" aria-labelledby="repairModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="repairModalLabel">
+                    <i class="fas fa-tools me-2"></i>Asset Repair
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="repairModalLabel">
-                                <i class="fas fa-tools me-2"></i>Asset Repair
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-body">
+
+                <!-- Asset Details Card -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <strong><i class="fas fa-box me-2"></i>Asset Details</strong>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Tag No.</label>
+                                <div id="repair_tag_no" class="form-control bg-light">-</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Serial No.</label>
+                                <div id="repair_serial_no" class="form-control bg-light">-</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Asset Type</label>
+                                <div id="repair_asset_type" class="form-control bg-light">-</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Asset Model</label>
+                                <div id="repair_asset_model" class="form-control bg-light">-</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Region</label>
+                                <div id="repair_location" class="form-control bg-light">-</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Airport / Station</label>
+                                <div id="repair_station" class="form-control bg-light">-</div>
+                            </div>
                         </div>
-
-                        <div class="modal-body">
-                            <!-- Asset Details -->
-                            <div class="card mb-3">
-                                <div class="card-header fw-bold">
-                                    <i class="fas fa-box me-2"></i>Asset Details
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label fw-bold">Tag No.</label>
-                                            <div id="repair_tag_no" class="form-control bg-light">-</div>
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label fw-bold">Serial No.</label>
-                                            <div id="repair_serial_no" class="form-control bg-light">-</div>
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label fw-bold">Asset Type</label>
-                                            <div id="repair_asset_type" class="form-control bg-light">-</div>
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label fw-bold">Asset Model</label>
-                                            <div id="repair_asset_model" class="form-control bg-light">-</div>
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label fw-bold">Region</label>
-                                            <div id="repair_location" class="form-control bg-light">-</div>
-                                        </div>
-                                        <div class="col-md-4 mb-3">
-                                            <label class="form-label fw-bold">Airport / Station</label>
-                                            <div id="repair_station" class="form-control bg-light">-</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Repair Information -->
-                            <div class="card mb-3">
-                                <div class="card-header fw-bold">
-                                    <i class="fas fa-wrench me-2"></i>Repair Information
-                                </div>
-                                <div class="card-body">
-                                    <input type="hidden" id="repair_asset_id">       
-                                    <input type="hidden" id="repair_record_id">       
-
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="repair_vendor_name" class="form-label">Vendor Name <span class="text-danger">*</span></label>
-                                            <input type="text" id="repair_vendor_name" class="form-control" placeholder="Enter vendor name">       
-                                        </div>
-
-                                        <div class="col-md-6 mb-3" id="repairSendDateWrapper">
-                                            <label for="repair_send_date" class="form-label">Send Date <span class="text-danger">*</span></label>
-                                            <input type="date" id="repair_send_date" class="form-control">                  
-                                        </div>
-
-                                        <div class="col-md-6 mb-3" id="repairReturnDateWrapper">
-                                            <label for="repair_return_date" class="form-label">Return Date <span class="text-danger">*</span></label>
-                                            <input type="date" id="repair_return_date" class="form-control">       
-                                        </div>
-
-                                        <div class="col-md-12 mb-3">
-                                            <label for="repair_remarks" class="form-label">Remarks</label>
-                                            <textarea id="repair_remarks" class="form-control" rows="3" placeholder="Enter remarks"></textarea>                       
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Inline History Toggle Button -->
-                            <div class="text-end mb-2">
-                                <button type="button" class="btn btn-outline-secondary" id="btnRepairHistory">       
-                                    <i class="fas fa-history me-1"></i> Repair History
-                                </button>
-                            </div>
-
-                            <!-- Inline History Section -->
-                            <div class="card border-0 shadow-sm mt-3" id="repairHistoryWrapper" style="display: none;">
-                                <div class="card-header bg-dark text-white fw-bold">
-                                    <i class="fas fa-history me-2"></i>Repair History Logs
-                                </div>
-                                <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped align-middle mb-0">
-                                            <thead class="table-secondary">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Vendor Name</th>
-                                                    <th>Send Date</th>
-                                                    <th>Return Date</th>
-                                                    <th>Remarks</th>
-                                                    <th>Created By</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="repairHistoryTableBody">
-                                                <!-- AJAX loaded rows -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-
-                            <button type="button" class="btn btn-warning" id="btnSendForRepair">                 
-                                <i class="fas fa-tools me-1"></i> Send for Repair
-                            </button>
-
-                            <button type="button" class="btn btn-success" id="btnReturnFromRepair" style="display:none;">    
-                                <i class="fas fa-check me-1"></i> Return from Repair
-                            </button>
-                        </div>
-
                     </div>
                 </div>
+
+                <!-- Repair Information Card -->
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <strong><i class="fas fa-wrench me-2"></i>Repair Information</strong>
+                    </div>
+                    <div class="card-body">
+                        <input type="hidden" id="repair_asset_id">       
+                        <input type="hidden" id="repair_record_id">       
+
+                        <div class="row">
+                            <!-- Vendor -->
+                            <div class="col-md-6 mb-3">
+                                <label for="repair_vendor_name" class="form-label">
+                                    Vendor Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" id="repair_vendor_name" class="form-control" placeholder="Enter vendor name">       
+                            </div>
+
+                            <!-- Send Date -->
+                            <div class="col-md-6 mb-3" id="repairSendDateWrapper">
+                                <label for="repair_send_date" class="form-label">
+                                    Send Date <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" id="repair_send_date" class="form-control">                  
+                            </div>
+
+                            <!-- Return Date -->
+                            <div class="col-md-6 mb-3" id="repairReturnDateWrapper">
+                                <label for="repair_return_date" class="form-label">
+                                    Return Date <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" id="repair_return_date" class="form-control">       
+                            </div>
+
+                            <!-- Remarks -->
+                            <div class="col-md-12 mb-3">
+                                <label for="repair_remarks" class="form-label">Remarks</label>
+                                <textarea id="repair_remarks" class="form-control" rows="3" placeholder="Enter remarks"></textarea>                       
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toggle Repair History Button -->
+                <div class="text-end mb-3">
+                    <button type="button" class="btn btn-outline-secondary" id="btnRepairHistory" data-bs-toggle="collapse" data-bs-target="#repairHistoryCollapse" aria-expanded="false" aria-controls="repairHistoryCollapse">       
+                        <i class="fas fa-history me-1"></i> Repair History
+                    </button>
+                </div>
+
+                <!-- Embedded Repair History Card -->
+                <div class="collapse mt-3" id="repairHistoryCollapse">
+                    <div class="card">
+                        <div class="card-header bg-secondary text-white">
+                            <strong><i class="fas fa-history me-2"></i>Repair History Log</strong>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped align-middle mb-0">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Vendor Name</th>
+                                            <th>Send Date</th>
+                                            <th>Return Date</th>
+                                            <th>Remarks</th>
+                                            <th>Created By</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="repairHistoryTableBody">
+                                        <!-- Loaded via AJAX -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                <button type="button" class="btn btn-warning" id="btnSendForRepair">                 
+                    <i class="fas fa-tools me-1"></i> Send for Repair
+                </button>
+
+                <button type="button" class="btn btn-success" id="btnReturnFromRepair" style="display:none;">    
+                    <i class="fas fa-check me-1"></i> Return from Repair
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 
         </div>
@@ -1557,209 +1570,734 @@
             });
 
         });
-       
 
-    });
+        
 
-    $(document).ready(function () {
+        /*
+        |--------------------------------------------------------------------------
+        | Repair Modal
+        |--------------------------------------------------------------------------
+        */
 
-        // Helper: Toast Notifications via SweetAlert2
-        function notify(type, message) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: type,
-                title: message,
-                showConfirmButton: false,
-                timer: 3000
-            });
-        }
-
-        // Helper: Format Dates
-        const getToday = () => new Date().toISOString().split('T')[0];
-        const formatDate = (dateStr) => {
-            if (!dateStr) return '';
-            let parts = dateStr.split('-');
-            return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : '';
-        };
-
-        // Helper: Escape HTML
-        const escapeHtml = (str) => $('<div>').text(str || '-').html();
-
-        // Reset Modal
-        function resetRepairModal() {
-            $('#repair_asset_id, #repair_record_id, #repair_vendor_name, #repair_send_date, #repair_return_date, #repair_remarks').val('');
-            $('#repair_tag_no, #repair_serial_no, #repair_asset_type, #repair_asset_model, #repair_location, #repair_station').text('-');
-            $('#repair_vendor_name, #repair_send_date, #repair_return_date, #repair_remarks').prop('readonly', false);
-            
-            $('#repairSendDateWrapper, #btnSendForRepair').show();
-            $('#repairReturnDateWrapper, #btnReturnFromRepair, #repairHistoryWrapper').hide();
-        }
-
-        // Load Repair Modal Details
         $(document).on('click', '.btnRepair', function () {
-            let assetId = $(this).data('id');
-            if (!assetId) return notify('error', 'Asset ID not found.');
 
+            let assetId = $(this).data('id');
+
+            if (!assetId) {
+                toastr.error('Asset ID not found.');
+                return;
+            }
+
+            // Reset modal
             resetRepairModal();
+
+            // Store encrypted asset ID
             $('#repair_asset_id').val(assetId);
+
+            // Show loading state
+            $('#repair_tag_no').text('Loading...');
+            $('#repair_serial_no').text('Loading...');
+            $('#repair_asset_type').text('Loading...');
+            $('#repair_asset_model').text('Loading...');
+            $('#repair_location').text('Loading...');
+            $('#repair_station').text('Loading...');
+
+            /*
+            |--------------------------------------------------------------------------
+            | Load Repair Details
+            |--------------------------------------------------------------------------
+            */
 
             $.ajax({
                 url: "{{ route('asset-inventory.repair.details', ':id') }}".replace(':id', assetId),
                 type: 'GET',
-                success: function (res) {
-                    if (!res.success) return notify('error', res.message || 'Unable to load repair details.');
 
-                    const asset = res.asset || {};
-                    $('#repair_tag_no').text(asset.tag_no || '-');
-                    $('#repair_serial_no').text(asset.serial_no || '-');
-                    $('#repair_asset_type').text(asset.asset_type || '-');
-                    $('#repair_asset_model').text(asset.asset_model || '-');
-                    $('#repair_location').text(asset.location || '-');
-                    $('#repair_station').text(asset.station || '-');
+                success: function (response) {
 
-                    if (asset.status === 'Available') {
-                        $('#repair_send_date').val(getToday());
-                        $('#repairReturnDateWrapper, #btnReturnFromRepair').hide();
-                        $('#repairSendDateWrapper, #btnSendForRepair').show();
-                    } else if (asset.status === 'Repair') {
-                        const repair = res.repair || {};
-                        $('#repair_record_id').val(repair.id || '');
-                        $('#repair_vendor_name').val(repair.vendor_name || '').prop('readonly', true);
-                        $('#repair_send_date').val(formatDate(repair.send_date)).prop('readonly', true);
-                        $('#repair_return_date').val(getToday()).prop('readonly', false);
-                        $('#repair_remarks').val(repair.remarks || '');
-
-                        $('#repairSendDateWrapper, #repairReturnDateWrapper, #btnReturnFromRepair').show();
-                        $('#btnSendForRepair').hide();
-                    } else {
-                        return notify('warning', 'Repair is not available for this asset.');
-                    }
-
-                    bootstrap.Modal.getOrCreateInstance('#repairModal').show();
-                },
-                error: (xhr) => notify('error', xhr.responseJSON?.message || 'Error fetching asset details.')
-            });
-        });
-
-        // Send to / Return from Repair Handler
-        function submitRepairAction(url, data, button, defaultText) {
-            button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Processing...');
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: data,
-                success: function (res) {
-                    if (res.success) {
-                        notify('success', res.message);
-                        bootstrap.Modal.getInstance('#repairModal').hide();
-                        setTimeout(() => location.reload(), 800);
-                    } else {
-                        notify('error', res.message || 'Operation failed.');
-                    }
-                },
-                error: function (xhr) {
-                    let msg = xhr.responseJSON?.message || 'An error occurred.';
-                    if (xhr.responseJSON?.errors) {
-                        msg = Object.values(xhr.responseJSON.errors)[0][0] || msg;
-                    }
-                    notify('error', msg);
-                },
-                complete: function () {
-                    button.prop('disabled', false).html(defaultText);
-                }
-            });
-        }
-
-        // Event: Send For Repair
-        $(document).on('click', '#btnSendForRepair', function () {
-            let btn = $(this);
-            let assetId = $('#repair_asset_id').val();
-            let vendor = $('#repair_vendor_name').val().trim();
-            let sendDate = $('#repair_send_date').val();
-
-            if (!vendor) return $('#repair_vendor_name').focus(), notify('error', 'Please enter vendor name.');
-            if (!sendDate) return $('#repair_send_date').focus(), notify('error', 'Please select send date.');
-
-            submitRepairAction("{{ route('asset-inventory.repair.send') }}", {
-                _token: "{{ csrf_token() }}",
-                asset_id: assetId,
-                vendor_name: vendor,
-                send_date: sendDate,
-                remarks: $('#repair_remarks').val().trim()
-            }, btn, '<i class="fas fa-tools me-1"></i> Send for Repair');
-        });
-
-        // Event: Return From Repair
-        $(document).on('click', '#btnReturnFromRepair', function () {
-            let btn = $(this);
-            let repairId = $('#repair_record_id').val();
-            let sendDate = $('#repair_send_date').val();
-            let returnDate = $('#repair_return_date').val();
-
-            if (!returnDate) return $('#repair_return_date').focus(), notify('error', 'Please select return date.');
-            if (sendDate && returnDate < sendDate) return $('#repair_return_date').focus(), notify('error', 'Return date must be on or after send date.');
-
-            submitRepairAction("{{ route('asset-inventory.repair.return') }}", {
-                _token: "{{ csrf_token() }}",
-                repair_id: repairId,
-                return_date: returnDate,
-                remarks: $('#repair_remarks').val().trim()
-            }, btn, '<i class="fas fa-check me-1"></i> Return from Repair');
-        });
-
-        // Event: Toggle Inline Repair History Under Information Card
-        $(document).on('click', '#btnRepairHistory', function () {
-            let wrapper = $('#repairHistoryWrapper');
-
-            if (wrapper.is(':visible')) {
-                wrapper.slideUp();
-                return;
-            }
-
-            let assetId = $('#repair_asset_id').val();
-            if (!assetId) return notify('error', 'Asset not found.');
-
-            $('#repairHistoryTableBody').html(`
-                <tr>
-                    <td colspan="6" class="text-center text-muted">
-                        <i class="fas fa-spinner fa-spin me-2"></i> Loading repair history...
-                    </td>
-                </tr>
-            `);
-
-            wrapper.slideDown();
-
-            $.ajax({
-                url: "{{ route('asset-inventory.repair.history', ':id') }}".replace(':id', assetId),
-                type: 'GET',
-                success: function (res) {
-                    if (!res.success || !res.history || res.history.length === 0) {
-                        $('#repairHistoryTableBody').html(`<tr><td colspan="6" class="text-center text-muted">No repair history found.</td></tr>`);
+                    if (!response.success) {
+                        toastr.error(
+                            response.message || 'Unable to load repair details.'
+                        );
                         return;
                     }
 
-                    let rows = res.history.map((item, index) => `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${escapeHtml(item.vendor_name)}</td>
-                            <td>${item.send_date || '-'}</td>
-                            <td>${item.return_date || '-'}</td>
-                            <td>${escapeHtml(item.remarks)}</td>
-                            <td>${escapeHtml(item.created_by)}</td>
-                        </tr>
-                    `).join('');
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Asset Details
+                    |--------------------------------------------------------------------------
+                    */
 
-                    $('#repairHistoryTableBody').html(rows);
+                    $('#repair_tag_no').text(
+                        response.asset?.tag_no || '-'
+                    );
+
+                    $('#repair_serial_no').text(
+                        response.asset?.serial_no || '-'
+                    );
+
+                    $('#repair_asset_type').text(
+                        response.asset?.asset_type || '-'
+                    );
+
+                    $('#repair_asset_model').text(
+                        response.asset?.asset_model || '-'
+                    );
+
+                    $('#repair_location').text(
+                        response.asset?.location || '-'
+                    );
+
+                    $('#repair_station').text(
+                        response.asset?.station || '-'
+                    );
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Check Asset Status
+                    |--------------------------------------------------------------------------
+                    */
+
+                    let status = response.asset?.status || '';
+
+                    if (status === 'Available') {
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | AVAILABLE ASSET
+                        | Show Send For Repair form
+                        |--------------------------------------------------------------------------
+                        */
+
+                        $('#repair_record_id').val('');
+
+                        $('#repair_vendor_name').val('').prop('readonly', false);                                                    
+
+                        $('#repair_send_date').val(getTodayDate()).prop('readonly', false);                                                      
+
+                        $('#repair_return_date').val('');                         
+                        $('#repair_return_date').prop('readonly', true);
+                        $('#repair_remarks').val('').prop('readonly', false);
+                                                       
+                        // Show send date
+                        $('#repairSendDateWrapper').show();
+
+                        // Hide return date
+                        $('#repairReturnDateWrapper').hide();
+
+                        // Show Send button
+                        $('#btnSendForRepair').show();
+
+                        // Hide Return button
+                        $('#btnReturnFromRepair').hide();
+
+                        // History button
+                        $('#btnRepairHistory').show();
+
+                    } else if (status === 'Repair') {
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | ASSET UNDER REPAIR
+                        | Show Return From Repair form
+                        |--------------------------------------------------------------------------
+                        */
+
+                        if (response.repair) {
+
+                            $('#repair_record_id').val(
+                                response.repair.id || ''
+                            );
+
+                            $('#repair_vendor_name')
+                                .val(response.repair.vendor_name || '')
+                                .prop('readonly', true);
+
+                            $('#repair_send_date')
+                                .val(convertDateForInput(
+                                    response.repair.send_date
+                                ))
+                                .prop('readonly', true);
+
+                            $('#repair_return_date')
+                                .val(getTodayDate())
+                                .prop('readonly', false);
+
+                            $('#repair_remarks')
+                                .val(response.repair.remarks || '')
+                                .prop('readonly', false);
+
+                        }
+
+                        // Show send date
+                        $('#repairSendDateWrapper').show();
+
+                        // Show return date
+                        $('#repairReturnDateWrapper').show();
+
+                        // Hide Send button
+                        $('#btnSendForRepair').hide();
+
+                        // Show Return button
+                        $('#btnReturnFromRepair').show();
+
+                        // Show history
+                        $('#btnRepairHistory').show();
+
+                    } else {
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | OTHER STATUS
+                        |--------------------------------------------------------------------------
+                        */
+
+                        toastr.warning(
+                            'Repair is not available for this asset.'
+                        );
+
+                        return;
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Show Repair Modal
+                    |--------------------------------------------------------------------------
+                    */
+
+                    let repairModalElement = document.getElementById('repairModal');
+                        
+
+                    let repairModal =
+                        bootstrap.Modal.getOrCreateInstance(
+                            repairModalElement
+                        );
+
+                    repairModal.show();
                 },
-                error: () => notify('error', 'Unable to load repair history.')
+
+                error: function (xhr) {
+
+                    toastr.error(
+                        xhr.responseJSON?.message ||
+                        'Unable to load repair details.'
+                    );
+                }
             });
+
         });
 
-        // Clean modal state when hidden
-        $(document).on('hidden.bs.modal', '#repairModal', resetRepairModal);
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEND ASSET FOR REPAIR
+        |--------------------------------------------------------------------------
+        */
+
+        $(document).on('click', '#btnSendForRepair', function () {
+
+            let button = $(this);
+
+            let assetId = $('#repair_asset_id').val();
+            let vendorName = $('#repair_vendor_name').val().trim();
+            let sendDate = $('#repair_send_date').val();
+            let remarks = $('#repair_remarks').val().trim();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validation
+            |--------------------------------------------------------------------------
+            */
+
+            if (!assetId) {
+                toastr.error('Asset ID not found.');
+                return;
+            }
+
+            if (!vendorName) {
+                toastr.error('Please enter vendor name.');
+                $('#repair_vendor_name').focus();
+                return;
+            }
+
+            if (!sendDate) {
+                toastr.error('Please select send date.');
+                $('#repair_send_date').focus();
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | Disable Button
+            |--------------------------------------------------------------------------
+            */
+
+            button.prop('disabled', true);
+
+            let originalText = button.html();
+
+            button.html(
+                '<i class="fas fa-spinner fa-spin me-1"></i> Sending...'
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | AJAX
+            |--------------------------------------------------------------------------
+            */
+
+            $.ajax({
+
+                url: "{{ route('asset-inventory.repair.send') }}",
+
+                type: 'POST',
+
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    asset_id: assetId,
+                    vendor_name: vendorName,
+                    send_date: sendDate,
+                    remarks: remarks
+                },
+
+                success: function (response) {
+
+                    if (response.success) {
+
+                        toastr.success(
+                            response.message ||
+                            'Asset sent for repair successfully.'
+                        );
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Close Repair Modal
+                        |--------------------------------------------------------------------------
+                        */
+
+                        let repairModalElement = document.getElementById('repairModal');
+                            
+                        let repairModal =
+                            bootstrap.Modal.getOrCreateInstance(
+                                repairModalElement
+                            );
+
+                        repairModal.hide();
+
+
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Reload Asset Inventory
+                        |--------------------------------------------------------------------------
+                        */
+
+                        setTimeout(function () {
+                            location.reload();
+                        }, 700);
+
+                    } else {
+
+                        toastr.error(
+                            response.message ||
+                            'Unable to send asset for repair.'
+                        );
+                    }
+                },
+
+                error: function (xhr) {
+
+                    let message =
+                        xhr.responseJSON?.message ||
+                        'Unable to send asset for repair.';
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Laravel Validation Errors
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (xhr.responseJSON?.errors) {
+
+                        let errors = xhr.responseJSON.errors;
+
+                        Object.keys(errors).forEach(function (field) {
+
+                            if (errors[field]?.length) {
+                                message = errors[field][0];
+                                return false;
+                            }
+
+                        });
+                    }
+
+                    toastr.error(message);
+                },
+
+                complete: function () {
+
+                    button.prop('disabled', false);
+
+                    button.html(originalText);
+                }
+            });
+
+        });
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN ASSET FROM REPAIR
+        |--------------------------------------------------------------------------
+        */
+
+$(document).on('click', '#btnReturnFromRepair', function () {
+
+    let button = $(this);
+
+    let repairId = $('#repair_record_id').val();
+    let sendDate = $('#repair_send_date').val();
+    let returnDate = $('#repair_return_date').val();
+    let remarks = $('#repair_remarks').val().trim();
+
+    if (!repairId) {
+        toastr.error('Repair record not found.');
+        return;
+    }
+
+    if (!returnDate) {
+        toastr.error('Please select return date.');
+        $('#repair_return_date').focus();
+        return;
+    }
+
+    // --- FIX: Client-side date check ---
+    if (sendDate && returnDate < sendDate) {
+        toastr.error('Return date must be on or after the send date.');
+        $('#repair_return_date').focus();
+        return;
+    }
+
+    button.prop('disabled', true);
+    let originalText = button.html();
+    button.html('<i class="fas fa-spinner fa-spin me-1"></i> Returning...');
+
+    $.ajax({
+        url: "{{ route('asset-inventory.repair.return') }}",
+        type: 'POST',
+        data: {
+            _token: "{{ csrf_token() }}",
+            repair_id: repairId,
+            return_date: returnDate,
+            remarks: remarks
+        },
+        success: function (response) {
+            if (response.success) {
+                toastr.success(response.message || 'Asset returned from repair successfully.');
+
+                let repairModalElement = document.getElementById('repairModal');
+                let repairModal = bootstrap.Modal.getOrCreateInstance(repairModalElement);
+                repairModal.hide();
+
+                setTimeout(function () {
+                    location.reload();
+                }, 700);
+            } else {
+                toastr.error(response.message || 'Unable to return asset from repair.');
+            }
+        },
+        error: function (xhr) {
+            let message = xhr.responseJSON?.message || 'Unable to return asset from repair.';
+            if (xhr.responseJSON?.errors) {
+                let errors = xhr.responseJSON.errors;
+                Object.keys(errors).forEach(function (field) {
+                    if (errors[field]?.length) {
+                        message = errors[field][0];
+                        return false;
+                    }
+                });
+            }
+            toastr.error(message);
+        },
+        complete: function () {
+            button.prop('disabled', false);
+            button.html(originalText);
+        }
     });
+});
+
+        /*
+        |--------------------------------------------------------------------------
+        | REPAIR HISTORY
+        |--------------------------------------------------------------------------
+        */
+
+$(document).on('click', '#btnRepairHistory', function () {
+
+    let assetId = $('#repair_asset_id').val();
+
+    if (!assetId) {
+        toastr.error('Asset not found.');
+        return;
+    }
+
+    $('#repairHistoryTableBody').html(`
+        <tr>
+            <td colspan="6" class="text-center">
+                <i class="fas fa-spinner fa-spin me-2"></i>
+                Loading repair history...
+            </td>
+        </tr>
+    `);
+
+    // --- FIX: Show history modal on click ---
+    let historyModalElement = document.getElementById('repairHistoryModal');
+    if (historyModalElement) {
+        let historyModal = bootstrap.Modal.getOrCreateInstance(historyModalElement);
+        historyModal.show();
+    }
+
+    $.ajax({
+        url: "{{ route('asset-inventory.repair.history', ':id') }}".replace(':id', assetId),
+        type: 'GET',
+        success: function (response) {
+            if (!response.success) {
+                toastr.error(response.message || 'Unable to load repair history.');
+                return;
+            }
+
+            let rows = '';
+
+            if (!response.history || response.history.length === 0) {
+                rows = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            No repair history found.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                $.each(response.history, function (index, item) {
+                    rows += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${escapeHtml(item.vendor_name || '-')}</td>
+                            <td>${item.send_date || '-'}</td>
+                            <td>${item.return_date || '-'}</td>
+                            <td>${escapeHtml(item.remarks || '-')}</td>
+                            <td>${escapeHtml(item.created_by || '-')}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            $('#repairHistoryTableBody').html(rows);
+        },
+        error: function (xhr) {
+            toastr.error(xhr.responseJSON?.message || 'Unable to load repair history.');
+        }
+    });
+});
+
+        /*
+        |--------------------------------------------------------------------------
+        | CLOSE HISTORY MODAL
+        | REOPEN REPAIR MODAL
+        |--------------------------------------------------------------------------
+        */
+
+        $(document).on(
+            'hidden.bs.modal',
+            '#repairHistoryModal',
+            function () {
+
+                let repairModalElement =
+                    document.getElementById('repairModal');
+
+                if (!repairModalElement) {
+                    return;
+                }
+
+                let repairModal =
+                    bootstrap.Modal.getOrCreateInstance(
+                        repairModalElement
+                    );
+
+                repairModal.show();
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESET REPAIR MODAL WHEN CLOSED
+        |--------------------------------------------------------------------------
+        */
+
+        $(document).on(
+            'hidden.bs.modal',
+            '#repairModal',
+            function () {
+
+                resetRepairModal();
+
+            }
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TODAY'S DATE
+        |--------------------------------------------------------------------------
+        | Returns YYYY-MM-DD
+        |--------------------------------------------------------------------------
+        */
+
+        function getTodayDate() {
+
+            let today = new Date();
+
+            let year = today.getFullYear();
+
+            let month = String(
+                today.getMonth() + 1
+            ).padStart(2, '0');
+
+            let day = String(
+                today.getDate()
+            ).padStart(2, '0');
+
+            return year + '-' + month + '-' + day;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CONVERT DATE
+        |--------------------------------------------------------------------------
+        | API date: 30-09-2026
+        | Input date: 2026-09-30
+        |--------------------------------------------------------------------------
+        */
+
+        function convertDateForInput(dateString) {
+
+            if (!dateString) {
+                return '';
+            }
+
+            let parts = dateString.split('-');
+
+            if (parts.length !== 3) {
+                return '';
+            }
+
+            return parts[2] + '-' + parts[1] + '-' + parts[0];
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESET REPAIR MODAL
+        |--------------------------------------------------------------------------
+        */
+
+        function resetRepairModal() {
+
+            $('#repair_asset_id').val('');
+            $('#repair_record_id').val('');
+
+            $('#repair_tag_no').text('-');
+            $('#repair_serial_no').text('-');
+            $('#repair_asset_type').text('-');
+            $('#repair_asset_model').text('-');
+            $('#repair_location').text('-');
+            $('#repair_station').text('-');
+
+            $('#repair_vendor_name')
+                .val('')
+                .prop('readonly', false);
+
+            $('#repair_send_date')
+                .val('')
+                .prop('readonly', false);
+
+            $('#repair_return_date')
+                .val('')
+                .prop('readonly', false);
+
+            $('#repair_remarks')
+                .val('')
+                .prop('readonly', false);
+
+            /*
+            |--------------------------------------------------------------------------
+            | Default visibility
+            |--------------------------------------------------------------------------
+            */
+
+            $('#repairSendDateWrapper').show();
+
+            $('#repairReturnDateWrapper').hide();
+
+            $('#btnSendForRepair').show();
+
+            $('#btnReturnFromRepair').hide();
+
+            $('#btnRepairHistory').show();
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ESCAPE HTML
+        |--------------------------------------------------------------------------
+        | Prevents vendor/remarks text from breaking HTML.
+        |--------------------------------------------------------------------------
+        */
+
+        function escapeHtml(value) {
+
+            return $('<div>')
+                .text(value)
+                .html();
+        }
+
+        // Fetch history directly into the embedded collapse table
+$('#btnRepairHistory').on('click', function() {
+    let assetId = $('#repair_asset_id').val();
+    $.ajax({
+        url: '/asset-repair-history/' + assetId,
+        type: 'GET',
+        success: function(response) {
+            $('#repairHistoryTableBody').html(response.html);
+        },
+        error: function(xhr) {
+            console.error('Failed to load repair history');
+        }
+    });
+});
+
+// Ensure AJAX success callback resets button state & closes modal
+function handleRepairSuccess(response) {
+    // 1. Show notification (SweetAlert or Toastr)
+    Swal.fire({ icon: 'success', title: 'Success', text: response.message, timer: 1500, showConfirmButton: false });
+
+    // 2. Hide modal and reset button UI
+    $('#repairModal').modal('hide');
+    $('#btnSendForRepair').prop('disabled', false).html('<i class="fas fa-tools me-1"></i> Send for Repair');
+    $('#btnReturnFromRepair').prop('disabled', false).html('<i class="fas fa-check me-1"></i> Return from Repair');
+
+    // 3. Reload DataTable or refresh content
+    if (typeof dataTable !== 'undefined') {
+        dataTable.ajax.reload();
+    }
+}
+    });
+
+
 </script>
 
 @endpush

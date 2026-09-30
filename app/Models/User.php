@@ -94,7 +94,12 @@ class User extends Authenticatable
 
     public function outstationHistory(): HasMany
     {
-        return $this->hasMany(AssetOutstationHistory::class);
+        return $this->hasMany(AssetOutstationHistory::class, 'asset_inventory_id');
+    }
+
+    public function assetRepairHistory(): HasMany
+    {
+        return $this->hasMany(AssetRepairHistory::class, 'asset_inventory_id');                          
     }
 
     public function locationPermissions(): HasMany

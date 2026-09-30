@@ -176,13 +176,20 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/get-models/{type}', [AssetInventoryController::class,'getModels'])->name('getModels');   
         Route::get('/export', [AssetInventoryController::class, 'export'])->name('export');    
         Route::get('/excel-template', [AssetInventoryController::class, 'downloadTemplate'])->name('downloadTemplate');
-        Route::post('/import-excel', [AssetInventoryController::class, 'importExcel'])->name('importExcel');       
+        Route::post('/import-excel', [AssetInventoryController::class, 'importExcel'])->name('importExcel');    
+           
         Route::post('/outstation', [AssetInventoryController::class, 'outstation'])->name('outstation');       
         Route::get('/outstation/stations/{location}', [AssetInventoryController::class, 'getOutstationStations'])->name('outstation.stations');
         Route::get('/outstation/details/{id}', [AssetInventoryController::class, 'getOutstationDetails'])->name('outstation.details');  
         Route::get('/outstation/history/{id}', [AssetInventoryController::class, 'outstationHistory'])->name('outstation.history');   
-        Route::get('/outstation/history/{id}/export', [AssetInventoryController::class, 'exportOutstationHistory'])->name('outstation.history.export');         
-        Route::post('/scrap/{id}', [AssetInventoryController::class, 'scrap'])->name('scrap');           
+        Route::get('/outstation/history/{id}/export', [AssetInventoryController::class, 'exportOutstationHistory'])->name('outstation.history.export');  
+
+        Route::post('/scrap/{id}', [AssetInventoryController::class, 'scrap'])->name('scrap'); 
+
+        Route::get('repair/details/{id}', [AssetInventoryController::class, 'getRepairDetails'])->name('repair.details');  
+        Route::post('repair/send', [AssetInventoryController::class, 'sendForRepair'])->name('repair.send');  
+        Route::post('repair/return', [AssetInventoryController::class, 'returnFromRepair'])->name('repair.return');  
+        Route::get('repair/history/{id}', [AssetInventoryController::class, 'repairHistory'])->name('repair.history');  
     
     });
 

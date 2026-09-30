@@ -31,6 +31,9 @@
     <!-- custom css -->
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
 
+    <!-- toastr css -->
+    <link rel="stylesheet" href="{{ asset('assets/css/toastr.min.css') }}">
+
     @stack('styles')
 
 </head>
@@ -74,6 +77,10 @@
 
     <!-- PieChart -->
     <script src="{{ asset('assets/js/chart.js') }}"></script>
+
+    <!-- toastr js -->
+    <script src="{{ asset('assets/css/toastr.min.js') }}"></script>
+    
 
     @stack('scripts')
 

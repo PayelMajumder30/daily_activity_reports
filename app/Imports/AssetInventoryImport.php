@@ -30,6 +30,31 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow, WithMultiple
         ];
     }
 
+    private function isNotApplicableValue($value): bool
+    {
+        if ($value === null) {
+            return false;
+        }
+
+        $value = strtolower(trim((string) $value));
+
+        return in_array($value, [
+            '',
+            'na',
+            'n/a',
+            'n.a',
+            'n.a.',
+            'not applicable',
+            'not-applicable',
+            'not available',
+            'not-available',
+            'not found',
+            'not-found',
+            'Not Available',
+            '-',
+        ], true);
+    }
+
     public function collection(Collection $rows)
     {
         if ($rows->isEmpty()) {
@@ -58,7 +83,7 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow, WithMultiple
             }
             
             // Checks 'airport_station' or fallback to 'airportstation' if slash was removed
-            $stationId    = trim((string) ($row['airport_station'] ?? $row['airportstation'] ?? ''));
+            $stationId        = trim((string) ($row['airport_station'] ?? $row['airportstation'] ?? ''));
             
             $poNumber         = trim((string) ($row['po_no'] ?? ''));
             $installationDate = $row['installation_date'] ?? null;
@@ -300,27 +325,5 @@ class AssetInventoryImport implements ToCollection, WithHeadingRow, WithMultiple
         throw new \Exception('Invalid date format');
     }
 
-    private function isNotApplicableValue($value): bool
-    {
-        if ($value === null) {
-            return false;
-        }
-
-        $value = strtolower(trim((string) $value));
-
-        return in_array($value, [
-            '',
-            'na',
-            'n/a',
-            'n.a',
-            'n.a.',
-            'not applicable',
-            'not-applicable',
-            'not available',
-            'not-available',
-            'not found',
-            'not-found',
-            '-',
-        ], true);
-    }
+    
 }

@@ -60,5 +60,10 @@ class AssetInventory extends Model
     {
         return $this->hasMany(AssetOutstation::class, 'asset_inventory_id');                          
     }
+
+    public function assetRepairHistory(): HasMany
+    {
+        return $this->hasMany(AssetRepairHistory::class, 'asset_inventory_id');                          
+    }
    
 }
