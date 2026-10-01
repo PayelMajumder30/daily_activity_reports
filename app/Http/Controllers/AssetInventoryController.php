@@ -1610,80 +1610,80 @@ class AssetInventoryController extends Controller
     // }
 
     // Return asset from repair
-public function returnFromRepair(Request $request)
-{
-    $request->validate([
-        'repair_id'   => 'required',
-        'return_date' => 'required|date',
-        'remarks'     => 'nullable|string',
-    ]);
+    public function returnFromRepair(Request $request)
+    {
+        $request->validate([
+            'repair_id'   => 'required',
+            'return_date' => 'required|date',
+            'remarks'     => 'nullable|string',
+        ]);
 
-    try {
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        $repairId = decryptId($request->repair_id);
+            $repairId = decryptId($request->repair_id);
 
-        $repair = AssetRepairHistory::where('id', $repairId)->lockForUpdate()->first();                             
+            $repair = AssetRepairHistory::where('id', $repairId)->lockForUpdate()->first();                             
 
-        if (!$repair) {
-            throw new \Exception('Repair record not found.');
-        }
-
-        if ($repair->return_date) {
-            throw new \Exception('This repair has already been completed.');
-        }
-
-        // --- FIX: Perform date comparison AFTER fetching $repair ---
-        if ($request->return_date && $repair->send_date) {
-            $sendDate = \Carbon\Carbon::parse($repair->send_date)->startOfDay();
-            $returnDate = \Carbon\Carbon::parse($request->return_date)->startOfDay();
-
-            if ($returnDate->lt($sendDate)) {
-                throw new \Exception('Return date must be on or after the send date (' . $sendDate->format('d-m-Y') . ').');
+            if (!$repair) {
+                throw new \Exception('Repair record not found.');
             }
+
+            if ($repair->return_date) {
+                throw new \Exception('This repair has already been completed.');
+            }
+
+            // --- FIX: Perform date comparison AFTER fetching $repair ---
+            if ($request->return_date && $repair->send_date) {
+                $sendDate = \Carbon\Carbon::parse($repair->send_date)->startOfDay();
+                $returnDate = \Carbon\Carbon::parse($request->return_date)->startOfDay();
+
+                if ($returnDate->lt($sendDate)) {
+                    throw new \Exception('Return date must be on or after the send date (' . $sendDate->format('d-m-Y') . ').');
+                }
+            }
+
+            $asset = AssetInventory::where('id', $repair->asset_inventory_id)->lockForUpdate()->first();           
+
+            if (!$asset) {
+                throw new \Exception('Asset not found.');
+            }
+
+            if ($asset->asset_status !== 'Repair') {
+                throw new \Exception('Asset is not currently under repair.');
+            }
+
+            $repair->update([
+                'return_date' => $request->return_date,
+                'remarks'     => $request->remarks ?? $repair->remarks,
+            ]);
+
+            $asset->update([
+                'asset_status' => 'Available',
+            ]);
+
+            eventLog(
+                'Update',
+                'Asset Inventory',
+                'Asset ' . $asset->tag_no . ' returned from repair on ' . $request->return_date
+            );
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Asset returned from repair successfully.'
+            ]);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
         }
-
-        $asset = AssetInventory::where('id', $repair->asset_inventory_id)->lockForUpdate()->first();           
-
-        if (!$asset) {
-            throw new \Exception('Asset not found.');
-        }
-
-        if ($asset->asset_status !== 'Repair') {
-            throw new \Exception('Asset is not currently under repair.');
-        }
-
-        $repair->update([
-            'return_date' => $request->return_date,
-            'remarks'     => $request->remarks ?? $repair->remarks,
-        ]);
-
-        $asset->update([
-            'asset_status' => 'Available',
-        ]);
-
-        eventLog(
-            'Update',
-            'Asset Inventory',
-            'Asset ' . $asset->tag_no . ' returned from repair on ' . $request->return_date
-        );
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Asset returned from repair successfully.'
-        ]);
-
-    } catch (\Throwable $e) {
-        DB::rollBack();
-
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage()
-        ], 422);
     }
-}
 
     // repair history
     public function repairHistory($id)

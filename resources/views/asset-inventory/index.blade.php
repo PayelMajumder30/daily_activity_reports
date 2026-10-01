@@ -299,7 +299,7 @@
                                         <button type="button" class="btn btn-sm btn-warning btnRepair"                                               
                                                 data-id="{{ encryptId($item->id) }}"  title="Repair">
                                                
-                                            <i class="bi bi-tools repair"></i>
+                                            <i class="bi bi-wrench-adjustable"></i>
                                         </button>
 
                                     @endif
@@ -907,12 +907,9 @@
 
             let formData = new FormData(form);
 
-            $('#excelImportErrors')
-                .addClass('d-none')
-                .html('');
+            $('#excelImportErrors').addClass('d-none').html('');                             
 
-            $('#uploadExcelBtn')
-                .prop('disabled', true)
+            $('#uploadExcelBtn').prop('disabled', true)               
                 .html(
                     '<span class="spinner-border spinner-border-sm"></span> Uploading...'
                 );
@@ -941,9 +938,8 @@
                     let response = xhr.responseJSON;
                     let message = '';
                     if (response && response.errors) {
-                        message =
-                            '<strong>Please check the following:</strong><br><br>';
-
+                        message = '<strong>Please check the following:</strong><br><br>';
+                            
                         response.errors.forEach(function(error) {
                             message += '• ' + error + '<br>';
 
@@ -1052,18 +1048,11 @@
                     */
 
                     $('#outstation_asset_id').val(asset.id);
-
                     $('#outstation_tag').text(asset.tag_no || '-');
-
                     $('#outstation_type').text(asset.asset_type || '-');
-
                     $('#outstation_model').text(asset.asset_model || '-');
-
-                    $('#outstation_current_location')
-                        .text(asset.location || '-');
-
-                    $('#outstation_current_station')
-                        .text(asset.station || '-');
+                    $('#outstation_current_location').text(asset.location || '-');                      
+                    $('#outstation_current_station').text(asset.station || '-');                        
 
                     /*
                     |--------------------------------------------------------------------------
@@ -1071,9 +1060,8 @@
                     |--------------------------------------------------------------------------
                     */
 
-                    $('#outstation_station')
-                        .data('current-station', asset.station_id || '');
-
+                    $('#outstation_station').data('current-station', asset.station_id || '');
+                        
                     /*
                     |--------------------------------------------------------------------------
                     | Show Modal
@@ -1094,8 +1082,7 @@
                     Swal.fire({
                         icon: 'error',
                         title: 'Unable to Load Asset',
-                        text: response?.message ||
-                            'Unable to fetch asset details.'
+                        text: response?.message || 'Unable to fetch asset details.'                           
                     });
 
                 }
@@ -1113,11 +1100,8 @@
         $('#outstation_location').on('change', function () {
 
             let locationId = $(this).val();
-
             let stationDropdown = $('#outstation_station');
-
             let currentStationId = stationDropdown.data('current-station');
-
 
             /*
             |--------------------------------------------------------------------------
@@ -1135,7 +1119,6 @@
                 stationDropdown
                     .html('<option value="">Select Destination Station</option>')
                     .prop('disabled', true);
-
                 return;
             }
 
@@ -1146,20 +1129,14 @@
             |--------------------------------------------------------------------------
             */
 
-            let url = "{{ route('asset-inventory.outstation.stations', ':id') }}"
-                .replace(':id', locationId);
-
-
+            let url = "{{ route('asset-inventory.outstation.stations', ':id') }}".replace(':id', locationId);
+                
             $.ajax({
 
                 url: url,
-
                 type: 'GET',
-
                 success: function (response) {
-
                     stationDropdown.empty();
-
                     stationDropdown.append(
                         '<option value="">Select Destination Station</option>'
                     );
@@ -1207,7 +1184,6 @@
                         );
 
                     });
-
 
                     stationDropdown.prop('disabled', false);
 
@@ -1313,453 +1289,449 @@
         | show Outstation History
         |--------------------------------------------------------------------------
         */
+        function escapeHtml(value) {
+            return $('<div>').text(value ?? '-').html();
+        }
+
         $(document).on('click', '.view-outstation-history', function () {
 
-            let assetId = $(this).data('id');
+                let assetId = $(this).data('id');
 
-            currentOutstationAssetId = assetId;
+                currentOutstationAssetId = assetId;
 
-            // Reset modal
-            $('#history_tag').text('Loading...');
-            $('#history_serial').text('Loading...');
-            $('#history_type').text('Loading...');
-            $('#history_model').text('Loading...');
-            $('#history_current_location').text('Loading...');
-            $('#history_current_station').text('Loading...');
-            $('#history_status').text('Loading...');
+                // Reset asset details
+                $('#history_tag').text('Loading...');
+                $('#history_serial').text('Loading...');
+                $('#history_type').text('Loading...');
+                $('#history_model').text('Loading...');
+                $('#history_current_location').text('Loading...');
+                $('#history_current_station').text('Loading...');
+                $('#history_status').text('Loading...');
 
-            $('#outstationHistoryTableBody').html(`
-                <tr>
-                    <td colspan="7" class="text-center">
-                        <i class="bi bi-hourglass-split"></i>
-                        Loading history...
-                    </td>
-                </tr>
-            `);
+                // Reset history table
+                $('#outstationHistoryTableBody').html(`
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            <i class="bi bi-hourglass-split"></i>
+                            Loading history...
+                        </td>
+                    </tr>
+                `);
 
-            $('#exportOutstationHistoryBtn')
-                .prop('disabled', true);
+                $('#exportOutstationHistoryBtn').prop('disabled', true);
 
-            // Show modal
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('outstationHistoryModal')).show();
-            const repairModalElement = document.getElementById('repairModal');
-            const repairHistoryModalElement = document.getElementById('repairHistoryModal');
+                // Open only the Outstation History modal
+                const modalElement = document.getElementById('outstationHistoryModal');
 
-            const repairModal = bootstrap.Modal.getOrCreateInstance(repairModalElement);                         
-            const repairHistoryModal = bootstrap.Modal.getOrCreateInstance(repairHistoryModalElement);
-                                                                             
-            let url = "{{ route('asset-inventory.outstation.history', ':id') }}".replace(':id', assetId);               
+                bootstrap.Modal.getOrCreateInstance(modalElement).show();
 
-            $.ajax({
-
-                url: url,
-                type: 'GET',
-
-                success: function (response) {
-
-                    if (!response.success) {
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: response.message || 'Unable to load history.'
-                        });
-
-                        return;
-                    }
-
-                    let asset = response.asset;
-
-                    // Asset details
-                    $('#history_tag').text(asset.tag_no || '-');
-
-                    $('#history_serial').text(asset.serial_no || '-');
-
-                    $('#history_type').text(asset.asset_type || '-');
-
-                    $('#history_model').text(asset.asset_model || '-');
-
-                    $('#history_current_location').text(asset.location || '-');
-                        
-                    $('#history_current_station').text(asset.station || '-');                    
-
-                    $('#history_status').text(asset.asset_status || '-');
-                        
-
-                    // History
-                    let tbody = $('#outstationHistoryTableBody');
-
-                    tbody.empty();
-
-                    if (!response.history ||
-                        response.history.length === 0) {
-
-                        tbody.html(`
-                            <tr>
-                                <td colspan="7"
-                                    class="text-center text-muted">
-                                    No outstation history found.
-                                </td>
-                            </tr>
-                        `);
-
-                    } else {
-
-                        $.each(response.history, function (index, item) {
-
-                            tbody.append(`
-                                <tr>
-                                    <td>${index + 1}</td>
-                                    <td>${item.outstation_date || '-'}</td>
-                                    <td>${item.from_location || '-'}</td>
-                                    <td>${item.from_station || '-'}</td>
-                                    <td>${item.to_location || '-'}</td>
-                                    <td>${item.to_station || '-'}</td>
-                                </tr>
-                            `);
-
-                        });
-                    }
-
-                    // Enable export
-                    $('#exportOutstationHistoryBtn')
-                        .prop('disabled', false);
-                },
-
-                error: function (xhr) {
-
-                    let response = xhr.responseJSON;
-
-                    $('#outstationHistoryTableBody').html(`
-                        <tr>
-                            <td colspan="7"
-                                class="text-center text-danger">
-                                Unable to load outstation history.
-                            </td>
-                        </tr>
-                    `);
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Unable to Load History',
-                        text: response?.message ||
-                            'Something went wrong.'
-                    });
-                }
-
-            });
-
-        });
-
-        /*
-        |--------------------------------------------------------------------------
-        | Export Outstation History
-        |--------------------------------------------------------------------------
-        */
-        $('#exportOutstationHistoryBtn').on('click', function () {
-
-            if (!currentOutstationAssetId) {
-
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Asset Not Selected',
-                    text: 'Please select an asset first.'
-                });
-
-                return;
-            }
-
-            let url =
-                "{{ route('asset-inventory.outstation.history.export', ':id') }}"
-                .replace(':id', currentOutstationAssetId);
-
-            window.location.href = url;
-        });
-
-        $(document).on('click', '.scrap-asset', function () {
-
-            let assetId = $(this).data('id');
-
-            Swal.fire({
-
-                icon: 'warning',
-                title: 'Mark Asset as Physically Damaged?',
-                text: 'This asset will be marked as physically damaged.',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Mark Damaged',
-                cancelButtonText: 'Cancel',
-                reverseButtons: true
-
-            }).then(function (result) {
-
-                if (!result.isConfirmed) {
-                    return;
-                }
-
-
-                /*
-                |--------------------------------------------------------------------------
-                | Scrap Asset
-                |--------------------------------------------------------------------------
-                */
+                // Fetch history
+                let url = "{{ route('asset-inventory.outstation.history', ':id') }}"
+                    .replace(':id', assetId);
 
                 $.ajax({
-
-                    url: "{{ route('asset-inventory.scrap', ':id') }}".replace(':id', assetId),                     
-                    type: 'POST',
-                    data: {
-                        _token: "{{ csrf_token() }}"
-                    },
-
-                    beforeSend: function () {
-
-                        Swal.fire({
-
-                            title: 'Processing...',
-                            text: 'Updating asset status.',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                            didOpen: function () {
-                                Swal.showLoading();
-                            }
-
-                        });
-
-                    },
+                    url: url,
+                    type: 'GET',
 
                     success: function (response) {
 
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Asset Updated',
-                            text: response.message
+                        if (!response.success) {
 
-                        }).then(function () {
+                            $('#outstationHistoryTableBody').html(`
+                                <tr>
+                                    <td colspan="6" class="text-center text-danger">
+                                        Unable to load outstation history.
+                                    </td>
+                                </tr>
+                            `);
 
-                            window.location.href =
-                                "{{ route('asset-inventory.index') }}";
-                        });
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message || 'Unable to load history.'
+                            });
+
+                            return;
+                        }
+
+                        let asset = response.asset || {};
+
+                        // Fill asset details
+                        $('#history_tag').text(asset.tag_no || '-');
+                        $('#history_serial').text(asset.serial_no || '-');
+                        $('#history_type').text(asset.asset_type || '-');
+                        $('#history_model').text(asset.asset_model || '-');
+                        $('#history_current_location').text(asset.location || '-');
+                        $('#history_current_station').text(asset.station || '-');
+                        $('#history_status').text(asset.asset_status || '-');
+
+                        // Fill history table
+                        let tbody = $('#outstationHistoryTableBody');
+                        tbody.empty();
+
+                        if (!response.history || response.history.length === 0) {
+
+                            tbody.html(`
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        No outstation history found.
+                                    </td>
+                                </tr>
+                            `);
+
+                        } else {
+
+                            $.each(response.history, function (index, item) {
+
+                                tbody.append(`
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${escapeHtml(item.outstation_date || '-')}</td>
+                                        <td>${escapeHtml(item.from_location || '-')}</td>
+                                        <td>${escapeHtml(item.from_station || '-')}</td>
+                                        <td>${escapeHtml(item.to_location || '-')}</td>
+                                        <td>${escapeHtml(item.to_station || '-')}</td>
+                                    </tr>
+                                `);
+
+                            });
+                        }
+
+                        $('#exportOutstationHistoryBtn').prop('disabled', false);
 
                     },
 
                     error: function (xhr) {
-                        let response = xhr.responseJSON;
+
+                        $('#outstationHistoryTableBody').html(`
+                            <tr>
+                                <td colspan="6" class="text-center text-danger">
+                                    Unable to load outstation history.
+                                </td>
+                            </tr>
+                        `);
+
                         Swal.fire({
                             icon: 'error',
-                            title: 'Unable to Update Asset',
-                            text: response?.message || 'Something went wrong.'                          
+                            title: 'Unable to Load History',
+                            text: xhr.responseJSON?.message ||
+                                'Unable to fetch outstation history.'
                         });
 
                     }
-
                 });
 
             });
 
-        });
-       
+            /*
+            |--------------------------------------------------------------------------
+            | Export Outstation History
+            |--------------------------------------------------------------------------
+            */
+            $('#exportOutstationHistoryBtn').on('click', function () {
 
-    });
+                if (!currentOutstationAssetId) {
 
-    $(document).ready(function () {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Asset Not Selected',
+                        text: 'Please select an asset first.'
+                    });
 
-        // Helper: Toast Notifications via SweetAlert2
-        function notify(type, message) {
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: type,
-                title: message,
-                showConfirmButton: false,
-                timer: 3000
-            });
-        }
-
-        // Helper: Format Dates
-        const getToday = () => new Date().toISOString().split('T')[0];
-        const formatDate = (dateStr) => {
-            if (!dateStr) return '';
-            let parts = dateStr.split('-');
-            return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : '';
-        };
-
-        // Helper: Escape HTML
-        const escapeHtml = (str) => $('<div>').text(str || '-').html();
-
-        // Reset Modal
-        function resetRepairModal() {
-            $('#repair_asset_id, #repair_record_id, #repair_vendor_name, #repair_send_date, #repair_return_date, #repair_remarks').val('');
-            $('#repair_tag_no, #repair_serial_no, #repair_asset_type, #repair_asset_model, #repair_location, #repair_station').text('-');
-            $('#repair_vendor_name, #repair_send_date, #repair_return_date, #repair_remarks').prop('readonly', false);
-            
-            $('#repairSendDateWrapper, #btnSendForRepair').show();
-            $('#repairReturnDateWrapper, #btnReturnFromRepair, #repairHistoryWrapper').hide();
-        }
-
-        // Load Repair Modal Details
-        $(document).on('click', '.btnRepair', function () {
-            let assetId = $(this).data('id');
-            if (!assetId) return notify('error', 'Asset ID not found.');
-
-            resetRepairModal();
-            $('#repair_asset_id').val(assetId);
-
-            $.ajax({
-                url: "{{ route('asset-inventory.repair.details', ':id') }}".replace(':id', assetId),
-                type: 'GET',
-                success: function (res) {
-                    if (!res.success) return notify('error', res.message || 'Unable to load repair details.');
-
-                    const asset = res.asset || {};
-                    $('#repair_tag_no').text(asset.tag_no || '-');
-                    $('#repair_serial_no').text(asset.serial_no || '-');
-                    $('#repair_asset_type').text(asset.asset_type || '-');
-                    $('#repair_asset_model').text(asset.asset_model || '-');
-                    $('#repair_location').text(asset.location || '-');
-                    $('#repair_station').text(asset.station || '-');
-
-                    if (asset.status === 'Available') {
-                        $('#repair_send_date').val(getToday());
-                        $('#repairReturnDateWrapper, #btnReturnFromRepair').hide();
-                        $('#repairSendDateWrapper, #btnSendForRepair').show();
-                    } else if (asset.status === 'Repair') {
-                        const repair = res.repair || {};
-                        $('#repair_record_id').val(repair.id || '');
-                        $('#repair_vendor_name').val(repair.vendor_name || '').prop('readonly', true);
-                        $('#repair_send_date').val(formatDate(repair.send_date)).prop('readonly', true);
-                        $('#repair_return_date').val(getToday()).prop('readonly', false);
-                        $('#repair_remarks').val(repair.remarks || '');
-
-                        $('#repairSendDateWrapper, #repairReturnDateWrapper, #btnReturnFromRepair').show();
-                        $('#btnSendForRepair').hide();
-                    } else {
-                        return notify('warning', 'Repair is not available for this asset.');
-                    }
-
-                    bootstrap.Modal.getOrCreateInstance('#repairModal').show();
-                },
-                error: (xhr) => notify('error', xhr.responseJSON?.message || 'Error fetching asset details.')
-            });
-        });
-
-        // Send to / Return from Repair Handler
-        function submitRepairAction(url, data, button, defaultText) {
-            button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Processing...');
-
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: data,
-                success: function (res) {
-                    if (res.success) {
-                        notify('success', res.message);
-                        bootstrap.Modal.getInstance('#repairModal').hide();
-                        setTimeout(() => location.reload(), 800);
-                    } else {
-                        notify('error', res.message || 'Operation failed.');
-                    }
-                },
-                error: function (xhr) {
-                    let msg = xhr.responseJSON?.message || 'An error occurred.';
-                    if (xhr.responseJSON?.errors) {
-                        msg = Object.values(xhr.responseJSON.errors)[0][0] || msg;
-                    }
-                    notify('error', msg);
-                },
-                complete: function () {
-                    button.prop('disabled', false).html(defaultText);
+                    return;
                 }
+
+                let url =
+                    "{{ route('asset-inventory.outstation.history.export', ':id') }}"
+                    .replace(':id', currentOutstationAssetId);
+
+                window.location.href = url;
             });
-        }
 
-        // Event: Send For Repair
-        $(document).on('click', '#btnSendForRepair', function () {
-            let btn = $(this);
-            let assetId = $('#repair_asset_id').val();
-            let vendor = $('#repair_vendor_name').val().trim();
-            let sendDate = $('#repair_send_date').val();
+            $(document).on('click', '.scrap-asset', function () {
 
-            if (!vendor) return $('#repair_vendor_name').focus(), notify('error', 'Please enter vendor name.');
-            if (!sendDate) return $('#repair_send_date').focus(), notify('error', 'Please select send date.');
+                let assetId = $(this).data('id');
 
-            submitRepairAction("{{ route('asset-inventory.repair.send') }}", {
-                _token: "{{ csrf_token() }}",
-                asset_id: assetId,
-                vendor_name: vendor,
-                send_date: sendDate,
-                remarks: $('#repair_remarks').val().trim()
-            }, btn, '<i class="fas fa-tools me-1"></i> Send for Repair');
-        });
+                Swal.fire({
 
-        // Event: Return From Repair
-        $(document).on('click', '#btnReturnFromRepair', function () {
-            let btn = $(this);
-            let repairId = $('#repair_record_id').val();
-            let sendDate = $('#repair_send_date').val();
-            let returnDate = $('#repair_return_date').val();
+                    icon: 'warning',
+                    title: 'Mark Asset as Physically Damaged?',
+                    text: 'This asset will be marked as physically damaged.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Mark Damaged',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
 
-            if (!returnDate) return $('#repair_return_date').focus(), notify('error', 'Please select return date.');
-            if (sendDate && returnDate < sendDate) return $('#repair_return_date').focus(), notify('error', 'Return date must be on or after send date.');
+                }).then(function (result) {
 
-            submitRepairAction("{{ route('asset-inventory.repair.return') }}", {
-                _token: "{{ csrf_token() }}",
-                repair_id: repairId,
-                return_date: returnDate,
-                remarks: $('#repair_remarks').val().trim()
-            }, btn, '<i class="fas fa-check me-1"></i> Return from Repair');
-        });
-
-        // Event: Toggle Inline Repair History Under Information Card
-        $(document).on('click', '#btnRepairHistory', function () {
-            let wrapper = $('#repairHistoryWrapper');
-
-            if (wrapper.is(':visible')) {
-                wrapper.slideUp();
-                return;
-            }
-
-            let assetId = $('#repair_asset_id').val();
-            if (!assetId) return notify('error', 'Asset not found.');
-
-            $('#repairHistoryTableBody').html(`
-                <tr>
-                    <td colspan="6" class="text-center text-muted">
-                        <i class="fas fa-spinner fa-spin me-2"></i> Loading repair history...
-                    </td>
-                </tr>
-            `);
-
-            wrapper.slideDown();
-
-            $.ajax({
-                url: "{{ route('asset-inventory.repair.history', ':id') }}".replace(':id', assetId),
-                type: 'GET',
-                success: function (res) {
-                    if (!res.success || !res.history || res.history.length === 0) {
-                        $('#repairHistoryTableBody').html(`<tr><td colspan="6" class="text-center text-muted">No repair history found.</td></tr>`);
+                    if (!result.isConfirmed) {
                         return;
                     }
 
-                    let rows = res.history.map((item, index) => `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${escapeHtml(item.vendor_name)}</td>
-                            <td>${item.send_date || '-'}</td>
-                            <td>${item.return_date || '-'}</td>
-                            <td>${escapeHtml(item.remarks)}</td>
-                            <td>${escapeHtml(item.created_by)}</td>
-                        </tr>
-                    `).join('');
 
-                    $('#repairHistoryTableBody').html(rows);
-                },
-                error: () => notify('error', 'Unable to load repair history.')
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Scrap Asset
+                    |--------------------------------------------------------------------------
+                    */
+
+                    $.ajax({
+
+                        url: "{{ route('asset-inventory.scrap', ':id') }}".replace(':id', assetId),                     
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+
+                        beforeSend: function () {
+
+                            Swal.fire({
+
+                                title: 'Processing...',
+                                text: 'Updating asset status.',
+                                allowOutsideClick: false,
+                                allowEscapeKey: false,
+                                didOpen: function () {
+                                    Swal.showLoading();
+                                }
+
+                            });
+
+                        },
+
+                        success: function (response) {
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Asset Updated',
+                                text: response.message
+
+                            }).then(function () {
+
+                                window.location.href =
+                                    "{{ route('asset-inventory.index') }}";
+                            });
+
+                        },
+
+                        error: function (xhr) {
+                            let response = xhr.responseJSON;
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Unable to Update Asset',
+                                text: response?.message || 'Something went wrong.'                          
+                            });
+
+                        }
+
+                    });
+
+                });
+
             });
+        
+
         });
 
-        // Clean modal state when hidden
-        $(document).on('hidden.bs.modal', '#repairModal', resetRepairModal);
-    });
+        $(document).ready(function () {
+
+            // Helper: Toast Notifications via SweetAlert2
+            function notify(type, message) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: type,
+                    title: message,
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+            }
+
+            // Helper: Format Dates
+            const getToday = () => new Date().toISOString().split('T')[0];
+            const formatDate = (dateStr) => {
+                if (!dateStr) return '';
+                let parts = dateStr.split('-');
+                return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : '';
+            };
+
+            // Helper: Escape HTML
+            const escapeHtml = (str) => $('<div>').text(str || '-').html();
+
+            // Reset Modal
+            function resetRepairModal() {
+                $('#repair_asset_id, #repair_record_id, #repair_vendor_name, #repair_send_date, #repair_return_date, #repair_remarks').val('');
+                $('#repair_tag_no, #repair_serial_no, #repair_asset_type, #repair_asset_model, #repair_location, #repair_station').text('-');
+                $('#repair_vendor_name, #repair_send_date, #repair_return_date, #repair_remarks').prop('readonly', false);
+                
+                $('#repairSendDateWrapper, #btnSendForRepair').show();
+                $('#repairReturnDateWrapper, #btnReturnFromRepair, #repairHistoryWrapper').hide();
+            }
+
+            // Load Repair Modal Details
+            $(document).on('click', '.btnRepair', function () {
+                let assetId = $(this).data('id');
+                if (!assetId) return notify('error', 'Asset ID not found.');
+
+                resetRepairModal();
+                $('#repair_asset_id').val(assetId);
+
+                $.ajax({
+                    url: "{{ route('asset-inventory.repair.details', ':id') }}".replace(':id', assetId),
+                    type: 'GET',
+                    success: function (res) {
+                        if (!res.success) return notify('error', res.message || 'Unable to load repair details.');
+
+                        const asset = res.asset || {};
+                        $('#repair_tag_no').text(asset.tag_no || '-');
+                        $('#repair_serial_no').text(asset.serial_no || '-');
+                        $('#repair_asset_type').text(asset.asset_type || '-');
+                        $('#repair_asset_model').text(asset.asset_model || '-');
+                        $('#repair_location').text(asset.location || '-');
+                        $('#repair_station').text(asset.station || '-');
+
+                        if (asset.status === 'Available') {
+                            $('#repair_send_date').val(getToday());
+                            $('#repairReturnDateWrapper, #btnReturnFromRepair').hide();
+                            $('#repairSendDateWrapper, #btnSendForRepair').show();
+                        } else if (asset.status === 'Repair') {
+                            const repair = res.repair || {};
+                            $('#repair_record_id').val(repair.id || '');
+                            $('#repair_vendor_name').val(repair.vendor_name || '').prop('readonly', true);
+                            $('#repair_send_date').val(formatDate(repair.send_date)).prop('readonly', true);
+                            $('#repair_return_date').val(getToday()).prop('readonly', false);
+                            $('#repair_remarks').val(repair.remarks || '');
+
+                            $('#repairSendDateWrapper, #repairReturnDateWrapper, #btnReturnFromRepair').show();
+                            $('#btnSendForRepair').hide();
+                        } else {
+                            return notify('warning', 'Repair is not available for this asset.');
+                        }
+
+                        bootstrap.Modal.getOrCreateInstance('#repairModal').show();
+                    },
+                    error: (xhr) => notify('error', xhr.responseJSON?.message || 'Error fetching asset details.')
+                });
+            });
+
+            // Send to / Return from Repair Handler
+            function submitRepairAction(url, data, button, defaultText) {
+                button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Processing...');
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
+                    success: function (res) {
+                        if (res.success) {
+                            notify('success', res.message);
+                            bootstrap.Modal.getInstance('#repairModal').hide();
+                            setTimeout(() => location.reload(), 800);
+                        } else {
+                            notify('error', res.message || 'Operation failed.');
+                        }
+                    },
+                    error: function (xhr) {
+                        let msg = xhr.responseJSON?.message || 'An error occurred.';
+                        if (xhr.responseJSON?.errors) {
+                            msg = Object.values(xhr.responseJSON.errors)[0][0] || msg;
+                        }
+                        notify('error', msg);
+                    },
+                    complete: function () {
+                        button.prop('disabled', false).html(defaultText);
+                    }
+                });
+            }
+
+            // Event: Send For Repair
+            $(document).on('click', '#btnSendForRepair', function () {
+                let btn = $(this);
+                let assetId = $('#repair_asset_id').val();
+                let vendor = $('#repair_vendor_name').val().trim();
+                let sendDate = $('#repair_send_date').val();
+
+                if (!vendor) return $('#repair_vendor_name').focus(), notify('error', 'Please enter vendor name.');
+                if (!sendDate) return $('#repair_send_date').focus(), notify('error', 'Please select send date.');
+
+                submitRepairAction("{{ route('asset-inventory.repair.send') }}", {
+                    _token: "{{ csrf_token() }}",
+                    asset_id: assetId,
+                    vendor_name: vendor,
+                    send_date: sendDate,
+                    remarks: $('#repair_remarks').val().trim()
+                }, btn, '<i class="fas fa-tools me-1"></i> Send for Repair');
+            });
+
+            // Event: Return From Repair
+            $(document).on('click', '#btnReturnFromRepair', function () {
+                let btn = $(this);
+                let repairId = $('#repair_record_id').val();
+                let sendDate = $('#repair_send_date').val();
+                let returnDate = $('#repair_return_date').val();
+
+                if (!returnDate) return $('#repair_return_date').focus(), notify('error', 'Please select return date.');
+                if (sendDate && returnDate < sendDate) return $('#repair_return_date').focus(), notify('error', 'Return date must be on or after send date.');
+
+                submitRepairAction("{{ route('asset-inventory.repair.return') }}", {
+                    _token: "{{ csrf_token() }}",
+                    repair_id: repairId,
+                    return_date: returnDate,
+                    remarks: $('#repair_remarks').val().trim()
+                }, btn, '<i class="fas fa-check me-1"></i> Return from Repair');
+            });
+
+            // Event: Toggle Inline Repair History Under Information Card
+            $(document).on('click', '#btnRepairHistory', function () {
+                let wrapper = $('#repairHistoryWrapper');
+
+                if (wrapper.is(':visible')) {
+                    wrapper.slideUp();
+                    return;
+                }
+
+                let assetId = $('#repair_asset_id').val();
+                if (!assetId) return notify('error', 'Asset not found.');
+
+                $('#repairHistoryTableBody').html(`
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            <i class="fas fa-spinner fa-spin me-2"></i> Loading repair history...
+                        </td>
+                    </tr>
+                `);
+
+                wrapper.slideDown();
+
+                $.ajax({
+                    url: "{{ route('asset-inventory.repair.history', ':id') }}".replace(':id', assetId),
+                    type: 'GET',
+                    success: function (res) {
+                        if (!res.success || !res.history || res.history.length === 0) {
+                            $('#repairHistoryTableBody').html(`<tr><td colspan="6" class="text-center text-muted">No repair history found.</td></tr>`);
+                            return;
+                        }
+
+                        let rows = res.history.map((item, index) => `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${escapeHtml(item.vendor_name)}</td>
+                                <td>${item.send_date || '-'}</td>
+                                <td>${item.return_date || '-'}</td>
+                                <td>${escapeHtml(item.remarks)}</td>
+                                <td>${escapeHtml(item.created_by)}</td>
+                            </tr>
+                        `).join('');
+
+                        $('#repairHistoryTableBody').html(rows);
+                    },
+                    error: () => notify('error', 'Unable to load repair history.')
+                });
+            });
+
+            // Clean modal state when hidden
+            $(document).on('hidden.bs.modal', '#repairModal', resetRepairModal);
+        });
 </script>
 
 @endpush

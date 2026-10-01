@@ -32,7 +32,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
 
     <!-- toastr css -->
-    <link rel="stylesheet" href="{{ asset('assets/css/toastr.min.css') }}">
+    <!-- <link rel="stylesheet" href="{{ asset('assets/css/toastr.min.css') }}"> -->
 
     @stack('styles')
 
@@ -79,7 +79,7 @@
     <script src="{{ asset('assets/js/chart.js') }}"></script>
 
     <!-- toastr js -->
-    <script src="{{ asset('assets/css/toastr.min.js') }}"></script>
+    <!-- <script src="{{ asset('assets/css/toastr.min.js') }}"></script> -->
     
 
     @stack('scripts')

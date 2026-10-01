@@ -672,14 +672,6 @@ class AssetIssueRegisterController extends Controller
     public function custodianDetails($id)
     {
 
-        // $custodian = Custodian::with([
-        //     'designation',
-        //     'discipline',
-        //     'section',
-        //     'location',
-        //     'station',
-        // ])->where('id', $id)->where('status', 1)->first();
-
         $custodiansQuery = Custodian::with(['designation', 'discipline', 'section', 'location', 'station',])->where('id', $id)->where('status', 1);
         if(auth()->user()->role == 1) {
             $custodiansQuery->whereIn('station_id', permittedStationIds());
