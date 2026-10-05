@@ -28,4 +28,9 @@ class AssetIssueRegister extends Model
     {
         return $this->belongsTo(Custodian::class,'custodian_id');    
     }
+
+    public function incidentIssues()
+    {
+        return $this->hasMany(IncidentIssueRegister::class, 'asset_issue_register_id');                       
+    }
 }

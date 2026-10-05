@@ -3,7 +3,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{DashboardController, UploadController, ComplaintController, UploaderController, UserConfigurationController, ConfigureController, EventLogController,
-                            SettingController, AssetInventoryController, IssueRegController, CustodianController, AssetIssueRegisterController, AssetRetainedController, UserPermissionController};
+                            SettingController, AssetInventoryController, IssueRegController, CustodianController, AssetIssueRegisterController, AssetRetainedController, UserPermissionController,
+                            IncidentIssueRegisterController};
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -143,8 +144,15 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
             Route::put('/update/{id}', [SettingController::class, 'stationUpdate'])->name('update');       
             Route::post('/status/{id}', [SettingController::class, 'stationStatus'])->name('status');
             Route::get('/by-location/{id}', [SettingController::class, 'stationsByLocation'])->name('byLocation');
-        });
-        
+        });       
+    });
+
+    Route::prefix('setting/issue_category')->name('issue_category.')->group(function () {   
+        Route::get('/', [SettingController::class,'catIndex'])->name('index');
+        Route::post('/store', [SettingController::class,'catStore'])->name('store');
+        Route::get('/edit/{id}', [SettingController::class,'catEdit'])->name('edit');
+        Route::put('/update/{id}', [SettingController::class,'catUpdate'])->name('update');
+        Route::post('/status/{id}', [SettingController::class,'catChangeStatus'])->name('changeStatus');
     });
 
     // user location permission
@@ -220,6 +228,18 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/export', [AssetIssueRegisterController::class, 'export'])->name('export');    
         Route::post('/{id}/retain', [AssetIssueRegisterController::class, 'retain'])->name('retain');   
 
+    });
+
+    // Incident issue register
+    Route::prefix('incident_issue_register')->name('incident_issue_register.')->group(function(){
+        Route::get('/', [IncidentIssueRegisterController::class, 'index'])->name('index');
+        Route::get('/create', [IncidentIssueRegisterController::class, 'create'])->name('create');
+        Route::post('/store', [IncidentIssueRegisterController::class, 'store'])->name('store');
+        Route::get('/search-asset', [IncidentIssueRegisterController::class, 'searchAsset'])->name('searchAsset');
+        Route::get('/asset-details/{id}', [IncidentIssueRegisterController::class, 'assetDetails'])->name('assetDetails');
+        Route::get('/{id}/details', [IncidentIssueRegisterController::class, 'details'])->name('details');
+        Route::post('/{id}/attend', [IncidentIssueRegisterController::class, 'attend'])->name('attend');
+        Route::post('/{id}/close', [IncidentIssueRegisterController::class, 'close'])->name('close');
     });
 
     // Asset retained

@@ -106,4 +106,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserLocationPermission::class, 'user_id');
     }
+
+    public function incidentIssues()
+    {
+        return $this->hasMany(IncidentIssueRegister::class, 'support_user_id');                       
+    }
 }

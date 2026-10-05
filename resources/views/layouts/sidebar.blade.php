@@ -110,12 +110,12 @@
                 <a class="nav-link text-white d-flex justify-content-between align-items-center
                     {{ request()->routeIs('designation.*')|| request()->routeIs('discipline.*')|| request()->routeIs('asset-type.*')|| request()->routeIs('asset-model.*')
                         || request()->routeIs('asset-tag.*')|| request()->routeIs('asset-inventory.*')|| request()->routeIs('custodian.*')
-                        || request()->routeIs('asset-assignment.*')
+                        || request()->routeIs('issue_category.*')|| request()->routeIs('asset-assignment.*')
                         ? '' : 'collapsed' }}" data-bs-toggle="collapse" href="#settingsMenu" role="button"
 
                     aria-expanded="{{ request()->routeIs('designation.*') || request()->routeIs('discipline.*')|| request()->routeIs('asset-type.*')                        
                         || request()->routeIs('asset-model.*')|| request()->routeIs('asset-tag.*')|| request()->routeIs('asset-inventory.*')                       
-                        || request()->routeIs('custodian.*')|| request()->routeIs('asset-assignment.*') ? 'true' : 'false' }}" aria-controls="settingsMenu">
+                        || request()->routeIs('custodian.*')|| request()->routeIs('issue_category.*') || request()->routeIs('asset-assignment.*') ? 'true' : 'false' }}" aria-controls="settingsMenu">
 
                     <span>
                         <i class="bi bi-sliders"></i>
@@ -127,8 +127,8 @@
 
                 <div class="collapse
                     {{ request()->routeIs('designation.*')|| request()->routeIs('discipline.*')|| request()->routeIs('asset-type.*')|| request()->routeIs('asset-model.*')   
-                        || request()->routeIs('asset-tag.*')|| request()->routeIs('asset-inventory.*')|| request()->routeIs('custodian.*')                       
-                        || request()->routeIs('asset-assignment.*')? 'show' : '' }}" id="settingsMenu">
+                        || request()->routeIs('asset-tag.*')|| request()->routeIs('asset-inventory.*')|| request()->routeIs('custodian.*')                    
+                        || request()->routeIs('issue_category.*') ||request()->routeIs('asset-assignment.*')? 'show' : '' }}" id="settingsMenu">
                     <ul class="nav flex-column ms-3 mt-2">
 
                         <li class="nav-item">
@@ -163,14 +163,6 @@
                             </a>
                         </li>
 
-                        <!-- <li class="nav-item">
-                            <a href="{{ route('asset-tag.index')}}"
-                                class="nav-link text-white {{ request()->routeIs('asset-tag.*') ? 'active bg-primary' : '' }}">
-                                <i class="bi bi-upc-scan"></i>
-                                Asset Tag
-                            </a>
-                        </li> -->
-
                         <li class="nav-item">
                             <a href="{{ route('location.index')}}"
                                 class="nav-link text-white {{ request()->routeIs('location.*') ? 'active bg-primary' : '' }}">
@@ -179,6 +171,13 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a href="{{ route('issue_category.index') }}"
+                                class="nav-link text-white {{ request()->routeIs('issue_category.*') ? 'active bg-primary' : '' }}">
+                                <i class="bi bi-grid"></i>
+                                Category
+                            </a>
+                        </li>
                          
                     </ul>
                 </div>
@@ -215,6 +214,17 @@
                     Asset Issue Register
                 </a>
             </li>
+            
+        @endif
+
+        @if(in_array(auth()->user()->role, [0, 1, 2]))    
+            <li class="nav-item">
+                <a href="{{ route('incident_issue_register.index')}}" class="nav-link text-white {{ request()->routeIs('incident_issue_register.*') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Incident Issue Register
+                </a>
+            </li>
+            
         @endif
     </ul>
 

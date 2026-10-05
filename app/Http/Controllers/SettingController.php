@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Validation\Rule;
-use App\Models\{Designation, Discipline, AssetType, AssetModel, AssetTag, Location, DeptSection, AirportStation};
+use App\Models\{Designation, Discipline, AssetType, AssetModel, AssetTag, Location, DeptSection, AirportStation, IssueCategory};
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -73,6 +73,7 @@ class SettingController extends Controller
         ]);
     }  
 
+
     //Discipline(department)
     public function discIndex(){
 
@@ -137,6 +138,7 @@ class SettingController extends Controller
             'status'  => $discipline->status
         ]);
     }  
+
 
      //Discipline(department)/section
     public function sectionIndex($id){
@@ -261,6 +263,7 @@ class SettingController extends Controller
             'status'  => $section->status
         ]);
     }
+
 
     // asset type
     public function assetIndex(){
@@ -425,74 +428,9 @@ class SettingController extends Controller
         ]);
     } 
 
-    // tag no
-    // public function tagIndex(){
-
-    //     // dd('Controller Hit');
-    //     $assetTags = AssetTag::latest()->get();
-    //     return view('settings.asset-tag.index', compact('assetTags'));
-    // }
-
-    // public function tagStore(Request $request){
-    //     // dd($request->all());
-    //     $request->validate([
-    //         'tag_no' => 'required|unique:asset_tags,tag_no'
-    //     ],[
-    //         'tag_no.required' => 'Asset Tag Number is required.',
-    //         'tag_no.unique'   => 'This Asset Tag Number already exists.',
-    //     ]);
-
-    //     AssetTag::create([
-    //         'tag_no' => $request->tag_no
-    //     ]);
-
-    //     eventLog('Create', 'Asset Tag', 'Create asset tag: '.$request->tag_no);
-
-    //     return redirect()->back()->with('success','Asset tag added successfully.');
-    // }
-
-    // public function tagEdit($id) {
-    //     $assetTag = AssetTag::findOrFail(decryptId($id));
-
-    //     return response()->json($assetTag);
-    // }
-
-    // public function tagUpdate(Request $request, $id){
-
-    //     $assetTag = AssetTag::findOrFail(decryptId($id));
-
-    //     $request->validate([
-    //         'tag_no' => 'required|unique:asset_tags,tag_no,'.$assetTag->id
-    //     ],[
-    //         'tag_no.required' => 'Asset Tag Number is required.',
-    //         'tag_no.unique'   => 'This Asset Tag Number already exists.',
-    //     ]);
-
-    //     $assetTag->update([
-    //         'tag_no'=>$request->tag_no
-    //     ]);
-
-    //     eventLog('Update', 'Asset tag', 'Updated asset tag: '.$assetTag->tag_no);
-
-    //     return redirect()->back()->with('success','Asset tag updated successfully.');
-    // }
-
-    // public function tagChangeStatus($id){
-        
-    //     $assetTag = AssetTag::findOrFail(decryptId($id));
-    //     $assetTag->status = !$assetTag->status;
-    //     $assetTag->save();
-
-    //     eventLog('Status Change', 'Asset type', $assetTag->status ? 'Activated asset tag: '.$assetTag->name : 'Deactivated asset tag: '.$assetTag->name);
-    //     return response()->json([
-    //         'success' => true,
-    //         'status'  => $assetTag->status
-    //     ]);
-    // } 
 
     // location(region)
-        public function locationIndex(){
-
+    public function locationIndex(){
         $locations = Location::latest()->get();
         return view('settings.location.index', compact('locations'));
     }
@@ -561,6 +499,7 @@ class SettingController extends Controller
             'status'  => $location->status
         ]);
     }  
+
 
     // location(region)/ airport/station
     public function stationIndex($id){
@@ -729,4 +668,69 @@ class SettingController extends Controller
             })
         );
     }
+
+    // Issue Category(type of issues)
+    public function catIndex(){
+
+        // dd('Controller Hit');
+        $categories = IssueCategory::latest()->get();
+        return view('settings.issue-category.index', compact('categories'));
+    }
+
+    public function catStore(Request $request){
+        // dd($request->all());
+        $request->validate([
+            'title' => 'required|unique:issue_categories,title'
+        ],[
+            'title.required' => 'Title is required.',
+            'title.unique'   => 'This Title already exists.',
+        ]);
+
+        IssueCategory::create([
+            'title' => $request->title
+        ]);
+
+        eventLog('Create', 'Issue Category', 'Create category issue: '.$request->title);
+
+        return redirect()->back()->with('success','Title added successfully.');
+    }
+
+    public function catEdit($id) {
+        $category = IssueCategory::findOrFail(decryptId($id));
+
+        return response()->json($category);
+    }
+
+    public function catUpdate(Request $request, $id){
+
+        $category = IssueCategory::findOrFail(decryptId($id));
+
+        $request->validate([
+            'title' => 'required|unique:issue_categories,title,'.$category->id
+        ],[
+            'title.required' => 'Title is required.',
+            'title.unique'   => 'This Title already exists.',
+        ]);
+
+        $category->update([
+            'title'=>$request->title
+        ]);
+
+        eventLog('Update', 'Issue Category', 'Updated category: '.$category->title);
+
+        return redirect()->back()->with('success','Title updated successfully.');
+    }
+
+    public function catChangeStatus($id){
+        
+        $category = IssueCategory::findOrFail(decryptId($id));
+        $category->status = !$category->status;
+        $category->save();
+
+        eventLog('Status Change', 'Category', $category->status ? 'Activated category: '.$category->title : 'Deactivated category: '.$category->title);
+        return response()->json([
+            'success' => true,
+            'status'  => $category->status
+        ]);
+    } 
 }
