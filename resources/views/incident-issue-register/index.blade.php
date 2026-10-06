@@ -11,11 +11,11 @@
         <div class="col-md-8">
             <h2 class="fw-bold">
                 <i class="bi bi-person-workspace"></i>
-                Incident issue register
+                Incident register
             </h2>
 
             <p class="text-muted">
-                Manage all incident issue registers
+                Manage all incident registers
             </p>
 
         </div>
@@ -75,7 +75,7 @@
                 <li class="nav-item">
 
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#attendTab">                                                    
-                        Attend
+                        Attended
 
                         <span class="badge bg-warning">
                             {{ $attendIncidents->count() }}
@@ -88,7 +88,7 @@
                 <li class="nav-item">
 
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#closeTab">
-                        Close
+                        Closed
 
                         <span class="badge bg-success">
                             {{ $closeIncidents->count() }}
@@ -105,9 +105,7 @@
 
                 {{-- OPEN --}}
 
-                <div class="tab-pane fade show active"
-                     id="openTab">
-
+                <div class="tab-pane fade show active" id="openTab">                    
                     @include(
                         'incident-issue-register.partials.table',
                         [
@@ -121,8 +119,7 @@
 
                 {{-- ATTEND --}}
 
-                <div class="tab-pane fade"
-                     id="attendTab">
+                <div class="tab-pane fade" id="attendTab">                    
 
                     @include(
                         'incident-issue-register.partials.table',
@@ -137,8 +134,7 @@
 
                 {{-- CLOSE --}}
 
-                <div class="tab-pane fade"
-                     id="closeTab">
+                <div class="tab-pane fade" id="closeTab">                    
 
                     @include(
                         'incident-issue-register.partials.table',
@@ -279,18 +275,9 @@
 
 <script>
 
-$(document).ready(function () {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Open Incident Modal
-    |--------------------------------------------------------------------------
-    */
-
     $(document).on('click', '.incident-status-btn', function () {
 
         let id = $(this).data('id');
-
         let status = $(this).data('status');
 
         $('#incident_id').val(id);
@@ -298,14 +285,18 @@ $(document).ready(function () {
         $.ajax({
 
             url: "{{ url('incident_issue_register') }}/" + id + "/details",
-
             type: "GET",
 
             success: function (response) {
 
                 if (!response.status) {
 
-                    toastr.error(response.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message,
+                        confirmButtonText: 'OK'
+                    });
 
                     return;
                 }
@@ -313,17 +304,11 @@ $(document).ready(function () {
                 let data = response.data;
 
                 $('#modal_call_id').text(data.call_id);
-
                 $('#modal_status').text(data.status);
-
                 $('#modal_asset_model').text(data.asset_model);
-
                 $('#modal_tag_no').text(data.tag_no);
-
                 $('#modal_serial_no').text(data.serial_no);
-
                 $('#modal_custodian').text(data.custodian);
-
                 $('#modal_category').text(data.category);
 
                 $('#modal_generated').text(
@@ -353,8 +338,7 @@ $(document).ready(function () {
 
                     if (status === 'Open') {
 
-                        $('#incidentModalTitle')
-                            .text('Attend Incident');
+                        $('#incidentModalTitle').text('Attend Incident');                            
 
                         $('#incidentActionBtn')
                             .text('Attend Call')
@@ -362,14 +346,13 @@ $(document).ready(function () {
                             .addClass('btn-primary')
                             .show();
 
-                        $('#modal_remarks')
-                            .prop('readonly', false);
+                        $('#modal_remarks').prop('readonly', false);                           
 
                     }
+
                     else if (status === 'Attend') {
 
-                        $('#incidentModalTitle')
-                            .text('Close Incident');
+                        $('#incidentModalTitle').text('Close Incident');                            
 
                         $('#incidentActionBtn')
                             .text('Close Call')
@@ -377,34 +360,21 @@ $(document).ready(function () {
                             .addClass('btn-success')
                             .show();
 
-                        $('#modal_remarks')
-                            .prop('readonly', false);
+                        $('#modal_remarks').prop('readonly', false);
+                            
 
                     }
+
                     else {
-
-                        $('#incidentModalTitle')
-                            .text('Incident Details');
-
-                        $('#incidentActionBtn')
-                            .hide();
-
-                        $('#modal_remarks')
-                            .prop('readonly', true);
-
+                        $('#incidentModalTitle').text('Incident Details');                          
+                        $('#incidentActionBtn').hide();                          
+                        $('#modal_remarks').prop('readonly', true);                           
                     }
 
                 @else
-
-                    $('#incidentModalTitle')
-                        .text('Incident Details');
-
-                    $('#incidentActionBtn')
-                        .hide();
-
-                    $('#modal_remarks')
-                        .prop('readonly', true);
-
+                    $('#incidentModalTitle').text('Incident Details');                      
+                    $('#incidentActionBtn').hide();                       
+                    $('#modal_remarks').prop('readonly', true);                       
                 @endif
 
 
@@ -413,14 +383,16 @@ $(document).ready(function () {
                 );
 
                 modal.show();
-
             },
 
             error: function () {
 
-                toastr.error(
-                    'Unable to fetch incident details.'
-                );
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to fetch incident details.',
+                    confirmButtonText: 'OK'
+                });
 
             }
 
@@ -438,105 +410,105 @@ $(document).ready(function () {
     $('#incidentActionBtn').on('click', function () {
 
         let id = $('#incident_id').val();
+        let remarks = $('#modal_remarks').val().trim();
+        let status = $('#modal_status').text().trim();
 
-        let remarks = $('#modal_remarks').val();
+        if (!remarks) {
 
-        let status = $('#modal_status').text();
-
-        if (!remarks.trim()) {
-
-            toastr.error(
-                'Issue details cannot be empty.'
-            );
+            Swal.fire({
+                icon: 'warning',
+                title: 'Issue Details Required',
+                text: 'Issue details cannot be empty.',
+                confirmButtonText: 'OK'
+            });
 
             return;
         }
 
+
         let actionUrl = '';
 
         if (status === 'Open') {
-
-            actionUrl = "{{ url('incident_issue_register') }}/ " + id + "/attend";           
-
+            actionUrl = "{{ url('incident_issue_register') }}/" + id + "/attend";                                              
         }
+
         else if (status === 'Attend') {
-            actionUrl = "{{ url('incident_issue_register') }}/" + id + "/close";              
+            actionUrl = "{{ url('incident_issue_register') }}/" + id + "/close";                                          
         }
-        else {
 
+        else {
             return;
         }
 
 
         $.ajax({
-
             url: actionUrl,
-
             type: "POST",
-
             data: {
-
                 _token: "{{ csrf_token() }}",
                 remarks: remarks
-
             },
 
-            beforeSend: function () {
 
+            beforeSend: function () {
                 $('#incidentActionBtn')
                     .prop('disabled', true)
                     .text('Saving...');
-
             },
+
 
             success: function (response) {
 
                 if (response.status) {
 
-                    toastr.success(response.message);
-
-                    setTimeout(function () {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message,
+                        confirmButtonText: 'OK'
+                    }).then(function () {
                         location.reload();
-                    }, 800);
+                    });
 
                 }
+
                 else {
 
-                    toastr.error(response.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message ?? 'Unable to update incident.',
+                        confirmButtonText: 'OK'
+                    });
 
                 }
 
             },
+
 
             error: function (xhr) {
 
+                let message = 'Something went wrong.';
+
                 if (xhr.responseJSON?.message) {
-
-                    toastr.error(
-                        xhr.responseJSON.message
-                    );
-
-                } else {
-
-                    toastr.error(
-                        'Something went wrong.'
-                    );
-
+                    message = xhr.responseJSON.message;
                 }
 
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: message,
+                    confirmButtonText: 'OK'
+                });
             },
 
             complete: function () {
-
-                $('#incidentActionBtn').prop('disabled', false);                    
-
+                $('#incidentActionBtn').prop('disabled', false);                 
             }
 
         });
 
     });
-
-});
 
 </script>
 

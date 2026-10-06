@@ -39,12 +39,30 @@ class IncidentIssueRegisterController extends Controller
      */
     private function incidentQuery()
     {
-        return IncidentIssueRegister::with([
+        $query = IncidentIssueRegister::with([
             'assetIssueRegister.assetInventory.assetModel.assetType',
-            'assetIssueRegister.custodian',
-            'supportUser',
-            'category',
+            'assetIssueRegister.custodian', 'supportUser', 'category',
         ]);
+
+         /*
+        |--------------------------------------------------------------------------
+        | Engineer: Show only assigned incidents
+        |--------------------------------------------------------------------------
+        */
+
+        if(auth()->user()->role == 2){
+            $query->where('support_user_id', auth()->id());
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Management & Call Coordinator
+        |--------------------------------------------------------------------------
+        | Role 0 and Role 1 can see incidents of all engineers.
+        |--------------------------------------------------------------------------
+        */
+
+        return $query;
     }
 
     /**
@@ -119,7 +137,7 @@ class IncidentIssueRegisterController extends Controller
                     ?? $asset?->assetModel?->title
                     ?? 'N/A',
 
-                'asset_type' => $asset?->assetModel?->assetType?->title
+                'asset_type' => $asset?->assetModel?->assetType?->name
                     ?? 'N/A',
 
                 'custodian_name' => $custodian?->custodian_name
@@ -323,24 +341,24 @@ class IncidentIssueRegisterController extends Controller
         $incident = IncidentIssueRegister::where('id', $id)
             ->where('status', 'Open')
             ->where('support_user_id', auth()->id())
-            ->first();
+            ->firstOrFail();
 
         if (!$incident) {
             return response()->json([
-                'status' => false,
-                'message' => 'Incident is not available for attendance.'
+                'status'    => false,
+                'message'   => 'Incident is not available for attendance.'
             ], 422);
         }
 
         $incident->update([
-            'remarks' => $request->remarks,
-            'status' => 'Attend',
+            'remarks'   => $request->remarks,
+            'status'    => 'Attend',
             'call_attended_at' => now(),
         ]);
 
         return response()->json([
-            'status' => true,
-            'message' => 'Incident attended successfully.'
+            'status'    => true,
+            'message'   => 'Incident attended successfully.'
         ]);
     }
 
@@ -363,7 +381,7 @@ class IncidentIssueRegisterController extends Controller
         $incident = IncidentIssueRegister::where('id', $id)
             ->where('status', 'Attend')
             ->where('support_user_id', auth()->id())
-            ->first();
+            ->firstOrFail();
 
         if (!$incident) {
             return response()->json([

@@ -72,6 +72,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('uploader.index');
         }
 
+        if (auth()->user()->role == 2) {
+            return redirect()->route('incident_issue_register.index');
+        }
+
         return redirect()->route('dashboard');
     }
 

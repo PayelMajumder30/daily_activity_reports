@@ -12,12 +12,12 @@
         <div class="col-md-8">
 
             <h2 class="fw-bold">
-                <i class="bi bi-person-workspace"></i>
-                Add Custodian
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Register new incident
             </h2>
 
             <p class="text-muted">
-                Create a new custodian
+                Register new incident
             </p>
 
         </div>
@@ -121,9 +121,7 @@
                 </div>
 
                 {{-- Selected Asset Preview --}}
-                <div class="row mt-4"
-                    id="assetPreviewSection"
-                    style="display:none;">
+                <div class="row mt-4" id="assetPreviewSection" style="display:none;">                   
 
                     <div class="col-md-12">
 
@@ -286,9 +284,7 @@
             */
 
             $('#searchAssetBtn').on('click', function () {
-
                 let search = $('#asset_search').val().trim();
-
                 if (search === '') {
 
                     Swal.fire({
@@ -304,19 +300,13 @@
                 $.ajax({
 
                     url: "{{ route('incident_issue_register.searchAsset') }}",
-
                     type: "GET",
-
                     data: {
                         search: search
                     },
 
                     beforeSend: function () {
-
-                        $('#searchAssetBtn')
-                            .prop('disabled', true)
-                            .text('Searching...');
-
+                        $('#searchAssetBtn').prop('disabled', true).text('Searching...');                                                      
                     },
 
                     success: function (response) {
@@ -393,11 +383,7 @@
                     },
 
                     complete: function () {
-
-                        $('#searchAssetBtn')
-                            .prop('disabled', false)
-                            .text('Search');
-
+                        $('#searchAssetBtn').prop('disabled', false).text('Search');                                                  
                     }
 
                 });
@@ -437,34 +423,16 @@
 
                         let data = response.data;
 
-                        $('#asset_issue_register_id')
-                            .val(data.id);
-
-                        $('#preview_tag_no')
-                            .text(data.tag_no);
-
-                        $('#preview_serial_no')
-                            .text(data.serial_no);
-
-                        $('#preview_asset_model')
-                            .text(data.asset_model);
-
-                        $('#preview_asset_type')
-                            .text(data.asset_type);
-
-                        $('#preview_custodian')
-                            .text(data.custodian_name);
-
-                        $('#preview_location')
-                            .text(data.location);
-
-                        $('#preview_station')
-                            .text(data.station);
-
+                        $('#asset_issue_register_id').val(data.id);                            
+                        $('#preview_tag_no').text(data.tag_no);                         
+                        $('#preview_serial_no').text(data.serial_no);                          
+                        $('#preview_asset_model').text(data.asset_model);                           
+                        $('#preview_asset_type').text(data.asset_type);                            
+                        $('#preview_custodian').text(data.custodian_name);                            
+                        $('#preview_location').text(data.location);                            
+                        $('#preview_station').text(data.station);                            
                         $('#assetPreviewSection').show();
-
                         $('#incidentDetailsSection').show();
-
                         $('html, body').animate({
                             scrollTop: $('#assetPreviewSection').offset().top - 100
                         }, 500);
@@ -496,9 +464,7 @@
             $('#incidentForm').on('submit', function (e) {
 
                 if (!$('#asset_issue_register_id').val()) {
-
                     e.preventDefault();
-
                     Swal.fire({
                         icon: 'warning',
                         title: 'Asset Required',
@@ -510,9 +476,7 @@
                 }
 
                 if (!$('#support_user_id').val()) {
-
                     e.preventDefault();
-
                     Swal.fire({
                         icon: 'warning',
                         title: 'Engineer Required',

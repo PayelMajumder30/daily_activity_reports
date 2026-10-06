@@ -10,13 +10,13 @@
             <div class="mb-2">
                 <i class="bi bi-person-circle fs-1 text-info"></i>
             </div>
-            <!-- <div class="mb-1 text-white">
+            <div class="mb-1 text-white">
                 {{ ucwords(auth()->user()->name)}}
-            </div> -->
+            </div>
 
-            <span class="badge {{ auth()->user()->role == 0 ? 'bg-success' : 'bg-warning text-dark' }}">
+            <!-- <span class="badge {{ auth()->user()->role == 0 ? 'bg-success' : 'bg-warning text-dark' }}">
                 {{ auth()->user()->role == 0 ? 'Management' : 'Call Coordinator' }}
-            </span>
+            </span> -->
         </div>
     </hr>
 
