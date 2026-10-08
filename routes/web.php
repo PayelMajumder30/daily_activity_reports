@@ -240,6 +240,7 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/{id}/details', [IncidentIssueRegisterController::class, 'details'])->name('details');
         Route::post('/{id}/attend', [IncidentIssueRegisterController::class, 'attend'])->name('attend');
         Route::post('/{id}/close', [IncidentIssueRegisterController::class, 'close'])->name('close');
+        Route::post('/{id}/change-engineer', [IncidentIssueRegisterController::class, 'changeEngineer'])->name('changeEngineer');
     });
 
     // Asset retained

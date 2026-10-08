@@ -45,10 +45,8 @@
       
         <div class="card-body">
 
-            <form id="incidentForm"
-                action="{{ route('incident_issue_register.store') }}"
-                method="POST">
-
+            <form id="incidentForm" action="{{ route('incident_issue_register.store') }}" method="POST">
+                              
                 @csrf
 
                 {{-- Asset Search --}}
@@ -61,14 +59,8 @@
 
                         <div class="input-group">
 
-                            <input type="text"
-                                id="asset_search"
-                                class="form-control"
-                                placeholder="Search Tag No, Serial No or Custodian Name">
-
-                            <button type="button"
-                                    class="btn btn-primary"
-                                    id="searchAssetBtn">
+                            <input type="text" id="asset_search" class="form-control" placeholder="Search Tag No, Serial No or Custodian Name">                                                                                         
+                            <button type="button" class="btn btn-primary" id="searchAssetBtn">                                                                       
                                 Search
                             </button>
 
@@ -86,8 +78,8 @@
 
                     <div class="col-md-12">
 
-                        <div id="assetSearchResult"
-                            style="display:none;">
+                        <div id="assetSearchResult" style="display:none;">
+                           
 
                             <h6>Search Result</h6>
 
@@ -183,13 +175,11 @@
                 </div>
 
                 {{-- Incident Details --}}
-                <div id="incidentDetailsSection"
-                    style="display:none;">
+                <div id="incidentDetailsSection" style="display:none;">                   
 
                     <hr class="my-4">
 
                     <div class="row">
-
                         <div class="col-md-6 mb-3">
 
                             <label class="form-label">
@@ -325,8 +315,7 @@
 
                             $('#assetSearchBody').html(`
                                 <tr>
-                                    <td colspan="7"
-                                        class="text-center text-muted">
+                                    <td colspan="7" class="text-center text-muted">                                      
                                         No issued asset found.
                                     </td>
                                 </tr>

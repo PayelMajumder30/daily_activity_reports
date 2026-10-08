@@ -15,8 +15,8 @@ class IncidentIssueRegister extends Model
     
     protected $casts = [
         'call_generated_at' => 'datetime',
-        'call_attended_at' => 'datetime',
-        'call_closed_at' => 'datetime',
+        'call_attended_at'  => 'datetime',
+        'call_closed_at'    => 'datetime',
     ];
 
     public function assetIssueRegister(): BelongsTo

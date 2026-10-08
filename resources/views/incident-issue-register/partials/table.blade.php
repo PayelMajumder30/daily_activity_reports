@@ -45,7 +45,17 @@
 
                     <td>{{ $asset?->tag_no ?? 'N/A' }} </td>                                           
                     <td>{{ $asset?->serial_no ?? 'N/A' }}</td>                                         
-                    <td>{{ $incident->supportUser?->name ?? 'N/A' }}</td>                                          
+                    <!-- <td>{{ $incident->supportUser?->name ?? 'N/A' }}</td>                                           -->
+                    <td>
+                        @if($incident->status === 'Open' && in_array(auth()->user()->role, [0, 1]))
+                            <button class="btn btn-link p-0 assigned-engineer-btn" data-id="{{ $incident->id }}" data-engineer-id="{{ $incident->support_user_id }}"
+                                data-engineer-name="{{ $incident->supportUser?->name ?? 'N/A' }}" title="Reassign Engineer">
+                                {{ $incident->supportUser?->name ?? 'N/A' }}
+                            </button>
+                        @else
+                            {{ $incident->supportUser?->name ?? 'N/A' }}
+                        @endif
+                    </td>
                     <td>{{ $incident->call_generated_at?->format('d-m-Y H:i:s') ?? '-' }}</td>                                           
                     <td>{{ $incident->call_attended_at?->format('d-m-Y H:i:s') ?? '-' }}</td>                                           
                     <td>{{ $incident->call_closed_at?->format('d-m-Y H:i:s') ?? '-' }}</td>                                           

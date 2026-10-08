@@ -160,17 +160,13 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
 
             <div class="modal-content">
-
                 <div class="modal-header">
 
-                    <h5 class="modal-title" id="incidentModalTitle">
-                        
+                    <h5 class="modal-title" id="incidentModalTitle">                      
                         Incident Details
                     </h5>
 
-                    <button type="button" class="btn-close" data-bs-dismiss="modal">
-                                                
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>                                                                 
 
                 </div>
 
@@ -178,7 +174,6 @@
 
                     <input type="hidden" id="incident_id">
                         
-
                     <div class="row">
 
                         <div class="col-md-6 mb-3">
@@ -241,10 +236,10 @@
                             Issue Details / Remarks
                         </label>
 
-                        <textarea id="modal_remarks" class="form-control" rows="5"></textarea>
+                        <textarea id="modal_remarks" class="form-control" rows="5" readonly></textarea>
                                                             
                     </div>
-
+                    
                 </div>
 
                 <div class="modal-footer">
@@ -269,11 +264,99 @@
 
     </div>
 
+    {{-- Change Assigned Engineer Modal --}}
+
+    <div class="modal fade" id="changeEngineerModal" tabindex="-1"
+        aria-labelledby="changeEngineerModalLabel" aria-hidden="true">
+
+        <div class="modal-dialog modal-md modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title" id="changeEngineerModalLabel">
+                        Change Assigned Engineer
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">                                                                        
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" id="change_engineer_incident_id">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Current Engineer
+                        </label>
+                        <input type="text" class="form-control" id="current_engineer_name" readonly>                                                                           
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label for="new_engineer_id" class="form-label">
+                            Select New Engineer <span class="text-danger">*</span>
+                        </label>
+
+                        <select class="form-select" id="new_engineer_id">
+                                
+                            <option value="">
+                                Select Engineer
+                            </option>
+
+                            @foreach($engineers as $engineer)
+
+                                <option value="{{ $engineer->id }}">
+                                    {{ $engineer->name }}
+                                    @if(!empty($engineer->emp_id))
+                                        - {{ $engineer->emp_id }}
+                                    @endif
+                                </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">                                                    
+                        Cancel
+                    </button>
+
+                    <button type="button" class="btn btn-primary" id="changeEngineerBtn">                                              
+                        Save
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 </div>
 
 @push('scripts')
 
 <script>
+
+    /*
+    |--------------------------------------------------------------------------
+    | Auto Refresh Incident Issue Register
+    |--------------------------------------------------------------------------
+    | Refresh the page every 60 seconds so newly assigned incidents
+    | are automatically visible to the engineer.
+    |--------------------------------------------------------------------------
+    */
+
+    setInterval(function(){
+        location.reload();
+    }, 60000);
 
     $(document).on('click', '.incident-status-btn', function () {
 
@@ -504,6 +587,143 @@
 
             complete: function () {
                 $('#incidentActionBtn').prop('disabled', false);                 
+            }
+
+        });
+
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Open Change Engineer Modal
+    |--------------------------------------------------------------------------
+    */
+
+    $(document).on('click', '.assigned-engineer-btn', function () {
+
+        let incidentId = $(this).data('id');
+        let engineerId = $(this).data('engineer-id');
+        let engineerName = $(this).data('engineer-name');
+
+        $('#change_engineer_incident_id').val(incidentId);
+
+        $('#current_engineer_name').val(engineerName);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reset dropdown
+        |--------------------------------------------------------------------------
+        */
+
+        $('#new_engineer_id').val('');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Hide current engineer from dropdown
+        |--------------------------------------------------------------------------
+        */
+
+        $('#new_engineer_id option').show();
+        $('#new_engineer_id option[value="' + engineerId + '"]').hide();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Open modal
+        |--------------------------------------------------------------------------
+        */
+
+        let modal = new bootstrap.Modal(
+            document.getElementById('changeEngineerModal')
+        );
+
+        modal.show();
+
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Save Changed Engineer
+    |--------------------------------------------------------------------------
+    */
+
+    $('#changeEngineerBtn').on('click', function () {
+
+        let incidentId = $('#change_engineer_incident_id').val();
+        let newEngineerId = $('#new_engineer_id').val();
+
+        if (!newEngineerId) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Engineer Required',
+                text: 'Please select an engineer.',
+                confirmButtonText: 'OK'
+            });
+
+            return;
+        }
+
+        let button = $('#changeEngineerBtn');
+
+        $.ajax({
+
+            url: "{{ url('incident_issue_register') }}/" + incidentId + "/change-engineer",                         
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                support_user_id: newEngineerId
+            },
+
+
+            beforeSend: function () {
+                button.prop('disabled', true).text('Saving...');                                   
+            },
+
+
+            success: function (response) {
+
+                if (response.status) {
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: response.message,
+                        confirmButtonText: 'OK'
+                    }).then(function () {
+                        location.reload();
+                    });
+
+                } else {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: response.message ?? 'Unable to change engineer.',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            },
+
+
+            error: function (xhr) {
+
+                let message = 'Something went wrong.';
+
+                if (xhr.responseJSON?.message) {
+                    message = xhr.responseJSON.message;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: message,
+                    confirmButtonText: 'OK'
+                });
+
+            },
+
+            complete: function () {
+                button.prop('disabled', false).text('Save');                                
             }
 
         });
