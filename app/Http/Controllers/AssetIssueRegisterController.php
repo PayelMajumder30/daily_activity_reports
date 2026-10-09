@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Exports\CustodianAssetExport;
 use App\Exports\AssetIssueRegisterExport;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Models\{AssetInventory, Custodian, AssetIssueRegister, AssetTransfer, AssetType};
+use App\Models\{AssetInventory, Custodian, AssetIssueRegister, AssetTransfer, AssetType, AssetModel};
 
 class AssetIssueRegisterController extends Controller
 {
@@ -83,10 +83,18 @@ class AssetIssueRegisterController extends Controller
         /*
         | Search asset type
         */ 
-
         if($request->filled('asset_type')) {
             $query->whereHas('assetInventory.assetModel.assetType', function($q) use($request) {
                 $q->where('id', $request->asset_type);
+            });
+        }
+
+         /*
+        | Search asset model
+        */ 
+        if($request->filled('asset_model')) {
+            $query->whereHas('assetInventory.assetModel', function($q) use($request) {
+                $q->where('id', $request->asset_model);
             });
         }
 
@@ -107,11 +115,10 @@ class AssetIssueRegisterController extends Controller
         $issueStatuses = AssetIssueRegister::query()->whereNotNull('issue_status')->where('issue_status', '!=', '')->distinct()
                                                     ->orderBy('issue_status')->pluck('issue_status');
 
-        $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();      
-        
+        $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();         
+        $assetModels = AssetModel::where('status', 1)->orderBy('model_name')->get();                     
         $custodians = Custodian::with(['designation', 'discipline', 'section', 'location'])->where('status', 1)->orderBy('custodian_name')->get();
-
-        return view('asset-issue-register.index', compact('issueRegisters', 'issueStatuses', 'custodians', 'assetTypes'));
+        return view('asset-issue-register.index', compact('issueRegisters', 'issueStatuses', 'custodians', 'assetTypes', 'assetModels'));
     }
 
 

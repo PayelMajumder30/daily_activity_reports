@@ -22,40 +22,19 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
-     */
-    // public function store(LoginRequest $request): RedirectResponse
-    // {
-    //     $request->authenticate();
-
-    //     $request->session()->regenerate();
-
-    //     if(auth()->user()->role == 0)
-    //         {
-    //             return redirect()->route('dashboard');
-    //         }
-
-    //     if(auth()->user()->role == 1){
-    //         return redirect()->route('uploader.index');
-    //     }
-
-    //     return redirect()->route('dashboard');
-
-    //     // return redirect()->intended(route('dashboard', absolute: false));
-    // }
-
-
+    */
 
     public function store(LoginRequest $request): RedirectResponse
     {
         // Check if user exists
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('name', $request->name)->first();
 
-        // Check account status
+        // Check if user exists by name
         if ($user && $user->status == 0) {
             return back()
-                ->withInput($request->only('email'))
+                ->withInput($request->only('name'))
                 ->withErrors([
-                    'email' => 'Your account has been deactivated. Please contact the administrator.',
+                    'name' => 'Your account has been deactivated. Please contact the administrator.',
                 ]);
         }
 

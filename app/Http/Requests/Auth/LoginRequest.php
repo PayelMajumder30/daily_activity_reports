@@ -25,10 +25,18 @@ class LoginRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
+    // public function rules(): array
+    // {
+    //     return [
+    //         'email' => ['required', 'string', 'email'],
+    //         'password' => ['required', 'string'],
+    //     ];
+    // }
+
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
+            'name' => ['required', 'string'],
             'password' => ['required', 'string'],
         ];
     }
@@ -38,20 +46,40 @@ class LoginRequest extends FormRequest
      *
      * @throws ValidationException
      */
+    // public function authenticate(): void
+    // {
+    //     $this->ensureIsNotRateLimited();
+
+    //     if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+    //         RateLimiter::hit($this->throttleKey());
+
+    //         throw ValidationException::withMessages([
+    //             'email' => trans('auth.failed'),
+    //         ]);
+    //     }
+
+    //     RateLimiter::clear($this->throttleKey());
+    // }
+
+   
     public function authenticate(): void
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        if (! Auth::attempt([
+            'name' => $this->input('name'),
+            'password' => $this->input('password'),
+        ], $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'name' => trans('auth.failed'),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
     }
+
 
     /**
      * Ensure the login request is not rate limited.

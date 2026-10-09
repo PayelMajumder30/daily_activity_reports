@@ -28,8 +28,8 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label>Email</label>
-                            <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>      
+                            <label>Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ old('name') }}" required autofocus>      
                         </div>
 
                         <div class="mb-3">
@@ -37,11 +37,11 @@
                             <input type="password" name="password" class="form-control" required>       
                         </div>
 
-                        @error('email')
+                        @error('name')
                             <div class="text-danger mb-3">{{ $message }}</div>
                         @enderror
 
-                        <button class="btn btn-primary w-100">
+                        <button type="submit" class="btn btn-primary w-100">
                             Login
                         </button>
 

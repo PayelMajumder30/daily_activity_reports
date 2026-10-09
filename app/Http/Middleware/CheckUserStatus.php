@@ -23,7 +23,7 @@ class CheckUserStatus
             $request->session()->validate();
             $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors(['email' => 'Your account has been deactivated. Please contact the administrator.',]);
+            return redirect()->route('login')->withErrors(['name' => 'Your account has been deactivated. Please contact the administrator.',]);
         }
         return $next($request);
     }

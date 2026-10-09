@@ -1109,16 +1109,10 @@
             |--------------------------------------------------------------------------
             */
 
-            stationDropdown
-                .html('<option value="">Loading stations...</option>')
-                .prop('disabled', true);
-
+            stationDropdown.html('<option value="">Loading stations...</option>').prop('disabled', true);                           
 
             if (!locationId) {
-
-                stationDropdown
-                    .html('<option value="">Select Destination Station</option>')
-                    .prop('disabled', true);
+                stationDropdown.html('<option value="">Select Destination Station</option>').prop('disabled', true);                           
                 return;
             }
 
@@ -1149,7 +1143,6 @@
                         );
 
                         stationDropdown.prop('disabled', true);
-
                         return;
                     }
 
@@ -1220,11 +1213,8 @@
         $('#outstationForm').submit(function (e) {
 
             e.preventDefault();
-
             let form = this;
-
             let button = $('#outstationSubmitBtn');
-
 
             button
                 .prop('disabled', true)
@@ -1236,11 +1226,8 @@
             $.ajax({
 
                 url: "{{ route('asset-inventory.outstation') }}",
-
                 type: 'POST',
-
                 data: $(form).serialize(),
-
                 success: function (response) {
 
                     Swal.fire({
@@ -1441,9 +1428,7 @@
                     return;
                 }
 
-                let url =
-                    "{{ route('asset-inventory.outstation.history.export', ':id') }}"
-                    .replace(':id', currentOutstationAssetId);
+                let url = "{{ route('asset-inventory.outstation.history.export', ':id') }}".replace(':id', currentOutstationAssetId);                                     
 
                 window.location.href = url;
             });
@@ -1732,6 +1717,7 @@
             // Clean modal state when hidden
             $(document).on('hidden.bs.modal', '#repairModal', resetRepairModal);
         });
+    
 </script>
 
 @endpush

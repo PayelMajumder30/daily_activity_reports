@@ -63,7 +63,7 @@
             <form method="GET" action="{{ route('asset-issue-register.index') }}">
                 <div class="row">
                     {{-- Custodian --}}
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <label class="form-label">
                             Custodian Name
                         </label>
@@ -73,7 +73,7 @@
 
                     {{-- Employee ID --}}
 
-                    <div class="col-md-2">
+                    <div class="col-md-4">
 
                         <label class="form-label">
                             Employee ID
@@ -85,7 +85,7 @@
 
                     {{-- Tag --}}
 
-                    <div class="col-md-2">
+                    <div class="col-md-4">
                         <label class="form-label">
                             Asset Tag
                         </label>
@@ -93,7 +93,7 @@
                     </div>
 
                      {{-- Asset Type --}}
-                    <div class="col-md-2">
+                    <div class="col-md-4">
                         <label class="form-label">
                             Asset Type
                         </label>
@@ -112,9 +112,27 @@
                         </select>
                     </div>
 
+                       {{-- Asset Model --}}
+                    <div class="col-md-4">
+                        <label class="form-label">Asset Model</label>
+
+                        <select name="asset_model" id="asset_model" class="form-select">                           
+                            <option value="">
+                                All Asset Models
+                            </option>
+
+                            @foreach($assetModels as $assetModel)
+                                <option value="{{ $assetModel->id }}"
+                                    {{ request('asset_model') == $assetModel->id ? 'selected' : '' }}>
+                                    {{ ucwords($assetModel->model_name) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     {{-- Issue Status --}}
 
-                    <div class="col-md-2">
+                    <div class="col-md-4">
                         <label class="form-label">
                             Status
                         </label>
@@ -570,6 +588,12 @@
 <script>
 
     $(document).ready(function () {
+    
+    $('#asset_model').select2({
+        placeholder: 'All Asset Models',
+        allowClear: true,
+        width: '100%'
+    });
 
     $('#assetIssueTable').DataTable({
             columnDefs: [
