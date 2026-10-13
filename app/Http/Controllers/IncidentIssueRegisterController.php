@@ -448,11 +448,8 @@ class IncidentIssueRegisterController extends Controller
                         $q->whereIn('station_id', $stationIds);
                     }
                 );
-            })
-
-
-            ->find($id);
-
+            })->find($id);
+            
 
         if (!$assetIssue) {
 
@@ -465,7 +462,6 @@ class IncidentIssueRegisterController extends Controller
 
         $asset = $assetIssue->assetInventory;
         $custodian = $assetIssue->custodian;
-
 
         return response()->json([
             'status' => true,
@@ -626,8 +622,7 @@ class IncidentIssueRegisterController extends Controller
                     $assetIssue->assetInventory->station_id
                 )
             ) {
-                return back()
-                    ->withErrors(['asset_issue_register_id' => 'You do not have permission to generate an incident for this asset.'])->withInput();                                                           
+                return back()->withErrors(['asset_issue_register_id' => 'You do not have permission to generate an incident for this asset.'])->withInput();                                                                       
                     
             }
 
@@ -890,9 +885,8 @@ class IncidentIssueRegisterController extends Controller
 
         if ($incident->status !== 'Open') {
             return response()->json([
-                'status' => false,
-                'message' =>
-                    'Engineer cannot be changed after the incident has been attended.'
+                'status'    => false,
+                'message'   => 'Engineer cannot be changed after the incident has been attended.'                 
             ], 422);
         }
 
@@ -908,8 +902,8 @@ class IncidentIssueRegisterController extends Controller
         if (!$asset) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Asset information not found.'
+                'status'    => false,
+                'message'   => 'Asset information not found.'
             ], 422);
         }
 
@@ -932,9 +926,9 @@ class IncidentIssueRegisterController extends Controller
             if (!$stationIds ->contains($asset->station_id)) {
 
                 return response()->json([
-                    'status' => false,
-                    'message' =>
-                        'You do not have permission to change the engineer for this incident.'
+                    'status'    => false,
+                    'message'   => 'You do not have permission to change the engineer for this incident.'
+                        
                 ], 403);
             }
         }
@@ -965,9 +959,8 @@ class IncidentIssueRegisterController extends Controller
 
         if (!$engineer) {
             return response()->json([
-                'status' => false,
-                'message' =>
-                    'Invalid engineer selected or engineer is outside your permitted location.'
+                'status'    => false,
+                'message'   => 'Invalid engineer selected or engineer is outside your permitted location.'                 
             ], 422);
         }
 
@@ -981,8 +974,8 @@ class IncidentIssueRegisterController extends Controller
         if ((int) $incident->support_user_id === (int) $engineer->id) {
 
             return response()->json([
-                'status' => false,
-                'message' => 'Please select a different engineer.'
+                'status'    => false,
+                'message'   => 'Please select a different engineer.'
             ], 422);
         }
 
@@ -999,9 +992,9 @@ class IncidentIssueRegisterController extends Controller
 
 
         return response()->json([
-            'status' => true,
-            'message' => 'Assigned engineer changed successfully.',
-            'engineer' => $engineer->name,
+            'status'    => true,
+            'message'   => 'Assigned engineer changed successfully.',
+            'engineer'  => $engineer->name,
         ]);
     }
 }

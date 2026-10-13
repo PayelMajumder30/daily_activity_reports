@@ -214,6 +214,13 @@
                     Asset Issue Register
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="javascript:void(0)" class="nav-link text-white {{ request()->routeIs('asset-issue-register.*') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-person-check"></i>
+                    Outstation Transfer Register
+                </a>
+            </li>
             
         @endif
 

@@ -345,8 +345,7 @@
                                 Add Assets
                             </h5>
 
-                            <button type="button" class="btn-close"                                                             
-                                data-bs-dismiss="modal">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal">                                                                                           
                             </button>
                         </div>
 
@@ -616,7 +615,6 @@ $(document).ready(function () {
 
         let ids = [];
 
-
         $('#assetRows .modal-asset-tag')
             .each(function () {
 
@@ -713,24 +711,17 @@ $(document).ready(function () {
         |--------------------------------------------------------------
         */
 
-        let sourceOptions =
-            $('#assetOptionSource')
-                .html();
-
-
-        row.find('.modal-asset-tag')
-            .append(sourceOptions);
-
-
+        let sourceOptions = $('#assetOptionSource').html();
+                     
+        row.find('.modal-asset-tag').append(sourceOptions);
+            
         /*
         |--------------------------------------------------------------
         | Add row to modal
         |--------------------------------------------------------------
         */
 
-        $('#assetRows')
-            .append(row);
-
+        $('#assetRows').append(row);
 
         /*
         |--------------------------------------------------------------
@@ -783,7 +774,6 @@ $(document).ready(function () {
 
                 currentSelect.empty();
 
-
                 currentSelect.append(`
                     <option value="">
                         Select Asset Tag
@@ -801,7 +791,6 @@ $(document).ready(function () {
                     .each(function () {
 
                         let option = $(this);                          
-
                         let assetId = option.val();                          
 
                         /*
@@ -826,9 +815,7 @@ $(document).ready(function () {
                                 String(assetId)
                             )
                         ) {
-
                             return;
-
                         }
 
 
@@ -843,9 +830,7 @@ $(document).ready(function () {
                                 String(assetId)
                             )
                         ) {
-
                             return;
-
                         }
 
 
@@ -876,15 +861,10 @@ $(document).ready(function () {
                         '"]'
                     ).length
                 ) {
-
-                    currentSelect
-                        .val(currentValue);
+                    currentSelect.val(currentValue);                       
 
                 } else {
-
-                    currentSelect
-                        .val('');
-
+                    currentSelect.val('');                    
                 }
 
 
@@ -987,11 +967,8 @@ $(document).ready(function () {
             Swal.fire({
 
                 icon: 'warning',
-
                 title: 'Select Custodian',
-
-                text:
-                    'Please select a custodian before adding assets.'
+                text: 'Please select a custodian before adding assets.'                  
 
             });
 
@@ -1028,9 +1005,7 @@ $(document).ready(function () {
         '.modal-asset-tag',
         function () {
 
-            let currentSelect =
-                $(this);
-
+            let currentSelect = $(this);       
 
             /*
             |----------------------------------------------------------
@@ -1038,9 +1013,7 @@ $(document).ready(function () {
             |----------------------------------------------------------
             */
 
-            let selectedValue =
-                currentSelect.val();
-
+            let selectedValue = currentSelect.val();              
 
             /*
             |----------------------------------------------------------
@@ -1083,7 +1056,6 @@ $(document).ready(function () {
                     ) {
 
                         duplicate = true;
-
                         return false;
 
                     }
@@ -1148,12 +1120,8 @@ $(document).ready(function () {
             if (rows.length > 0) {
 
                 let lastRow = rows.last();                 
-
-                let lastValue =
-                    lastRow
-                        .find('.modal-asset-tag')
-                        .val();
-
+                let lastValue = lastRow.find('.modal-asset-tag').val();
+                                                              
 
                 /*
                 |------------------------------------------------------
@@ -1220,14 +1188,9 @@ $(document).ready(function () {
             if (rows.length === 1) {
 
                 let row = $(this).closest('.asset-row');                   
-
-                row.find('.modal-asset-tag').val('').trigger('change');
-                                       
-                row.find('.modal-asset-type').val('');
-                    
-                row.find('.modal-asset-model')
-                    .val('');
-
+                row.find('.modal-asset-tag').val('').trigger('change');                                  
+                row.find('.modal-asset-type').val('');                 
+                row.find('.modal-asset-model').val('');                
 
                 return;
 
@@ -1279,9 +1242,7 @@ $(document).ready(function () {
         function () {
 
             let selectedAssets = [];
-
             let hasEmptyRow = false;
-
             let duplicateFound = false;
 
 
@@ -1300,9 +1261,7 @@ $(document).ready(function () {
                             '.modal-asset-tag'
                         );
 
-                    let assetId =
-                        select.val();
-
+                    let assetId = select.val();                 
 
                     /*
                     |--------------------------------------------------
@@ -1338,7 +1297,6 @@ $(document).ready(function () {
                     if (alreadyExists) {
 
                         duplicateFound = true;
-
                         return false;
 
                     }
@@ -1401,11 +1359,8 @@ $(document).ready(function () {
                 Swal.fire({
 
                     icon: 'warning',
-
                     title: 'Asset Tag Required',
-
-                    text:
-                        'Please select an asset tag in every row.'
+                    text: 'Please select an asset tag in every row.'                        
 
                 });
 
@@ -1498,8 +1453,7 @@ $(document).ready(function () {
                     |--------------------------------------------------
                     */
 
-                    let rowNumber =
-                        $('#selectedAssetsBody tr[data-asset-id]').length + 1;                           
+                    let rowNumber = $('#selectedAssetsBody tr[data-asset-id]').length + 1;                                                 
 
                     /*
                     |--------------------------------------------------
@@ -1530,7 +1484,6 @@ $(document).ready(function () {
                             <td>
                                 ${selected.asset_model}
                             </td>
-
 
                             <td>
 
@@ -1596,7 +1549,6 @@ $(document).ready(function () {
 
             row.remove();
 
-
             /*
             |----------------------------------------------------------
             | Re-number rows
@@ -1655,8 +1607,7 @@ $(document).ready(function () {
             |----------------------------------------------------------
             */
 
-            let assets =
-                $('input[name="asset_inventory_ids[]"]');
+            let assets = $('input[name="asset_inventory_ids[]"]');                
 
             if (assets.length === 0) {
 

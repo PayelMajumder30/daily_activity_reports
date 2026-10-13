@@ -10,7 +10,7 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <h2 class="fw-bold">
-                <i class="bi bi-person-workspace"></i>
+                <i class="bi bi-exclamation-triangle me-2"></i>
                 Incident register
             </h2>
 
@@ -41,9 +41,8 @@
 
             @if(auth()->user()->role != 2)
 
-                <a href="{{ route('incident_issue_register.create') }}"
-                   class="btn btn-primary">
-
+                <a href="{{ route('incident_issue_register.create') }}" class="btn btn-primary">
+                   
                     <i class="fas fa-plus"></i>
                     Add Incident
 
@@ -443,8 +442,7 @@
                             .addClass('btn-success')
                             .show();
 
-                        $('#modal_remarks').prop('readonly', false);
-                            
+                        $('#modal_remarks').prop('readonly', false);                           
 
                     }
 

@@ -198,6 +198,9 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('repair/send', [AssetInventoryController::class, 'sendForRepair'])->name('repair.send');  
         Route::post('repair/return', [AssetInventoryController::class, 'returnFromRepair'])->name('repair.return');  
         Route::get('repair/history/{id}', [AssetInventoryController::class, 'repairHistory'])->name('repair.history');  
+
+        Route::get('/outstation-history', [AssetInventoryController::class, 'outstationHistoryIndex'])->name('outstation.history.index');
+    
     
     });
 

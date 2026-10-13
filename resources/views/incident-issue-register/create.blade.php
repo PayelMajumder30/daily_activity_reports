@@ -45,7 +45,7 @@
       
         <div class="card-body">
 
-            <form id="incidentForm" action="{{ route('incident_issue_register.store') }}" method="POST">
+            <form id="incidentForm" action="{{ route('incident_issue_register.store') }}" method="POST" novalidate>
                               
                 @csrf
 
@@ -78,8 +78,7 @@
 
                     <div class="col-md-12">
 
-                        <div id="assetSearchResult" style="display:none;">
-                           
+                        <div id="assetSearchResult" style="display:none;">                      
 
                             <h6>Search Result</h6>
 
@@ -187,22 +186,18 @@
                                 <span class="text-danger">*</span>
                             </label>
 
-                            <select name="support_user_id" id="support_user_id" class="form-select">                                   
-
-                                <option value="">
-                                    Select Engineer
-                                </option>
+                           {{-- Select Engineer --}}
+                            <select name="support_user_id" id="support_user_id" class="form-select" required>
+                                <option value="">Select Engineer</option>
 
                                 @foreach($engineers as $engineer)
-
                                     <option value="{{ $engineer->id }}">
                                         {{ $engineer->name }}
                                     </option>
-
                                 @endforeach
-
                             </select>
-
+                            <small class="text-danger" id="engineerError"></small>
+                            
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -212,22 +207,18 @@
                                 <span class="text-danger">*</span>
                             </label>
 
-                            <select name="category_id" id="category_id" class="form-select">                                   
-
-                                <option value="">
-                                    Select Issue Category
-                                </option>
+                           {{-- Issue Category --}}
+                            <select name="category_id" id="category_id" class="form-select" required>
+                                <option value="">Select Issue Category</option>
 
                                 @foreach($categories as $category)
-
                                     <option value="{{ $category->id }}">
                                         {{ $category->title }}
                                     </option>
-
                                 @endforeach
-
                             </select>
-
+                            <small class="text-danger" id="categoryError"></small>                                                     
+                           
                         </div>
 
                         <div class="col-md-12 mb-3">
@@ -236,8 +227,10 @@
                                 Issue Details
                                 <span class="text-danger">*</span>
                             </label>
-
-                            <textarea name="remarks" id="remarks" class="form-control" rows="5"></textarea>                                  
+                            {{-- Issue Details --}}
+                            <textarea name="remarks" id="remarks" class="form-control" rows="5" required></textarea>
+                            <small class="text-danger" id="remarksError"></small>                              
+                                                      
 
                         </div>
 
@@ -302,17 +295,11 @@
                     success: function (response) {
 
                         $('#assetSearchBody').empty();
-
                         $('#assetPreviewSection').hide();
-
                         $('#incidentDetailsSection').hide();
-
                         $('#asset_issue_register_id').val('');
-
                         if (!response.status || response.data.length === 0) {
-
                             $('#assetSearchResult').show();
-
                             $('#assetSearchBody').html(`
                                 <tr>
                                     <td colspan="7" class="text-center text-muted">                                      
@@ -331,17 +318,11 @@
                                 <tr>
 
                                     <td>${index + 1}</td>
-
                                     <td>${asset.tag_no}</td>
-
                                     <td>${asset.serial_no}</td>
-
                                     <td>${asset.asset_model}</td>
-
                                     <td>${asset.asset_type}</td>
-
                                     <td>${asset.custodian_name}</td>
-
                                     <td>
 
                                         <button type="button" class="btn btn-sm btn-primary selectAssetBtn" data-id="${asset.id}">                                                                                             
@@ -380,11 +361,11 @@
             });
 
 
-            /*
-            |--------------------------------------------------------------------------
-            | Select Asset
-            |--------------------------------------------------------------------------
-            */
+                /*
+                |--------------------------------------------------------------------------
+                | Select Asset
+                |--------------------------------------------------------------------------
+                */
 
             $(document).on('click', '.selectAssetBtn', function () {
 
@@ -450,10 +431,60 @@
             |--------------------------------------------------------------------------
             */
 
+            
+            // $('#incidentForm').on('submit', function (e) {
+
+            //     if (!$('#asset_issue_register_id').val()) {
+            //         e.preventDefault();
+            //         Swal.fire({
+            //             icon: 'warning',
+            //             title: 'Asset Required',
+            //             text: 'Please select an asset.',
+            //             confirmButtonText: 'OK'
+            //         });
+
+            //         return;
+            //     }
+
+            //     if (!$('#support_user_id').val()) {
+            //         e.preventDefault();
+            //         Swal.fire({
+            //             icon: 'warning',
+            //             title: 'Engineer Required',
+            //             text: 'Please select an engineer.',
+            //             confirmButtonText: 'OK'
+            //         });
+
+            //         return;
+            //     }
+
+            //     if (!$('#category_id').val()) {
+
+            //         e.preventDefault();
+
+            //         Swal.fire({
+            //             icon: 'warning',
+            //             title: 'Category Required',
+            //             text: 'Please select an issue category.',
+            //             confirmButtonText: 'OK'
+            //         });
+
+            //         return;
+            //     }
+
+            // });
+
             $('#incidentForm').on('submit', function (e) {
 
+                let isValid = true;
+
+                // Clear previous errors
+                $('#engineerError, #categoryError, #remarksError').text('');
+
+                // Asset validation - retain SweetAlert
                 if (!$('#asset_issue_register_id').val()) {
                     e.preventDefault();
+
                     Swal.fire({
                         icon: 'warning',
                         title: 'Asset Required',
@@ -464,33 +495,29 @@
                     return;
                 }
 
+                // Engineer validation
                 if (!$('#support_user_id').val()) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Engineer Required',
-                        text: 'Please select an engineer.',
-                        confirmButtonText: 'OK'
-                    });
-
-                    return;
+                    $('#engineerError').text('Engineer is required.');
+                    isValid = false;
                 }
 
+                // Category validation
                 if (!$('#category_id').val()) {
-
-                    e.preventDefault();
-
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Category Required',
-                        text: 'Please select an issue category.',
-                        confirmButtonText: 'OK'
-                    });
-
-                    return;
+                    $('#categoryError').text('Issue Category is required.');
+                    isValid = false;
                 }
 
+                // Remarks validation
+                if (!$('#remarks').val().trim()) {
+                    $('#remarksError').text('Issue Details are required.');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                }
             });
+       
 
         });
 

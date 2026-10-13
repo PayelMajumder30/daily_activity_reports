@@ -1745,4 +1745,36 @@ class AssetInventoryController extends Controller
             ], 500);
         }
     }
+
+    // oustation history register
+    public function outstationHistoryIndex()
+    {
+        $query = AssetOutstationHistory::with([
+            'assetInventory.assetType',
+            'assetInventory.assetModel',
+            'fromLocation',
+            'fromStation',
+            'toLocation',
+            'toStation',
+            'createdBy',
+        ]);
+
+        // Call Coordinator: restrict history to permitted stations
+        if (auth()->user()->role == 1) {
+            $stationIds = permittedStationIds();
+
+            $query->where(function ($q) use ($stationIds) {
+                $q->whereIn('from_station_id', $stationIds)
+                ->orWhereIn('to_station_id', $stationIds);
+            });
+        }
+
+        $histories = $query
+            ->orderByDesc('outstation_date')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('outstation-history.index', compact('histories'));                
+        
+    }
 }

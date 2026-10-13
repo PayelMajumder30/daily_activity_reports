@@ -189,6 +189,7 @@
                         <th>Warranty (Yrs)</th>
                         <th>Warranty End Date</th>
                         <th>Asset Status</th>
+                        <th>Status Update</th>
                         <th>Action</th>
                     </tr>
 
@@ -266,6 +267,7 @@
                                 @endif
 
                             </td>
+
                             <td>
 
                                 <button type="button" class="btn btn-sm btn-info view-outstation-history"                                   
@@ -273,36 +275,39 @@
                                     <i class="bi bi-eye"></i>
                                 </button>
 
-                                    {{-- Outstation --}}
-                                    @if($item->asset_status === 'Available')
+                                {{-- Physically Damaged --}}
+                                @if($item->asset_status !== 'Damaged')
 
-                                    <button type="button" class="btn btn-sm btn-primary outstation-asset" data-id="{{ $item->id }}" title="Outstation">                                                                                                                                       
-                                        <i class="bi bi-arrow-left-right"></i>
+                                    <button type="button" class="btn btn-sm btn-danger scrap-asset"                                                                         
+                                        data-id="{{ $item->id }}" title="Physically Damaged">
+                                                                            
+                                        <i class="bi bi-tools text-warning"></i>
+
                                     </button>
 
-                                    @endif
+                                @endif
 
-                                    {{-- Physically Damaged --}}
-                                    @if($item->asset_status !== 'Damaged')
+                                @if(in_array($item->asset_status, ['Available', 'Repair']))
 
-                                        <button type="button" class="btn btn-sm btn-danger scrap-asset"                                                                         
-                                            data-id="{{ $item->id }}" title="Physically Damaged">
-                                                                                
-                                            <i class="bi bi-tools text-warning"></i>
+                                    <button type="button" class="btn btn-sm btn-warning btnRepair"                                               
+                                            data-id="{{ encryptId($item->id) }}"  title="Repair">
+                                            
+                                        <i class="bi bi-wrench-adjustable"></i>
+                                    </button>
 
-                                        </button>
+                                @endif
+                            </td>
+                            <td>
 
-                                    @endif
+                                {{-- Outstation --}}
+                                @if($item->asset_status === 'Available')
 
-                                    @if(in_array($item->asset_status, ['Available', 'Repair']))
+                                <button type="button" class="btn btn-sm btn-primary outstation-asset" data-id="{{ $item->id }}" title="Outstation">                                                                                                                                       
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </button>
 
-                                        <button type="button" class="btn btn-sm btn-warning btnRepair"                                               
-                                                data-id="{{ encryptId($item->id) }}"  title="Repair">
-                                               
-                                            <i class="bi bi-wrench-adjustable"></i>
-                                        </button>
+                                @endif
 
-                                    @endif
                             </td>
 
                         </tr>
@@ -544,9 +549,7 @@
                             <div class="modal-footer">
 
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">             
-
                                     Cancel
-
                                 </button>
 
                                 <button type="submit" class="btn btn-primary"  id="outstationSubmitBtn">                                                                                                     
@@ -678,8 +681,7 @@
                                             <tbody id="outstationHistoryTableBody">
 
                                                 <tr>
-                                                    <td colspan="7"
-                                                        class="text-center">
+                                                    <td colspan="7" class="text-center">                                                       
                                                         No history found.
                                                     </td>
                                                 </tr>
@@ -1091,7 +1093,7 @@
 
         });
 
-       /*
+        /*
         |--------------------------------------------------------------------------
         | Destination Region Changed
         |--------------------------------------------------------------------------
@@ -1271,7 +1273,7 @@
 
         });
 
-         /*
+        /*
         |--------------------------------------------------------------------------
         | show Outstation History
         |--------------------------------------------------------------------------
