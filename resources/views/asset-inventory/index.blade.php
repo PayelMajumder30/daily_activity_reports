@@ -304,8 +304,14 @@
 
                                 <button type="button" class="btn btn-sm btn-primary outstation-asset" data-id="{{ $item->id }}" title="Outstation">                                                                                                                                       
                                     <i class="bi bi-arrow-left-right"></i>
-                                </button>
+                                </button>                               
 
+                                @endif
+                                @if(in_array($item->asset_status, ['Available', 'Assigned']))
+                                    {{-- Asset Replacement --}}
+                                    <button type="button" class="btn btn-sm btn-success replace-asset" data-id="{{ $item->id }}" title="Replace Asset">                                   
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </button>
                                 @endif
 
                             </td>
@@ -839,6 +845,135 @@
                 </div>
             </div>
 
+            
+            {{-- =========================================================
+                Asset Replacement Modal
+            ========================================================= --}}
+            <div class="modal fade" id="replacementModal" tabindex="-1"
+                aria-labelledby="replacementModalLabel" aria-hidden="true">
+
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="replacementModalLabel">
+                                <i class="bi bi-arrow-repeat"></i>
+                                Asset Replacement
+                            </h5>
+
+                            <button type="button" class="btn-close"
+                                data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <form id="replacementForm">
+                            @csrf
+
+                            <input type="hidden" id="replacement_asset_id" name="asset_inventory_id">                               
+
+                            <div class="modal-body">
+
+                                {{-- Current Asset Details --}}
+                                <div class="card bg-light border-0 mb-4">
+                                    <div class="card-body">
+
+                                        <h6 class="mb-3">Current Asset Details</h6>
+
+                                        <div class="row">
+                                            <div class="col-md-6 mb-2">
+                                                <strong>Asset Tag:</strong>
+                                                <span id="replacement_tag"></span>
+                                            </div>
+
+                                            <div class="col-md-6 mb-2">
+                                                <strong>Asset Type:</strong>
+                                                <span id="replacement_type"></span>
+                                            </div>
+
+                                            <div class="col-md-6 mb-2">
+                                                <strong>Current Model:</strong>
+                                                <span id="replacement_current_model"></span>
+                                            </div>
+
+                                            <div class="col-md-6 mb-2">
+                                                <strong>Current Serial No.:</strong>
+                                                <span id="replacement_current_serial"></span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <!-- <div class="alert alert-info">
+                                    Change either the asset model, serial number,
+                                    or both. Leave unchanged values as they are.
+                                </div> -->
+
+                                {{-- New Model --}}
+                                <div class="mb-3">
+                                    <label for="replacement_model" class="form-label">
+                                        New Asset Model
+                                    </label>
+
+                                    <select name="asset_model_id" id="replacement_model" class="form-select">                                      
+                                        <option value="">Select Asset Model</option>
+
+                                        @foreach($assetModels as $model)
+                                            <option value="{{ $model->id }}" data-type-id="{{$model->asset_type_id}}">
+                                                {{ $model->model_name }}
+                                            </option>
+                                        @endforeach
+
+                                    </select>
+
+                                    <small class="text-muted">
+                                        Keep the current model if it is not changing.
+                                    </small>
+                                </div>
+
+                                {{-- New Serial Number --}}
+                                <div class="mb-3">
+                                    <label for="replacement_serial" class="form-label">
+                                        New Serial Number
+                                    </label>
+
+                                    <input type="text" name="serial_no" id="replacement_serial" class="form-control" placeholder="Enter new serial number">
+                                                                              
+                                    <small class="text-muted">
+                                        Keep the current serial number if it is not changing.
+                                    </small>
+                                </div>
+
+                                {{-- Remarks --}}
+                                <div class="mb-3">
+                                    <label for="replacement_remarks" class="form-label">
+                                        Remarks
+                                    </label>
+
+                                    <textarea name="remarks" id="replacement_remarks"
+                                        class="form-control" rows="3" placeholder="Enter replacement remarks (optional)">
+                                        </textarea>
+                                </div>
+
+                                <div id="replacementErrors" class="alert alert-danger d-none"></div>                                   
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">                                   
+                                    Cancel
+                                </button>
+
+                                <button type="submit" class="btn btn-success" id="replacementSubmitBtn">                                   
+                                    <i class="bi bi-check-circle"></i>
+                                    Update Replacement
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
 
         </div>
 
@@ -1719,6 +1854,153 @@
             // Clean modal state when hidden
             $(document).on('hidden.bs.modal', '#repairModal', resetRepairModal);
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Replacement Modal
+        |--------------------------------------------------------------------------
+        */
+       
+        $(document).ready(function () {
+
+            const replacementModalElement   = document.getElementById('replacementModal');
+            const replacementModal          = new bootstrap.Modal(replacementModalElement);
+
+            // Open replacement modal and prefill current asset details.
+            $(document).on('click', '.replace-asset', function () {
+
+                const assetId = $(this).data('id');
+
+                $('#replacementForm')[0].reset();
+                $('#replacementErrors').addClass('d-none').empty();
+
+                $.ajax({
+                    url: "{{ route('asset-inventory.replacement.details', ':id') }}".replace(':id', assetId),                       
+                    type: 'GET',
+
+                    // Inside your AJAX success function:
+                    success: function (response) {
+
+                        $('#replacement_asset_id').val(response.id);
+                        $('#replacement_tag').text(response.tag_no || 'N/A');
+                        $('#replacement_type').text(response.asset_type);
+                        $('#replacement_current_model').text(response.model_name);
+                        $('#replacement_current_serial').text(response.serial_no || 'N/A');
+
+                        // Filter dropdown options by asset_type_id
+                        const assetTypeId = response.asset_type_id;
+                        $('#replacement_model option').each(function () {
+                            const optionTypeId = $(this).data('type-id');
+                            
+                            // Always show the default placeholder option
+                            if (!optionTypeId) {
+                                return;
+                            }
+
+                            if (optionTypeId == assetTypeId) {
+                                $(this).show();
+                            } else {
+                                $(this).hide();
+                            }
+                        });
+
+                        $('#replacement_model').val(
+                            String(response.asset_model_id ?? '')
+                        );
+
+                        $('#replacement_serial').val(response.serial_no || '');
+
+                        $('#replacementModal').modal('show');
+                    },
+
+                    error: function () {
+                        Swal.fire(
+                            'Error',
+                            'Unable to fetch asset details.',
+                            'error'
+                        );
+                    }
+                });
+            });
+
+            // Submit replacement form.
+            $('#replacementForm').on('submit', function (e) {
+
+                e.preventDefault();
+
+                const assetId = $('#replacement_asset_id').val();
+                const submitButton = $('#replacementSubmitBtn');
+
+                $('#replacementErrors').addClass('d-none').empty();
+
+                Swal.fire({
+                    title: 'Confirm Replacement?',
+                    text: 'The asset inventory will be updated and its replacement history recorded.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Update',
+                    cancelButtonText: 'Cancel'
+                }).then(function (result) {
+
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+
+                    submitButton.prop('disabled', true);
+
+                    $.ajax({
+                        url: "{{ route('asset-inventory.replacement.store', ':id') }}".replace(':id', assetId),                           
+                        type: 'POST',
+                        data: $('#replacementForm').serialize(),
+
+                        success: function (response) {
+
+                            replacementModal.hide();
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                confirmButtonText: 'OK'
+                            }).then(function () {
+                                window.location.reload();
+                            });
+                        },
+
+                        error: function (xhr) {
+
+                            let message = 'Unable to update replacement details.';
+
+                            if (xhr.status === 422) {
+
+                                const errors = xhr.responseJSON?.errors || {};
+                                const errorMessages = Object.values(errors).flat();
+
+                                message = errorMessages.length
+                                    ? errorMessages.join('\n')
+                                    : 'Please check the submitted details.';
+
+                            } else if (xhr.responseJSON?.message) {
+
+                                message = xhr.responseJSON.message;
+
+                            }
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Replacement Failed',
+                                text: message
+                            });
+                        },
+
+                        complete: function () {
+                            submitButton.prop('disabled', false);
+                        }
+                    });
+                });
+            });
+        });
+
     
 </script>
 

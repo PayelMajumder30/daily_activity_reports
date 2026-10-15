@@ -26,7 +26,7 @@
     </div>
       {{-- Upload Card --}}
 
-    <div class="card shadow border-0 mb-4">
+    <!-- <div class="card shadow border-0 mb-4">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">
                 <i class="bi bi-cloud-upload"></i>
@@ -79,16 +79,22 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
 
     {{-- Search Card --}}
 
     <div class="card shadow border-0 mb-4">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
                 <i class="bi bi-search"></i>
                 Search Complaint
             </h5>
+           
+
+            <a href="{{ route('complaints.export') }}" class="btn btn-success btn-sm" id="btnExportExcel">               
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Export to Excel
+            </a>
         </div>
 
         <div class="card-body">
@@ -336,6 +342,64 @@
         });
 
     }); 
+
+    
+    $(document).ready(function () {
+
+        // Convert dd-mm-yyyy to yyyy-mm-dd.
+        function formatDateForExport(date) {
+            if (!date) return '';
+
+            const parts = date.split('-');
+
+            if (parts.length !== 3) return date;
+
+            // Already yyyy-mm-dd
+            if (parts[0].length === 4) {
+                return date;
+            }
+
+            // Datepicker format: dd-mm-yyyy
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+
+        $('#btnExportExcel').on('click', function (e) {
+            e.preventDefault();
+
+            const fromDate = $('#from_date').val().trim();
+            const toDate = $('#to_date').val().trim();
+
+            $('#from_date_error').text('');
+            $('#to_date_error').text('');
+
+            if (fromDate && toDate) {
+                const from = new Date(formatDateForExport(fromDate));
+                const to = new Date(formatDateForExport(toDate));
+
+                if (from > to) {
+                    $('#to_date_error').text(
+                        'To date must be on or after From date.'
+                    );
+                    return;
+                }
+            }
+
+            const params = new URLSearchParams();
+
+            params.set('engineer', $('#engineer').val() || '');
+            params.set('from_date', formatDateForExport(fromDate));
+            params.set('to_date', formatDateForExport(toDate));
+            params.set('status', $('#status').val() || '');
+            params.set('complaint', $('#complaint').val().trim());
+
+            const exportUrl = $(this).attr('href');
+
+            window.location.href =
+                exportUrl + '?' + params.toString();
+        });
+
+    });
+
     
     @if(session('success'))
 

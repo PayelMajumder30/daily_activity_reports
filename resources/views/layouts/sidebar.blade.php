@@ -216,9 +216,16 @@
             </li>
 
             <li class="nav-item">
-                <a href="javascript:void(0)" class="nav-link text-white {{ request()->routeIs('asset-issue-register.*') ? 'active bg-primary' : '' }}">
-                    <i class="bi bi-person-check"></i>
+                <a href="{{ route('outstation.history.index')}}" class="nav-link text-white {{ request()->routeIs('outstation.history.*') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-arrow-left-right"></i>
                     Outstation Transfer Register
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('replacement.history.index') }}" class="nav-link text-white {{ request()->routeIs('asset-replacement-register.*') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-arrow-left-right"></i>
+                    Asset Replacement Register
                 </a>
             </li>
             

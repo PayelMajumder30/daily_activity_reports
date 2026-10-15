@@ -23,6 +23,7 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/dashboard/status_details', [DashboardController::class, 'statusDetails'])->name('dashboard.statusDetails');
         Route::get('/total_complaints', [ComplaintController::class, 'index'])->name('complaints.index');
         Route::get('/complaints/search', [ComplaintController::class, 'search'])->name('complaints.search');
+        Route::get('/complaints/export', [ComplaintController::class, 'export'])->name('complaints.export');    
         Route::post('/upload', [UploadController::class, 'store'])->name('upload.store');   
         
         //User configuration
@@ -199,10 +200,19 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::post('repair/return', [AssetInventoryController::class, 'returnFromRepair'])->name('repair.return');  
         Route::get('repair/history/{id}', [AssetInventoryController::class, 'repairHistory'])->name('repair.history');  
 
-        Route::get('/outstation-history', [AssetInventoryController::class, 'outstationHistoryIndex'])->name('outstation.history.index');
-    
-    
+        Route::get('/replacement-details/{id}', [AssetInventoryController::class, 'replacementDetails'])->name('replacement.details');
+        Route::post('/replacement/{id}', [AssetInventoryController::class, 'replaceAsset'])->name('replacement.store');
+   
+       
     });
+
+    // asset outststaion history
+    Route::get('/outstation-transfer-register', [AssetInventoryController::class, 'outstationHistoryIndex'])->name('outstation.history.index');
+    Route::get('/outstation-transfer-register/export', [AssetInventoryController::class, 'exportOutstationRegister'])->name('outstation.register.export');
+
+    // asset replacement register
+    Route::get('/asset-replacement-register', [AssetInventoryController::class, 'replacementIndex'])->name('replacement.history.index');
+    Route::get('/asset-replacement-register/export', [AssetInventoryController::class, 'exportReplacement'])->name('replacement.history.export');
 
     // asset register
     Route::prefix('issue-register')->name('issue-register.')->group(function() {

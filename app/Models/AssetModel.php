@@ -21,4 +21,9 @@ class AssetModel extends Model
     {
         return $this->hasMany(AssetInventory::class);
     }
+
+    public function replacementHistory(): HasMany
+    {
+        return $this->hasMany(AssetReplacementHistory::class, 'asset_inventory_id')->latest('replaced_at');            
+    }
 }

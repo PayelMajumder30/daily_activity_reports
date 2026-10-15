@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use App\Exports\{AssetInventoryExport, AssetInventoryTemplateExport, AssetOutstationHistoryExport};
+use App\Exports\{AssetInventoryExport, AssetInventoryTemplateExport, AssetOutstationHistoryExport, OutstationHistoryExport, AssetReplacementHistoryExport};
 use App\Imports\AssetInventoryImport;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Models\{AssetInventory, AssetType, AssetModel, Location, AirportStation, AssetOutstationHistory, AssetRepairHistory};
+use App\Models\{AssetInventory, AssetType, AssetModel, Location, AirportStation, AssetOutstationHistory, AssetRepairHistory, AssetReplacementHistory};
 
 class AssetInventoryController extends Controller
 {
@@ -28,71 +28,6 @@ class AssetInventoryController extends Controller
      * @param Request $request
      * @return \Illuminate\View\View
      */
-    // public function index(Request $request)
-    // {
-    //     $query = AssetInventory::with([
-    //         'assetModel.assetType',
-    //         'location'
-    //     ]);
-
-    //     // Tag No.
-    //     if ($request->filled('tag_no')) {
-    //         $query->where('tag_no', 'LIKE', '%' . $request->tag_no . '%' );     
-    //     }
-
-    //     // PO Number
-    //     if ($request->filled('po_number')) {
-    //         $query->where('po_number', 'LIKE','%' . $request->po_number . '%');
-    //     }
-
-    //     // Serial Number
-    //     if ($request->filled('serial_no')) {
-    //         $query->where('serial_no', 'LIKE', '%' . $request->serial_no . '%');
-    //     }
-
-    //     // Asset Type
-    //     if ($request->filled('asset_type')) {
-    //         $query->whereHas('assetModel', function ($q) use ($request) {
-    //             $q->where('asset_type_id', $request->asset_type);
-    //         });
-    //     }
-
-    //     // Asset Model
-    //     if ($request->filled('asset_model')) {
-    //         $query->where('asset_model_id', $request->asset_model);
-    //     }
-
-    //     //Asset status
-    //     if($request->filled('asset_status')) {
-    //         $query->where('asset_status', $request->asset_status);
-    //     } 
-
-    //     // Location
-    //     if ($request->filled('location')) {
-    //         $query->where('location_id', $request->location);
-    //     }
-
-    //     // Installation Date
-    //     if ($request->filled('installation_date')) {
-    //         $query->whereDate('installation_date', $request->installation_date);
-    //     }
-
-    //     $inventories = $query->latest()->get();
-            
-    //     // Asset Type dropdown
-    //     $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();
-
-    //     // Asset model dropdown
-    //     $assetModels = AssetModel::where('status', 1)->orderBy('model_name')->get();
-
-    //     // asset status
-    //     $assetStatuses = AssetInventory::where('asset_status', '!=', '')->distinct()->orderBy('asset_status')->pluck('asset_status');
-
-    //     $locations = Location::where('status', 1)->orderBy('name')->get();
-        
-            
-    //     return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels', 'assetStatuses', 'locations'));
-    // }
 
     public function index(Request $request)
     {
@@ -1527,87 +1462,6 @@ class AssetInventoryController extends Controller
         }
     }
 
-    // Return asset from repair
-    // public function returnFromRepair(Request $request)
-    // {
-    //     $request->validate([
-    //         'repair_id'  => 'required',
-    //         'return_date'=> 'required|date',
-    //         'remarks'    => 'nullable|string',
-    //     ]);
-
-    //     if (
-    //         \Carbon\Carbon::parse($request->return_date)
-    //             ->lt(\Carbon\Carbon::parse($repair->send_date))
-    //     ) {
-    //         throw new \Exception(
-    //             'Return date cannot be earlier than the send date.'
-    //         );
-    //     }
-
-    //     try {
-    //         DB::beginTransaction();
-
-    //         $repairId = decryptId($request->repair_id);
-
-    //         $repair = AssetRepairHistory::where('id', $repairId)->lockForUpdate()->first();                             
-
-    //         if (!$repair) {
-    //             throw new \Exception('Repair record not found.');
-    //         }
-
-    //         if ($repair->return_date) {
-    //             throw new \Exception(
-    //                 'This repair has already been completed.'
-    //             );
-    //         }
-
-    //         $asset = AssetInventory::where('id', $repair->asset_inventory_id)->lockForUpdate()->first();           
-
-    //         if (!$asset) {
-    //             throw new \Exception('Asset not found.');
-    //         }
-
-    //         if ($asset->asset_status !== 'Repair') {
-    //             throw new \Exception(
-    //                 'Asset is not currently under repair.'
-    //             );
-    //         }
-
-    //         $repair->update([
-    //             'return_date' => $request->return_date,
-    //             'remarks'     => $request->remarks ?? $repair->remarks,
-    //         ]);
-
-    //         $asset->update([
-    //             'asset_status' => 'Available',
-    //         ]);
-
-    //         eventLog(
-    //             'Update',
-    //             'Asset Inventory',
-    //             'Asset ' . $asset->tag_no .
-    //             ' returned from repair on ' .
-    //             $request->return_date
-    //         );
-
-    //         DB::commit();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Asset returned from repair successfully.'
-    //         ]);
-
-    //     } catch (\Throwable $e) {
-
-    //         DB::rollBack();
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage()
-    //         ], 422);
-    //     }
-    // }
 
     // Return asset from repair
     public function returnFromRepair(Request $request)
@@ -1747,7 +1601,7 @@ class AssetInventoryController extends Controller
     }
 
     // oustation history register
-    public function outstationHistoryIndex()
+    public function outstationHistoryIndex(Request $request)
     {
         $query = AssetOutstationHistory::with([
             'assetInventory.assetType',
@@ -1769,12 +1623,247 @@ class AssetInventoryController extends Controller
             });
         }
 
-        $histories = $query
-            ->orderByDesc('outstation_date')
-            ->orderByDesc('id')
+        /*
+        |--------------------------------------------------------------------------
+        | Search by Asset Tag Number
+        |--------------------------------------------------------------------------
+        */
+        if($request->filled('tag_no')){
+            $query->whereHas('assetInventory', function($q) use ($request){
+                $q->where('tag_no', 'LIKE', '%' . $request->tag_no . '%');
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search by Asset serial no.
+        |--------------------------------------------------------------------------
+        */
+        if($request->filled('serial_no')){
+            $query->whereHas('assetInventory', function($q) use ($request){
+                $q->where('serial_no', 'LIKE', '%' . $request->serial_no . '%');
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search by Asset Type
+        |--------------------------------------------------------------------------
+        */
+        if($request->filled('asset_type')){
+            $query->whereHas('assetInventory', function($q) use ($request){
+                $q->where('asset_type_id', 'LIKE', '%' . $request->asset_type . '%');
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search by Asset Type
+        |--------------------------------------------------------------------------
+        */
+        if($request->filled('asset_model')){
+            $query->whereHas('assetInventory', function($q) use ($request){
+                $q->where('asset_model_id', 'LIKE', '%' . $request->asset_model . '%');
+            });
+        }
+
+        $histories = $query->orderByDesc('outstation_date')->orderByDesc('id')->get();
+
+        $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();
+        $assetModels  = AssetModel::where('status', 1)->orderBy('model_name')->get();
+                           
+        return view('outstation-history.index', compact('histories', 'assetTypes', 'assetModels'));                  
+    }
+
+    public function exportOutstationRegister(Request $request){
+        $filters = $request->only(['tag_no', 'serial_no', 'asset_type', 'asset_model',]);
+
+        return Excel::download( new OutstationHistoryExport($filters), 'Asset_Outstation_History_' . now()->format('dmY') . '.xlsx');
+    }
+
+    // asset replacement
+    public function replacementDetails($id)
+    {
+        $asset = AssetInventory::with(['assetType', 'assetModel'])->findOrFail($id);
+            
+        return response()->json([
+            'id'            => $asset->id,
+            'tag_no'        => $asset->tag_no,
+            'serial_no'     => $asset->serial_no,
+            'asset_type_id' => $asset->asset_type_id,
+            'asset_model_id' => $asset->asset_model_id,
+            'model_name'    => $asset->assetModel->model_name ?? 'N/A',
+            'asset_type'    => $asset->assetType->name ?? 'N/A',
+        ]);
+    }
+
+    
+    public function replaceAsset(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'asset_model_id'    => ['nullable', 'integer', 'exists:asset_models,id',],
+            'serial_no'         => ['nullable', 'string', 'max:50',],
+            'remarks'           => ['nullable', 'string', 'max:2000',],  
+        ]);
+
+        $result = DB::transaction(function () use ($validated, $id) {
+
+            $asset = AssetInventory::whereKey($id)->lockForUpdate()->firstOrFail();                
+
+            $oldModelId = $asset->asset_model_id;
+            $oldSerialNo = $asset->serial_no;
+
+            // Empty values are treated as null.
+            $newModelId = filled($validated['asset_model_id'] ?? null) ? (int) $validated['asset_model_id'] : null;                        
+            $newSerialNo = filled($validated['serial_no'] ?? null) ? trim($validated['serial_no']) : null;                    
+            $modelChanged = $oldModelId != $newModelId;
+            $serialChanged = $oldSerialNo !== $newSerialNo;
+
+            if (!$modelChanged && !$serialChanged) {
+                throw ValidationException::withMessages([
+                    'replacement' =>
+                        'Please change the asset model or serial number.',
+                ]);
+            }
+
+            // Update the current inventory.
+            $asset->asset_model_id  = $newModelId;
+            $asset->serial_no       = $newSerialNo;
+            $asset->save();
+
+            // Preserve the old and new details.
+            AssetReplacementHistory::create([
+                'asset_inventory_id'    => $asset->id,
+                'old_asset_model_id'    => $oldModelId,
+                'new_asset_model_id'    => $newModelId,
+                'old_serial_no'         => $oldSerialNo,
+                'new_serial_no'         => $newSerialNo,
+                'replaced_by'           => auth()->id(),
+                'replaced_at'           => now(),
+                'remarks'               => $validated['remarks'] ?? null,
+            ]);
+
+            return [
+                'tag_no'    => $asset->tag_no,
+                'serial_no' => $asset->serial_no,
+            ];
+        });
+
+        return response()->json([
+            'success'   => true,
+            'message'   => 'Asset replacement details updated successfully.',
+            'data'      => $result,
+        ]);
+    }
+
+
+    //asset replacement module
+    // public function replacementIndex(Request $request)
+    // {
+    //     $query = AssetReplacementHistory::with([
+    //         'assetInventory.assetType',
+    //         'assetInventory.location',
+    //         'assetInventory.station',
+    //         'oldAssetModel',
+    //         'newAssetModel',
+    //         'replacedBy',
+    //     ]);
+
+    //     // Restrict Call Coordinator to permitted stations.
+    //     if (auth()->user()->role == 1) {
+    //         $stationIds = permittedStationIds();
+
+    //         $query->whereHas('assetInventory', function ($q) use ($stationIds) {
+    //             $q->whereIn('station_id', $stationIds);
+    //         });
+    //     }
+
+    //     // Optional search filters
+    //     if ($request->filled('tag_no')) {
+    //         $query->whereHas('assetInventory', function ($q) use ($request) {
+    //             $q->where('tag_no', 'like', '%' . $request->tag_no . '%');
+    //         });
+    //     }
+
+    //     if ($request->filled('serial_no')) {
+    //         $serial = $request->serial_no;
+
+    //         $query->where(function ($q) use ($serial) {
+    //             $q->where('old_serial_no', 'like', "%{$serial}%")
+    //             ->orWhere('new_serial_no', 'like', "%{$serial}%");
+    //         });
+    //     }
+
+    //     if ($request->filled('from_date')) {
+    //         $query->whereDate('replaced_at', '>=', $request->from_date);
+    //     }
+
+    //     if ($request->filled('to_date')) {
+    //         $query->whereDate('replaced_at', '<=', $request->to_date);
+    //     }
+
+    //     $replacementHistories = $query->orderByDesc('replaced_at')->get();
+                        
+    //     return view('asset-replacement-history.index',compact('replacementHistories'));           
+        
+    // }
+
+    public function replacementIndex(Request $request)
+    {
+        $query = AssetReplacementHistory::with([
+            'assetInventory.assetType',
+            'assetInventory.location',
+            'assetInventory.station',
+            'oldAssetModel',
+            'newAssetModel',
+            'replacedBy',
+        ]);
+
+        // Restrict Call Coordinator to permitted stations
+        if (auth()->user()->role == 1) {
+            $stationIds = permittedStationIds();
+
+            $query->whereHas('assetInventory', function ($q) use ($stationIds) {
+                $q->whereIn('station_id', $stationIds);
+            });
+        }
+
+        // Search by Tag No.
+        if ($request->filled('tag_no')) {
+            $tagNo = trim($request->tag_no);
+
+            $query->whereHas('assetInventory', function ($q) use ($tagNo) {
+                $q->where('tag_no', 'like', '%' . $tagNo . '%');
+            });
+        }
+
+        // Filter by Asset Type
+        if ($request->filled('asset_type')) {
+            $assetTypeId = $request->asset_type;
+
+            $query->whereHas('assetInventory', function ($q) use ($assetTypeId) {
+                $q->where('asset_type_id', $assetTypeId);
+            });
+        }
+
+        $replacementHistories = $query
+            ->orderByDesc('replaced_at')
             ->get();
 
-        return view('outstation-history.index', compact('histories'));                
+        // Active asset types for the dropdown
+        $assetTypes = AssetType::where('status', 1)
+            ->orderBy('name')
+            ->get();
+
+        return view('asset-replacement-history.index', compact('replacementHistories', 'assetTypes'));              
         
     }
+
+    public function exportReplacement(Request $request){
+
+        $filters = $request->only(['tag_no', 'asset_type',]);
+
+        return Excel::download(new AssetReplacementHistoryExport($filters), 'Asset_Replacement_History_' . now()->format('Ymd') . '.xlsx');
+    }
+
 }

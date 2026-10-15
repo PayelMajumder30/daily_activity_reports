@@ -111,4 +111,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(IncidentIssueRegister::class, 'support_user_id');                       
     }
+
+    public function replacementHistory(): HasMany
+    {
+        return $this->hasMany(AssetReplacementHistory::class, 'asset_inventory_id')->latest('replaced_at');            
+    }
 }

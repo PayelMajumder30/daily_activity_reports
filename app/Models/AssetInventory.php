@@ -65,5 +65,10 @@ class AssetInventory extends Model
     {
         return $this->hasMany(AssetRepairHistory::class, 'asset_inventory_id');                          
     }
+
+    public function replacementHistory(): HasMany
+    {
+        return $this->hasMany(AssetReplacementHistory::class, 'asset_inventory_id')->latest('replaced_at');            
+    }
    
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\{Upload, Complaint};
+use App\Exports\ComplaintExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 use Illuminate\Http\Request;
 
@@ -76,4 +78,26 @@ class ComplaintController extends Controller
 
         );
     }
+
+    
+    public function export(Request $request)
+    {
+        $filters = $request->validate([
+            'engineer'  => ['nullable', 'string'],
+            'status'    => ['nullable', 'string'],
+            'complaint' => ['nullable', 'string', 'max:255'],
+            'from_date' => ['nullable', 'date_format:Y-m-d'],
+            'to_date'   => [
+                'nullable',
+                'date_format:Y-m-d',
+                'after_or_equal:from_date',
+            ],
+        ]);
+
+        return Excel::download(
+            new ComplaintExport($filters),
+            'Complaint_Report_' . now()->format('d-m-Y_H-i-s') . '.xlsx'
+        );
+    }
+
 }
