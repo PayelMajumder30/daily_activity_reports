@@ -223,7 +223,7 @@
             </li>
 
             <li class="nav-item">
-                <a href="{{ route('replacement.history.index') }}" class="nav-link text-white {{ request()->routeIs('asset-replacement-register.*') ? 'active bg-primary' : '' }}">
+                <a href="{{ route('replacement.history.index') }}" class="nav-link text-white {{ request()->routeIs('replacement.history.*') ? 'active bg-primary' : '' }}">               
                     <i class="bi bi-arrow-left-right"></i>
                     Asset Replacement Register
                 </a>

@@ -1650,33 +1650,82 @@ class AssetInventoryController extends Controller
         | Search by Asset Type
         |--------------------------------------------------------------------------
         */
-        if($request->filled('asset_type')){
-            $query->whereHas('assetInventory', function($q) use ($request){
-                $q->where('asset_type_id', 'LIKE', '%' . $request->asset_type . '%');
-            });
-        }
+        // if($request->filled('asset_type')){
+        //     $query->whereHas('assetInventory', function($q) use ($request){
+        //         $q->where('asset_type_id', 'LIKE', '%' . $request->asset_type . '%');
+        //     });
+        // }
 
         /*
         |--------------------------------------------------------------------------
-        | Search by Asset Type
+        | Search by Asset model
         |--------------------------------------------------------------------------
         */
-        if($request->filled('asset_model')){
-            $query->whereHas('assetInventory', function($q) use ($request){
-                $q->where('asset_model_id', 'LIKE', '%' . $request->asset_model . '%');
+        // if($request->filled('asset_model')){
+        //     $query->whereHas('assetInventory', function($q) use ($request){
+        //         $q->where('asset_model_id', 'LIKE', '%' . $request->asset_model . '%');
+        //     });
+        // }
+
+        // Search by Asset Type
+        if ($request->filled('asset_type')) {
+            $query->whereHas('assetInventory', function ($q) use ($request) {
+                $q->where('asset_type_id', $request->asset_type);
             });
+        }
+
+        // Search by Asset Model
+        if ($request->filled('asset_model')) {
+            $query->whereHas('assetInventory', function ($q) use ($request) {
+                $q->where('asset_model_id', $request->asset_model);
+            });
+        }
+
+                // Filter by From Location
+        if ($request->filled('from_location_id')) {
+            $query->where(
+                'from_location_id',
+                $request->from_location_id
+            );
+        }
+
+        // Filter by From Station
+        if ($request->filled('from_station_id')) {
+            $query->where(
+                'from_station_id',
+                $request->from_station_id
+            );
+        }
+
+        // Filter by To Location
+        if ($request->filled('to_location_id')) {
+            $query->where(
+                'to_location_id',
+                $request->to_location_id
+            );
+        }
+
+        // Filter by To Station
+        if ($request->filled('to_station_id')) {
+            $query->where(
+                'to_station_id',
+                $request->to_station_id
+            );
         }
 
         $histories = $query->orderByDesc('outstation_date')->orderByDesc('id')->get();
 
         $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();
         $assetModels  = AssetModel::where('status', 1)->orderBy('model_name')->get();
+
+        $locations = Location::where('status', 1)->orderBy('name')->get();
+        $stations = AirportStation::where('status', 1)->orderBy('station_name')->get();
                            
-        return view('outstation-history.index', compact('histories', 'assetTypes', 'assetModels'));                  
+        return view('outstation-history.index', compact('histories', 'assetTypes', 'assetModels', 'locations', 'stations'));                  
     }
 
     public function exportOutstationRegister(Request $request){
-        $filters = $request->only(['tag_no', 'serial_no', 'asset_type', 'asset_model',]);
+        $filters = $request->only(['tag_no', 'serial_no', 'asset_type', 'asset_model', 'from_location_id', 'from_station_id', 'to_location_id', 'to_station_id',]);
 
         return Excel::download( new OutstationHistoryExport($filters), 'Asset_Outstation_History_' . now()->format('dmY') . '.xlsx');
     }
@@ -1758,55 +1807,6 @@ class AssetInventoryController extends Controller
 
 
     //asset replacement module
-    // public function replacementIndex(Request $request)
-    // {
-    //     $query = AssetReplacementHistory::with([
-    //         'assetInventory.assetType',
-    //         'assetInventory.location',
-    //         'assetInventory.station',
-    //         'oldAssetModel',
-    //         'newAssetModel',
-    //         'replacedBy',
-    //     ]);
-
-    //     // Restrict Call Coordinator to permitted stations.
-    //     if (auth()->user()->role == 1) {
-    //         $stationIds = permittedStationIds();
-
-    //         $query->whereHas('assetInventory', function ($q) use ($stationIds) {
-    //             $q->whereIn('station_id', $stationIds);
-    //         });
-    //     }
-
-    //     // Optional search filters
-    //     if ($request->filled('tag_no')) {
-    //         $query->whereHas('assetInventory', function ($q) use ($request) {
-    //             $q->where('tag_no', 'like', '%' . $request->tag_no . '%');
-    //         });
-    //     }
-
-    //     if ($request->filled('serial_no')) {
-    //         $serial = $request->serial_no;
-
-    //         $query->where(function ($q) use ($serial) {
-    //             $q->where('old_serial_no', 'like', "%{$serial}%")
-    //             ->orWhere('new_serial_no', 'like', "%{$serial}%");
-    //         });
-    //     }
-
-    //     if ($request->filled('from_date')) {
-    //         $query->whereDate('replaced_at', '>=', $request->from_date);
-    //     }
-
-    //     if ($request->filled('to_date')) {
-    //         $query->whereDate('replaced_at', '<=', $request->to_date);
-    //     }
-
-    //     $replacementHistories = $query->orderByDesc('replaced_at')->get();
-                        
-    //     return view('asset-replacement-history.index',compact('replacementHistories'));           
-        
-    // }
 
     public function replacementIndex(Request $request)
     {

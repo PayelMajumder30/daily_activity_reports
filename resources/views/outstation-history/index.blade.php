@@ -92,7 +92,69 @@
                         </select>
                     </div>
 
+                    {{-- From Airport / Location --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">From Airport / Location</label>
 
+                        <select name="from_location_id" id="from_location_id" class="form-select">
+                            <option value="">All Locations</option>
+
+                            @foreach($locations as $location)
+                                <option value="{{ $location->id }}"
+                                    {{ request('from_location_id') == $location->id ? 'selected' : '' }}>
+                                    {{ ucwords($location->name) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- From Station --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">From Station</label>
+
+                        <select name="from_station_id" id="from_station_id" class="form-select">
+                            <option value="">All Stations</option>
+
+                            @foreach($stations as $station)
+                                <option value="{{ $station->id }}"
+                                    {{ request('from_station_id') == $station->id ? 'selected' : '' }}>
+                                    {{ $station->station_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- To Airport / Location --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">To Airport / Location</label>
+
+                        <select name="to_location_id" id="to_location_id" class="form-select">
+                            <option value="">All Locations</option>
+
+                            @foreach($locations as $location)
+                                <option value="{{ $location->id }}"
+                                    {{ request('to_location_id') == $location->id ? 'selected' : '' }}>
+                                    {{ ucwords($location->name) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- To Station --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">To Station</label>
+
+                        <select name="to_station_id" id="to_station_id" class="form-select">
+                            <option value="">All Stations</option>
+
+                            @foreach($stations as $station)
+                                <option value="{{ $station->id }}"
+                                    {{ request('to_station_id') == $station->id ? 'selected' : '' }}>
+                                    {{ $station->station_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <div class="mt-3">

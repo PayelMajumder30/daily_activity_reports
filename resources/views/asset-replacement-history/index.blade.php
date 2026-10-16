@@ -102,8 +102,8 @@
                             <th>Location </th>
                             <th>Station</th>
                             <th>Old Model</th>
-                            <th>New Model</th>
                             <th>Old Serial No.</th>
+                            <th>New Model</th>
                             <th>New Serial No.</th>
                             <th>Replacement Date</th>
                             <th>Remarks</th>
@@ -133,11 +133,11 @@
                                 </td>
 
                                 <td>
-                                    {{ $history->newAssetModel->model_name ?? 'N/A' }}
-                                </td>
-
-                                <td>
                                     {{ $history->old_serial_no ?: 'N/A' }}
+                                </td>
+                                
+                                <td>
+                                    {{ $history->newAssetModel->model_name ?? 'N/A' }}
                                 </td>
 
                                 <td>
