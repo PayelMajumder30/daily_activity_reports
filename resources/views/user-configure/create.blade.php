@@ -40,7 +40,7 @@
 
                 <!-- Row 1 -->
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label>Name <span class="text-danger">*</span></label>
 
                         <input type="text" name="name"                          
@@ -51,7 +51,19 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    {{-- Username --}}
+                    <div class="col-md-4 mb-3">
+                        <label>Username <span class="text-danger">*</span></label>
+
+                        <input type="text" name="user_name" class="form-control @error('user_name') is-invalid @enderror"                          
+                            value="{{ old('user_name') }}" placeholder="Enter username (no spaces)" autocomplete="off">                                                     
+
+                        @error('user_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-4 mb-3">
                         <label>Email <span class="text-danger">*</span></label>
 
                         <input type="email" name="email"                           
@@ -166,55 +178,117 @@
 
     $(document).ready(function () {
 
-        $('#location_id').on('change', function () {
+        let oldStationId = "{{ old('station_id') }}";
+        let oldLocationId = "{{ old('location_id') }}";
 
-            let locationId = $(this).val();
+        // $('#location_id').on('change', function () {
+
+        //     let locationId = $(this).val();
+        //     let stationDropdown = $('#station_id');
+
+        //     stationDropdown.html('<option value="">Loading...</option>');
+
+        //     if (locationId) {
+        //         let url = "{{ route('user-configuration.stations', ':locationId') }}".replace(':locationId', locationId);
+        //         $.ajax({
+        //             url: url,
+        //             type: "GET",
+
+        //             success: function (stations) {
+
+        //                 stationDropdown.empty();
+
+        //                 stationDropdown.append(
+        //                     '<option value="">Select Station</option>'
+        //                 );
+
+        //                 $.each(stations, function (key, station) {
+
+        //                     stationDropdown.append(
+        //                         '<option value="' + station.id + '">' +
+        //                         station.station_name +
+        //                         '</option>'
+        //                     );
+
+        //                 });
+
+        //             },
+
+        //             error: function () {
+
+        //                 stationDropdown.html(
+        //                     '<option value="">Unable to load stations</option>'
+        //                 );
+
+        //             }
+        //         });
+
+        //     } else {
+
+        //         stationDropdown.html(
+        //             '<option value="">Select Station</option>'
+        //         );
+        //     }
+
+        // });
+        
+        function loadStations(locationId, selectedStationId = '') {
+
             let stationDropdown = $('#station_id');
 
-            stationDropdown.html('<option value="">Loading...</option>');
-
-            if (locationId) {
-                let url = "{{ route('user-configuration.stations', ':locationId') }}".replace(':locationId', locationId);
-                $.ajax({
-                    url: url,
-                    type: "GET",
-
-                    success: function (stations) {
-
-                        stationDropdown.empty();
-
-                        stationDropdown.append(
-                            '<option value="">Select Station</option>'
-                        );
-
-                        $.each(stations, function (key, station) {
-
-                            stationDropdown.append(
-                                '<option value="' + station.id + '">' +
-                                station.station_name +
-                                '</option>'
-                            );
-
-                        });
-
-                    },
-
-                    error: function () {
-
-                        stationDropdown.html(
-                            '<option value="">Unable to load stations</option>'
-                        );
-
-                    }
-                });
-
-            } else {
-
+            if (!locationId) {
                 stationDropdown.html(
                     '<option value="">Select Station</option>'
                 );
+                return;
             }
 
+            stationDropdown.html('<option value="">Loading...</option>');
+
+            let url = "{{ route('user-configuration.stations', ':locationId') }}".replace(':locationId', locationId);
+                
+            $.ajax({
+                url: url,
+                type: "GET",
+
+                success: function (stations) {
+
+                    stationDropdown.empty();
+
+                    stationDropdown.append(
+                        '<option value="">Select Station</option>'
+                    );
+
+                    $.each(stations, function (key, station) {
+
+                        stationDropdown.append(
+                            $('<option>', {
+                                value: station.id,
+                                text: station.station_name,
+                                selected: String(station.id) === String(selectedStationId)
+                            })
+                        );
+
+                    });
+
+                },
+
+                error: function () {
+                    stationDropdown.html(
+                        '<option value="">Unable to load stations</option>'
+                    );
+                }
+            });
+        }
+
+        // Restore the old station after validation failure
+        if (oldLocationId) {
+            loadStations(oldLocationId, oldStationId);
+        }
+
+        // Load stations when the region changes
+        $('#location_id').on('change', function () {
+            loadStations($(this).val());
         });
 
 

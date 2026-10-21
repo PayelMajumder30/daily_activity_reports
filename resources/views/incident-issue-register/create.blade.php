@@ -177,6 +177,45 @@
                 <div id="incidentDetailsSection" style="display:none;">                   
 
                     <hr class="my-4">
+                    
+                    {{-- Priority Selection --}}
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label">
+                                Priority
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="d-flex flex-wrap gap-2" id="priorityButtons">
+
+                                <button type="button" class="btn btn-outline-danger priority-btn" data-priority="Critical">                                   
+                                    Critical
+                                </button>
+
+                                <button type="button" class="btn btn-outline-warning priority-btn" data-priority="High">                                      
+                                    High
+                                </button>
+
+                                <button type="button" class="btn btn-outline-primary priority-btn" data-priority="Medium">                               
+                                    Medium
+                                </button>
+
+                                <button type="button" class="btn btn-outline-success priority-btn" data-priority="Low">                                
+                                    Low
+                                </button>
+
+                            </div>
+
+                            <input type="hidden" name="priority_status" id="priority_status" value="Medium">
+                                            
+                            <small class="text-muted">
+                                Select the priority level for this incident.
+                            </small>
+
+                            <small class="text-danger d-block" id="priorityError"></small>
+                                
+                        </div>
+                    </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -431,49 +470,6 @@
             |--------------------------------------------------------------------------
             */
 
-            
-            // $('#incidentForm').on('submit', function (e) {
-
-            //     if (!$('#asset_issue_register_id').val()) {
-            //         e.preventDefault();
-            //         Swal.fire({
-            //             icon: 'warning',
-            //             title: 'Asset Required',
-            //             text: 'Please select an asset.',
-            //             confirmButtonText: 'OK'
-            //         });
-
-            //         return;
-            //     }
-
-            //     if (!$('#support_user_id').val()) {
-            //         e.preventDefault();
-            //         Swal.fire({
-            //             icon: 'warning',
-            //             title: 'Engineer Required',
-            //             text: 'Please select an engineer.',
-            //             confirmButtonText: 'OK'
-            //         });
-
-            //         return;
-            //     }
-
-            //     if (!$('#category_id').val()) {
-
-            //         e.preventDefault();
-
-            //         Swal.fire({
-            //             icon: 'warning',
-            //             title: 'Category Required',
-            //             text: 'Please select an issue category.',
-            //             confirmButtonText: 'OK'
-            //         });
-
-            //         return;
-            //     }
-
-            // });
-
             $('#incidentForm').on('submit', function (e) {
 
                 let isValid = true;
@@ -516,6 +512,70 @@
                 if (!isValid) {
                     e.preventDefault();
                 }
+            });
+
+             /*
+            |--------------------------------------------------------------------------
+            | Priority status
+            |--------------------------------------------------------------------------
+            */
+
+            // Set Medium as the default selected priority
+            $('#priority_status').val('Medium');
+
+            $('#priorityButtons .priority-btn').each(function () {
+                const priority = $(this).data('priority');
+
+                if (priority === 'Medium') {
+                    $(this).removeClass('btn-outline-primary').addClass('btn-primary active');                                          
+                }
+            });
+
+            // Handle priority selection
+            $(document).on('click', '#priorityButtons .priority-btn', function () {
+
+                const priority = $(this).data('priority');
+
+                // Remove selected styling from all buttons
+                $('#priorityButtons .priority-btn').each(function () {
+                    const value = $(this).data('priority');
+
+                    $(this).removeClass('active btn-danger btn-warning btn-primary btn-success');                        
+
+                    if (value === 'Critical') {
+                        $(this).addClass('btn-outline-danger');
+                    } else if (value === 'High') {
+                        $(this).addClass('btn-outline-warning');
+                    } else if (value === 'Medium') {
+                        $(this).addClass('btn-outline-primary');
+                    } else if (value === 'Low') {
+                        $(this).addClass('btn-outline-success');
+                    }
+                });
+
+                // Highlight the selected button
+                const selectedButton = $(this);
+
+                selectedButton.removeClass(
+                    'btn-outline-danger btn-outline-warning ' +
+                    'btn-outline-primary btn-outline-success'
+                );
+
+                if (priority === 'Critical') {
+                    selectedButton.addClass('btn-danger active');
+                } else if (priority === 'High') {
+                    selectedButton.addClass('btn-warning active');
+                } else if (priority === 'Medium') {
+                    selectedButton.addClass('btn-primary active');
+                } else if (priority === 'Low') {
+                    selectedButton.addClass('btn-success active');
+                }
+
+                // Save the selection in the hidden input
+                $('#priority_status').val(priority);
+
+                // Clear any previous validation error
+                $('#priorityError').text('');
             });
        
 

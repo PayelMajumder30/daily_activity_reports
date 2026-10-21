@@ -586,6 +586,11 @@ class IncidentIssueRegisterController extends Controller
                 'required',
                 'string'
             ],
+
+            'priority_status' => [
+                'required',
+                'in:Critical,High,Medium,Low'
+            ],
         ]);
 
         // Make sure selected user is actually an engineer
@@ -645,6 +650,7 @@ class IncidentIssueRegisterController extends Controller
                 'support_user_id'   => $request->support_user_id,
                 'category_id'       => $request->category_id,
                 'remarks'           => $request->remarks,
+                'priority_status'   => $request->priority_status,
                 'status'            => 'Open',
                 'call_generated_at' => now(),
             ]);

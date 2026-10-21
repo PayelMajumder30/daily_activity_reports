@@ -49,6 +49,7 @@
                     <tr>
                         <th width="70">SL</th>
                         <th>Name</th>
+                        <th>User Name</th>
                         <th>Email</th>
                         <th>Region</th>
                         <th>Airport/Station</th>
@@ -64,6 +65,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ ucwords($user->name) }}</td>
+                            <td>{{ ucwords($user->user_name) }}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->location ? ucwords($user->location->name): 'N/A' }}</td> 
                             <td>{{ $user->station ? ucwords($user->station->station_name): 'N/A' }}</td>  

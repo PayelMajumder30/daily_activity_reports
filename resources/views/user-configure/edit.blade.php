@@ -42,7 +42,7 @@
                 <div class="row">
 
                     {{-- Name --}}
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
 
                         <label>
                             Name <span class="text-danger">*</span>
@@ -57,9 +57,23 @@
 
                     </div>
 
+                    {{-- User Name --}}
+                    <div class="col-md-4 mb-3">
+                        <label>
+                            User Name <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="text" name="user_name"
+                            class="form-control @error('user_name') is-invalid @enderror"
+                            value="{{ old('user_name', $user->user_name) }}">
+
+                        @error('user_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
 
                     {{-- Email --}}
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
 
                         <label>
                             Email <span class="text-danger">*</span>
@@ -221,105 +235,196 @@
 
 @push('scripts')
 <script>
+    // $(document).ready(function () {
+
+    //     let oldLocationId = "{{ old('location_id', $user->location_id) }}";
+    //     let oldStationId = "{{ old('station_id', $user->station_id) }}";
+
+
+    //     function loadStations(locationId, selectedStationId = '') {
+    //         let stationDropdown = $('#station_id');
+
+    //         stationDropdown.html(
+    //             '<option value="">Loading...</option>'
+    //         );
+
+    //         if (!locationId) {
+
+    //             stationDropdown.html(
+    //                 '<option value="">Select Station</option>'
+    //             );
+
+    //             return;
+    //         }
+
+    //         let url = "{{ route('user-configuration.stations', ':locationId') }}".replace(':locationId', locationId);                      
+
+    //         $.ajax({
+
+    //             url: url,
+    //             type: "GET",
+
+    //             success: function (stations) {
+
+    //                 stationDropdown.empty();
+    //                 stationDropdown.append(
+    //                     '<option value="">Select Station</option>'
+    //                 );
+
+
+    //                 if (stations.length > 0) {
+
+    //                     $.each(stations, function (key, station) {
+
+    //                         let selected = '';
+
+    //                         if (station.id == selectedStationId) {
+    //                             selected = 'selected';
+    //                         }
+
+    //                         stationDropdown.append(
+    //                             '<option value="' + station.id + '" ' +
+    //                             selected + '>' +
+    //                             station.station_name +
+    //                             '</option>'
+    //                         );
+
+    //                     });
+
+    //                 } else {
+
+    //                     stationDropdown.append(
+    //                         '<option value="">No station available</option>'
+    //                     );
+
+    //                 }
+
+    //             },
+
+    //             error: function (xhr) {
+
+    //                 console.log(xhr.responseText);
+    //                 stationDropdown.html(
+    //                     '<option value="">Unable to load stations</option>'
+    //                 );
+
+    //             }
+
+    //         });
+
+    //     }
+
+
+    //     // Load existing stations when edit page opens
+    //     if (oldLocationId) {
+
+    //         loadStations(
+    //             oldLocationId,
+    //             oldStationId
+    //         );
+
+    //     }
+
+    //     // When region changes
+    //     $('#location_id').on('change', function () {
+    //         let locationId = $(this).val();
+
+    //         // New region means no old station should remain selected
+    //         loadStations(locationId, '');
+
+    //     });
+
+
+    //     // Password show/hide
+    //     $('#togglePassword').click(function () {
+
+    //         let password = $('#password');
+    //         let icon = $(this).find('i');
+
+    //         if (password.attr('type') === 'password') {
+    //             password.attr('type', 'text');
+    //             icon.removeClass('bi-eye').addClass('bi-eye-slash');                    
+
+    //         } else {
+    //             password.attr('type', 'password');
+    //             icon.removeClass('bi-eye-slash').addClass('bi-eye');                   
+    //         }
+
+    //     });
+
+    // });
+    
     $(document).ready(function () {
 
         let oldLocationId = "{{ old('location_id', $user->location_id) }}";
         let oldStationId = "{{ old('station_id', $user->station_id) }}";
 
-
         function loadStations(locationId, selectedStationId = '') {
+
             let stationDropdown = $('#station_id');
+
+            if (!locationId) {
+                stationDropdown.html(
+                    '<option value="">Select Station</option>'
+                );
+                return;
+            }
 
             stationDropdown.html(
                 '<option value="">Loading...</option>'
             );
 
-            if (!locationId) {
-
-                stationDropdown.html(
-                    '<option value="">Select Station</option>'
-                );
-
-                return;
-            }
-
-            let url = "{{ route('user-configuration.stations', ':locationId') }}".replace(':locationId', locationId);                      
+            let url = "{{ route('user-configuration.stations', ':locationId') }}"
+                .replace(':locationId', locationId);
 
             $.ajax({
-
                 url: url,
-                type: "GET",
+                type: 'GET',
 
                 success: function (stations) {
 
                     stationDropdown.empty();
+
                     stationDropdown.append(
                         '<option value="">Select Station</option>'
                     );
 
-
-                    if (stations.length > 0) {
-
-                        $.each(stations, function (key, station) {
-
-                            let selected = '';
-
-                            if (station.id == selectedStationId) {
-                                selected = 'selected';
-                            }
-
-                            stationDropdown.append(
-                                '<option value="' + station.id + '" ' +
-                                selected + '>' +
-                                station.station_name +
-                                '</option>'
-                            );
-
-                        });
-
-                    } else {
+                    $.each(stations, function (key, station) {
 
                         stationDropdown.append(
-                            '<option value="">No station available</option>'
+                            $('<option>', {
+                                value: station.id,
+                                text: station.station_name,
+                                selected: String(station.id) === String(selectedStationId)
+                            })
                         );
 
-                    }
+                    });
 
+                    if (stations.length === 0) {
+                        stationDropdown.append(
+                            '<option value="" disabled>No station available</option>'
+                        );
+                    }
                 },
 
-                error: function (xhr) {
-
-                    console.log(xhr.responseText);
+                error: function () {
                     stationDropdown.html(
                         '<option value="">Unable to load stations</option>'
                     );
-
                 }
-
             });
-
         }
 
-
-        // Load existing stations when edit page opens
+        // Load the existing region and station when Edit opens
         if (oldLocationId) {
-
-            loadStations(
-                oldLocationId,
-                oldStationId
-            );
-
+            loadStations(oldLocationId, oldStationId);
         }
 
-        // When region changes
+        // Load stations when the selected region changes
         $('#location_id').on('change', function () {
-            let locationId = $(this).val();
-
-            // New region means no old station should remain selected
-            loadStations(locationId, '');
-
+            loadStations($(this).val(), '');
         });
-
 
         // Password show/hide
         $('#togglePassword').click(function () {
@@ -329,16 +434,16 @@
 
             if (password.attr('type') === 'password') {
                 password.attr('type', 'text');
-                icon.removeClass('bi-eye').addClass('bi-eye-slash');                    
-
+                icon.removeClass('bi-eye').addClass('bi-eye-slash');
             } else {
                 password.attr('type', 'password');
-                icon.removeClass('bi-eye-slash').addClass('bi-eye');                   
+                icon.removeClass('bi-eye-slash').addClass('bi-eye');
             }
 
         });
 
     });
+
 </script>
 @endpush
 @endsection

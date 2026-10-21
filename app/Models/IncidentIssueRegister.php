@@ -11,7 +11,7 @@ class IncidentIssueRegister extends Model
     //
 
     public $table = 'incident_issue_registers';
-    protected $fillable = ['call_id','asset_issue_register_id', 'support_user_id', 'category_id', 'remarks', 'status', 'call_generated_at', 'call_attended_at', 'call_closed_at'];
+    protected $fillable = ['call_id','asset_issue_register_id', 'support_user_id', 'category_id', 'remarks', 'status', 'priority_status', 'call_generated_at', 'call_attended_at', 'call_closed_at'];
     
     protected $casts = [
         'call_generated_at' => 'datetime',

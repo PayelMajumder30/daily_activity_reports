@@ -28,13 +28,13 @@
                         @csrf
 
                         <div class="mb-3">
-                            <label>Name</label>
-                            <input type="text" name="name" class="form-control" value="{{ old('name') }}" required autofocus>      
+                            <label>User Name</label>
+                            <input type="text" name="user_name" class="form-control @error('user_name') is-invalid @enderror" value="{{ old('user_name') }}" required autofocus>      
                         </div>
 
                         <div class="mb-3">
                             <label>Password</label>
-                            <input type="password" name="password" class="form-control" required>       
+                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>       
                         </div>
 
                         @error('name')

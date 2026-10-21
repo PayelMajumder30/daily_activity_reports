@@ -12,6 +12,7 @@
                 <th>Tag No</th>
                 <th>Serial No</th>
                 <th>Assigned To</th>
+                <th>Call Priority</th>
                 <th>Call Generation Time</th>
                 <th>Call Attend Time</th>
                 <th>Call Closing Time</th>
@@ -56,6 +57,25 @@
                             {{ $incident->supportUser?->name ?? 'N/A' }}
                         @endif
                     </td>
+                    
+                    <td>
+                        @php
+                            $priority = $incident->priority_status ?? 'Medium';
+
+                            $priorityClass = match ($priority) {
+                                'Critical' => 'bg-danger',
+                                'High'     => 'bg-warning text-dark',
+                                'Medium'   => 'bg-primary',
+                                'Low'      => 'bg-success',
+                                default    => 'bg-secondary',
+                            };
+                        @endphp
+
+                        <span class="badge {{ $priorityClass }} px-3 py-2">
+                            {{ $priority }}
+                        </span>
+                    </td>
+
                     <td>{{ $incident->call_generated_at?->format('d-m-Y H:i:s') ?? '-' }}</td>                                           
                     <td>{{ $incident->call_attended_at?->format('d-m-Y H:i:s') ?? '-' }}</td>                                           
                     <td>{{ $incident->call_closed_at?->format('d-m-Y H:i:s') ?? '-' }}</td>                                           

@@ -27,12 +27,12 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         // Check if user exists
-        $user = User::where('name', $request->name)->first();
+        $user = User::where('user_name', $request->user_name)->first();
 
         // Check if user exists by name
         if ($user && $user->status == 0) {
             return back()
-                ->withInput($request->only('name'))
+                ->withInput($request->only('user_name'))
                 ->withErrors([
                     'name' => 'Your account has been deactivated. Please contact the administrator.',
                 ]);
