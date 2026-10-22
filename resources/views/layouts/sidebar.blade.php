@@ -179,17 +179,17 @@
                             </a>
                         </li>
                          
+                        <li class="nav-item">
+                            <a href="{{ route('user-location-permission.index') }}" class="nav-link text-white     
+                                {{ request()->routeIs('user-location-permission.*') ? 'active bg-primary' : '' }}">
+                                    <i class="bi bi-shield-check"></i>
+                                    User Location Permission
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </li>
-
-            <li class="nav-item">
-               <a href="{{ route('user-location-permission.index') }}" class="nav-link text-white     
-                {{ request()->routeIs('user-location-permission.*') ? 'active bg-primary' : '' }}">
-                    <i class="bi bi-shield-check"></i>
-                    User Location Permission
-                </a>
-            </li>
+           
         @endif
 
        
