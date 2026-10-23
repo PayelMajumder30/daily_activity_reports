@@ -2095,6 +2095,7 @@ class AssetInventoryController extends Controller
 
     public function replacementIndex(Request $request)
     {
+        // dd($request->all());
         $query = AssetReplacementHistory::with([
             'assetInventory.assetType',
             'assetInventory.location',
@@ -2131,15 +2132,22 @@ class AssetInventoryController extends Controller
             });
         }
 
-        $replacementHistories = $query
-            ->orderByDesc('replaced_at')
-            ->get();
+        // Filter by Replacement Date From
+        if ($request->filled('from_date')) {
+            $query->whereDate('asset_replacement_histories.replaced_at', '>=', $request->from_date);
+        }
+        
+        // Filter by Replacement Date To
+        if ($request->filled('to_date')) {
+            $query->whereDate('asset_replacement_histories.replaced_at', '<=', $request->to_date);
+        }
+      
 
+        $replacementHistories = $query->orderByDesc('replaced_at')->get();
+            
         // Active asset types for the dropdown
-        $assetTypes = AssetType::where('status', 1)
-            ->orderBy('name')
-            ->get();
-
+        $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();
+            
         return view('asset-replacement-history.index', compact('replacementHistories', 'assetTypes'));              
         
     }

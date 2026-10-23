@@ -61,6 +61,17 @@
                     </select>
                 </div>
 
+                {{-- Replacement Date From --}}
+                <div class="col-md-3">
+                    <label for="from_date" class="form-label">Replacement Date From</label>
+                    <input type="date" name="from_date" id="from_date" class="form-control" value="{{ request('from_date') }}">     
+                </div>
+
+                {{-- Replacement Date To --}}
+                <div class="col-md-3">
+                    <label for="to_date" class="form-label">Replacement Date To</label>
+                    <input type="date" name="to_date" id="to_date" class="form-control" value="{{ request('to_date') }}">     
+                </div>
                 </div>
 
                 <div class="mt-3">
@@ -115,51 +126,31 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
 
-                                <td>
-                                    {{ $history->assetInventory->tag_no ?? 'N/A' }}
-                                </td>
-
-                                <td>
-                                    {{ $history->assetInventory->assetType->name ?? 'N/A' }}
-                                </td>
-
-                                <td>
-                                    {{ $history->assetInventory->location->name ?? 'N/A' }}                                   
-                                </td>
+                                <td>{{ $history->assetInventory->tag_no ?? 'N/A' }}</td>
+                                    
+                                <td>{{ $history->assetInventory->assetType->name ?? 'N/A' }}</td>
+                                    
+                                <td>{{ $history->assetInventory->location->name ?? 'N/A' }}</td>  
+                                                                                 
                                 <td>{{ $history->assetInventory->station->station_name ?? 'N/A' }}</td>
 
-                                <td>
-                                    {{ $history->oldAssetModel->model_name ?? 'N/A' }}
-                                </td>
-
-                                <td>
-                                    {{ $history->old_serial_no ?: 'N/A' }}
-                                </td>
+                                <td>{{ $history->oldAssetModel->model_name ?? 'N/A' }}</td>
+                                                                   
+                                <td>{{ $history->old_serial_no ?: 'N/A' }}</td>                              
                                 
-                                <td>
-                                    {{ $history->newAssetModel->model_name ?? 'N/A' }}
-                                </td>
+                                <td>{{ $history->newAssetModel->model_name ?? 'N/A' }}</td>                                                
+
+                                <td>{{ $history->new_serial_no ?: 'N/A' }}</td>                               
 
                                 <td>
-                                    {{ $history->new_serial_no ?: 'N/A' }}
+                                    {{ $history->replaced_at ? $history->replaced_at->format('d-m-Y') : 'N/A' }}                                       
                                 </td>
 
-                                <td>
-                                    {{ $history->replaced_at
-                                        ? $history->replaced_at->format('d-m-Y')
-                                        : 'N/A' }}
-                                </td>
-
-                                <td>
-                                    {{ $history->remarks ?: 'N/A' }}
-                                </td>
+                                <td>{{ $history->remarks ?: 'N/A' }}</td>
+                                                    
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="11" class="text-center">
-                                    No asset replacement history found.
-                                </td>
-                            </tr>
+                           {{-- Keep tbody empty; DataTables will display its empty message --}}
                         @endforelse
                     </tbody>
 

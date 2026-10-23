@@ -12,15 +12,6 @@ class IncidentIssueRegisterController extends Controller
     /**
      * Incident Issue Register index.
      */
-    // public function index()
-    // {
-    //     $openIncidents      = $this->incidentQuery()->where('status', 'Open')->latest()->get();                              
-    //     $attendIncidents    = $this->incidentQuery()->where('status', 'Attend')->latest()->get();                                
-    //     $closeIncidents     = $this->incidentQuery()->where('status', 'Close')->latest()->get();                              
-    //     $engineers          = User::where('role', 2)->where('status', 1)->orderBy('name')->get();
-
-    //     return view('incident-issue-register.index', compact('openIncidents', 'attendIncidents', 'closeIncidents', 'engineers'));                              
-    // }
 
     public function index()
     {
@@ -79,33 +70,6 @@ class IncidentIssueRegisterController extends Controller
     /**
      * Common incident query.
      */
-    // private function incidentQuery()
-    // {
-    //     $query = IncidentIssueRegister::with([
-    //         'assetIssueRegister.assetInventory.assetModel.assetType',
-    //         'assetIssueRegister.custodian', 'supportUser', 'category',
-    //     ]);
-
-    //      /*
-    //     |--------------------------------------------------------------------------
-    //     | Engineer: Show only assigned incidents
-    //     |--------------------------------------------------------------------------
-    //     */
-
-    //     if(auth()->user()->role == 2){
-    //         $query->where('support_user_id', auth()->id());
-    //     }
-
-    //     /*
-    //     |--------------------------------------------------------------------------
-    //     | Management & Call Coordinator
-    //     |--------------------------------------------------------------------------
-    //     | Role 0 and Role 1 can see incidents of all engineers.
-    //     |--------------------------------------------------------------------------
-    //     */
-
-    //     return $query;
-    // }
 
     private function incidentQuery()
     {
@@ -170,26 +134,6 @@ class IncidentIssueRegisterController extends Controller
     /**
      * Create incident page.
      */
-    // public function create()
-    // {
-    //     // Engineer cannot create incident
-    //     if (auth()->user()->role == 2) {
-    //         abort(403);
-    //     }
-
-    //     $engineers = User::where('role', 2)
-    //         ->where('status', 1)
-    //         ->orderBy('name')
-    //         ->get();
-
-    //     $categories = IssueCategory::where('status', 1)
-    //         ->orderBy('title')
-    //         ->get();
-
-    //     return view('incident-issue-register.create', compact('engineers', 'categories'));          
-        
-    // }
-
     public function create()
     {
         /*
@@ -240,58 +184,6 @@ class IncidentIssueRegisterController extends Controller
     /**
      * Search currently issued assets.
      */
-    // public function searchAsset(Request $request)
-    // {
-    //     $search = trim($request->search);
-
-    //     if (!$search) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Please enter a search value.'
-    //         ]);
-    //     }
-
-    //     $assetIssues = AssetIssueRegister::with([
-    //         'assetInventory.assetModel.assetType',
-    //         'assetInventory.location',
-    //         'custodian',
-    //     ])
-    //         ->where('issue_status', 'Issued')
-    //         ->where(function ($query) use ($search) {
-
-    //             $query->whereHas('assetInventory', function ($q) use ($search) {
-    //                 $q->where('tag_no', 'like', "%{$search}%")
-    //                     ->orWhere('serial_no', 'like', "%{$search}%");
-    //             });
-
-    //             $query->orWhereHas('custodian', function ($q) use ($search) {
-    //                 $q->where('custodian_name', 'like', "%{$search}%");
-    //             });
-    //         })
-    //         ->latest('id')
-    //         ->get();
-
-    //     $data = $assetIssues->map(function ($issue) {
-
-    //         $asset = $issue->assetInventory;
-    //         $custodian = $issue->custodian;
-
-    //         return [
-    //             'id'            => $issue->id,
-    //             'tag_no'        => $asset?->tag_no ?? 'N/A',
-    //             'serial_no'     => $asset?->serial_no ?? 'N/A',
-    //             'asset_model'   => $asset?->assetModel?->model_name ?? $asset?->assetModel?->title ?? 'N/A',                                   
-    //             'asset_type'    => $asset?->assetModel?->assetType?->name ?? 'N/A',                
-    //             'custodian_name' => $custodian?->custodian_name ?? 'N/A',
-                   
-    //         ];
-    //     });
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'data' => $data,
-    //     ]);
-    // }
 
     public function searchAsset(Request $request)
     {
@@ -379,50 +271,14 @@ class IncidentIssueRegisterController extends Controller
         });
 
         return response()->json([
-            'status' => true,
-            'data' => $data,
+            'status'    => true,
+            'data'      => $data,
         ]);
     }
 
     /**
      * Get complete selected asset details.
      */
-    // public function assetDetails($id)
-    // {
-    //     $assetIssue = AssetIssueRegister::with([
-    //         'assetInventory.assetModel.assetType',
-    //         'assetInventory.location',
-    //         'assetInventory.station',
-    //         'custodian',
-    //     ])
-    //         ->where('issue_status', 'Issued')
-    //         ->find($id);
-
-    //     if (!$assetIssue) {
-    //         return response()->json([
-    //             'status' => false,
-    //             'message' => 'Issued asset not found.'
-    //         ], 404);
-    //     }
-
-    //     $asset      = $assetIssue->assetInventory;
-    //     $custodian  = $assetIssue->custodian;
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'data' => [
-    //             'id'            => $assetIssue->id,
-    //             'tag_no'        => $asset?->tag_no ?? 'N/A',
-    //             'serial_no'     => $asset?->serial_no ?? 'N/A',
-    //             'asset_model'   => $asset?->assetModel?->model_name ?? $asset?->assetModel?->title ?? 'N/A',                                     
-    //             'asset_type'    => $asset?->assetModel?->assetType?->name ?? 'N/A',                   
-    //             'custodian_name' => $custodian?->custodian_name ?? 'N/A',                  
-    //             'location'      => $asset?->location?->name ?? 'N/A',                 
-    //             'station'       => $asset?->station?->station_name ?? 'N/A',
-                    
-    //         ]
-    //     ]);
-    // }
 
     public function assetDetails($id)
     {
@@ -482,84 +338,6 @@ class IncidentIssueRegisterController extends Controller
     /**
      * Store new incident.
      */
-    // public function store(Request $request)
-    // {
-    //     if (auth()->user()->role == 2) {
-    //         abort(403);
-    //     }
-
-    //     $request->validate([
-    //         'asset_issue_register_id' => [
-    //             'required',
-    //             'exists:asset_issue_registers,id'
-    //         ],
-
-    //         'support_user_id' => [
-    //             'required',
-    //             'exists:users,id'
-    //         ],
-
-    //         'category_id' => [
-    //             'required',
-    //             'exists:issue_categories,id'
-    //         ],
-
-    //         'remarks' => [
-    //             'required',
-    //             'string'
-    //         ],
-    //     ]);
-
-    //     // Make sure selected user is actually an engineer
-    //     $engineer = User::where('id', $request->support_user_id)
-    //         ->where('role', 2)
-    //         ->where('status', 1)
-    //         ->first();
-
-    //     if (!$engineer) {
-    //         return back()
-    //             ->withErrors([
-    //                 'support_user_id' => 'Invalid engineer selected.'
-    //             ])
-    //             ->withInput();
-    //     }
-
-    //     // Make sure selected issue record is currently issued
-    //     $assetIssue = AssetIssueRegister::where('id', $request->asset_issue_register_id)
-    //         ->where('issue_status', 'Issued')
-    //         ->first();
-
-    //     if (!$assetIssue) {
-    //         return back()
-    //             ->withErrors([
-    //                 'asset_issue_register_id' => 'Selected asset is not currently issued.'
-    //             ])
-    //             ->withInput();
-    //     }
-
-    //     DB::transaction(function () use ($request) {
-
-    //         $incident = IncidentIssueRegister::create([
-    //             'call_id'           => 'TEMP',
-    //             'asset_issue_register_id' => $request->asset_issue_register_id,
-    //             'support_user_id'   => $request->support_user_id,
-    //             'category_id'       => $request->category_id,
-    //             'remarks'           => $request->remarks,
-    //             'status'            => 'Open',
-    //             'call_generated_at' => now(),
-    //         ]);
-
-    //         $incident->update([
-    //             'call_id' => 'INC-' .
-    //                 now()->format('Ymd') . '-' .
-    //                 str_pad($incident->id, 4, '0', STR_PAD_LEFT),
-    //         ]);
-    //     });
-
-    //     return redirect()->route('incident_issue_register.index')->with('success', 'Incident generated successfully.');
-                        
-    // }
-
     public function store(Request $request)
     {
         if (auth()->user()->role == 2) {
@@ -600,10 +378,8 @@ class IncidentIssueRegisterController extends Controller
             ->first();
 
         if (!$engineer) {
-            return back()
-                ->withErrors([
-                    'support_user_id' => 'Invalid engineer selected.'
-                ])->withInput();               
+            return back()->withErrors(['support_user_id' => 'Invalid engineer selected.'])->withInput();                   
+                              
         }
 
         // Make sure selected issue record is currently issued
@@ -627,8 +403,7 @@ class IncidentIssueRegisterController extends Controller
                     $assetIssue->assetInventory->station_id
                 )
             ) {
-                return back()->withErrors(['asset_issue_register_id' => 'You do not have permission to generate an incident for this asset.'])->withInput();                                                                       
-                    
+                return back()->withErrors(['asset_issue_register_id' => 'You do not have permission to generate an incident for this asset.'])->withInput();                                                                                          
             }
 
             /*
@@ -661,6 +436,15 @@ class IncidentIssueRegisterController extends Controller
                     str_pad($incident->id, 4, '0', STR_PAD_LEFT),
             ]);
         });
+
+        eventLog(
+            'Incident Generated',
+            'Incident Issue Register',
+            'Incident ' . $incident->call_id .
+            ' generated for asset issue ID ' . $incident->asset_issue_register_id .
+            '. Assigned engineer: ' . $engineer->name .
+            '. Priority: ' . $incident->priority_status
+        );
 
         return redirect()->route('incident_issue_register.index')->with('success', 'Incident generated successfully.');
                         
@@ -738,6 +522,13 @@ class IncidentIssueRegisterController extends Controller
             'call_attended_at' => now(),
         ]);
 
+        eventLog(
+            'Incident Attended',
+            'Incident Issue Register',
+            'Incident ' . $incident->call_id .
+            ' attended by ' . auth()->user()->name
+        );
+
         return response()->json([
             'status'    => true,
             'message'   => 'Incident attended successfully.'
@@ -767,16 +558,23 @@ class IncidentIssueRegisterController extends Controller
 
         if (!$incident) {
             return response()->json([
-                'status' => false,
-                'message' => 'Incident is not available for closing.'
+                'status'    => false,
+                'message'   => 'Incident is not available for closing.'
             ], 422);
         }
 
         $incident->update([
-            'remarks' => $request->remarks,
-            'status' => 'Close',
+            'remarks'   => $request->remarks,
+            'status'    => 'Close',
             'call_closed_at' => now(),
         ]);
+
+        eventLog(
+            'Incident Closed',
+            'Incident Issue Register',
+            'Incident ' . $incident->call_id .
+            ' closed by ' . auth()->user()->name
+        );
 
         return response()->json([
             'status' => true,
@@ -787,79 +585,6 @@ class IncidentIssueRegisterController extends Controller
     /**
      * Change assigned engineer.
      */
-    // public function changeEngineer(Request $request, $id){
-    //     if(!in_array(auth()->user()->role, [0,1])){
-    //         abort(403);
-    //     }
-
-    //     $request->validate([
-    //         'support_user_id' => [
-    //             'required',
-    //             'exists:users,id'
-    //         ],
-    //     ]);
-
-    //     $incident = IncidentIssueRegister::findOrFail($id);
-
-    //      /*
-    //     |--------------------------------------------------------------------------
-    //     | Engineer can only be changed while incident is Open
-    //     |--------------------------------------------------------------------------
-    //     */
-
-    //     if ($incident->status !== 'Open') {
-    //         return response()->json([
-    //             'status'  => false,
-    //             'message' => 'Engineer cannot be changed after the incident has been attended.'
-    //         ], 422);
-    //     }
-
-    //     /*
-    //     |--------------------------------------------------------------------------
-    //     | Validate selected user is an active Engineer
-    //     |--------------------------------------------------------------------------
-    //     */
-
-    //     $engineer = User::where('id', $request->support_user_id)->where('role', 2)->where('status', 1)->first();                           
-
-    //     if (!$engineer) {
-    //         return response()->json([
-    //             'status'  => false,
-    //             'message' => 'Invalid engineer selected.'
-    //         ], 422);
-    //     }
-
-
-    //     /*
-    //     |--------------------------------------------------------------------------
-    //     | Do not allow selecting the same engineer
-    //     |--------------------------------------------------------------------------
-    //     */
-
-    //     if ((int) $incident->support_user_id === (int) $engineer->id) {
-
-    //         return response()->json([
-    //             'status'  => false,
-    //             'message' => 'Please select a different engineer.'
-    //         ], 422);
-    //     }
-
-    //     /*
-    //     |--------------------------------------------------------------------------
-    //     | Update Engineer
-    //     |--------------------------------------------------------------------------
-    //     */
-
-    //     $incident->update([
-    //         'support_user_id' => $engineer->id,
-    //     ]);
-
-    //     return response()->json([
-    //         'status'  => true,
-    //         'message' => 'Assigned engineer changed successfully.',
-    //         'engineer' => $engineer->name,
-    //     ]);
-    // }
 
     public function changeEngineer(Request $request, $id)
     {
@@ -991,10 +716,19 @@ class IncidentIssueRegisterController extends Controller
         | Update Engineer
         |--------------------------------------------------------------------------
         */
+        $oldEngineer = User::find($incident->support_user_id);
 
         $incident->update([
             'support_user_id' => $engineer->id,
         ]);
+
+        eventLog(
+            'Engineer Reassigned',
+            'Incident Issue Register',
+            'Incident ' . $incident->call_id .
+            ' reassigned from ' . ($oldEngineer?->name ?? 'Unknown') .
+            ' to ' . $engineer->name
+        );
 
 
         return response()->json([
