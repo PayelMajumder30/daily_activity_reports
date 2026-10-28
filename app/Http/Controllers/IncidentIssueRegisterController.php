@@ -417,7 +417,7 @@ class IncidentIssueRegisterController extends Controller
             }
         }
 
-        DB::transaction(function () use ($request) {
+        $incident = DB::transaction(function () use ($request) {
 
             $incident = IncidentIssueRegister::create([
                 'call_id'           => 'TEMP',
@@ -435,6 +435,8 @@ class IncidentIssueRegisterController extends Controller
                     now()->format('Ymd') . '-' .
                     str_pad($incident->id, 4, '0', STR_PAD_LEFT),
             ]);
+
+            return $incident;
         });
 
         eventLog(

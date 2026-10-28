@@ -250,7 +250,15 @@
                             <select name="category_id" id="category_id" class="form-select" required>
                                 <option value="">Select Issue Category</option>
 
-                                @foreach($categories as $category)
+                                {{-- Display all categories except Others --}}
+                                @foreach($categories->where('title', '!=', 'Others') as $category)
+                                    <option value="{{ $category->id }}">
+                                        {{ $category->title }}
+                                    </option>
+                                @endforeach
+
+                                {{-- Always display Others at the end --}}
+                                @foreach($categories->where('title', 'Others') as $category)
                                     <option value="{{ $category->id }}">
                                         {{ $category->title }}
                                     </option>
@@ -268,8 +276,7 @@
                             </label>
                             {{-- Issue Details --}}
                             <textarea name="remarks" id="remarks" class="form-control" rows="5" required></textarea>
-                            <small class="text-danger" id="remarksError"></small>                              
-                                                      
+                            <small class="text-danger" id="remarksError"></small>                                                                                  
 
                         </div>
 
