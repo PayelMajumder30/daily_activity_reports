@@ -65,7 +65,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ ucwords($user->name) }}</td>
-                            <td>{{ ucwords($user->user_name) }}</td>
+                            <td>{{ $user->user_name }}</td>
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->location ? ucwords($user->location->name): 'N/A' }}</td> 
                             <td>{{ $user->station ? ucwords($user->station->station_name): 'N/A' }}</td>  

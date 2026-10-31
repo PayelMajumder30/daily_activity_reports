@@ -73,19 +73,38 @@ class AssetInventoryController extends Controller
             );
         }
 
-        // Asset Type
+        // Decrypt Asset Type ID
+        $assetTypeId = null;
+
         if ($request->filled('asset_type')) {
-            $query->whereHas('assetModel', function ($q) use ($request) {
-                $q->where('asset_type_id', $request->asset_type);
-            });
+            try {
+                $assetTypeId = decryptId($request->asset_type);
+            } catch (\Exception $e) {
+                $assetTypeId = null;
+            }
         }
 
-        // Asset Model
-        if ($request->filled('asset_model')) {
-            $query->where(
-                'asset_model_id',
-                $request->asset_model
-            );
+        // Asset Type
+        if ($assetTypeId) {
+            $query->whereHas('assetModel', function ($q) use ($assetTypeId) {
+                $q->where('asset_type_id', $assetTypeId);
+            });
+        }
+      
+        // Decrypt Asset Model ID
+        $assetModelId = null;
+
+        if($request->filled('asset_model')){
+            try {
+                $assetModelId = decryptId($request->asset_model);
+            } catch (\Exception $e) {
+                $assetModelId = null;
+            }
+        }
+
+         // Asset Model
+        if ($assetModelId) {
+            $query->where('asset_model_id', $assetModelId);
         }
 
         // Asset Status
@@ -120,10 +139,18 @@ class AssetInventoryController extends Controller
             ->get();
 
         // Asset Model dropdown
-        $assetModels = AssetModel::where('status', 1)
-            ->orderBy('model_name')
-            ->get();
+        // $assetModels = AssetModel::where('status', 1)
+        //     ->orderBy('model_name')
+        //     ->get();
 
+        // Asset Model dropdown (Filtered by Asset Type)
+        $assetModelsQuery = AssetModel::where('status', 1);
+
+        if ($assetTypeId) {
+            $assetModelsQuery->where('asset_type_id', $assetTypeId);
+        }
+
+        $assetModels = $assetModelsQuery->orderBy('model_name')->get();
         // Asset Status
         $assetStatuses = AssetInventory::where(
             'asset_status',
@@ -135,8 +162,7 @@ class AssetInventoryController extends Controller
         ->pluck('asset_status');
 
         // Locations
-        // $locations = Location::where('status', 1)->orderBy('name')->get();        
-        // Locations dropdown based on user permissions
+        
         if (auth()->user()->role == 1) {
 
             $locationIds = permittedLocationIds();
@@ -149,7 +175,7 @@ class AssetInventoryController extends Controller
                 
         }   
 
-        return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels', 'assetStatuses', 'locations'));  
+        return view('asset-inventory.index', compact('inventories', 'assetTypes', 'assetModels', 'assetStatuses', 'locations', 'assetTypeId', 'assetModelId'));  
     }
 
 

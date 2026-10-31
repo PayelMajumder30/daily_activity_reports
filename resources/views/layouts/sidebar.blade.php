@@ -2,7 +2,7 @@
 
     <h6 class="text-center mb-4 d-flex align-items-center justify-content-center">
         <img src="{{asset('assets/images/favicon.ico')}}" alt="Logo" width="32" height="32" class="me-2">
-        Daily Activity Management System
+        IT MIS
     </h6>
 
     <hr>
@@ -53,7 +53,7 @@
                 </a>
             </li>
 
-            <li class="nav-item mb-2">
+            <!-- <li class="nav-item mb-2">
 
                 <a class="nav-link text-white d-flex justify-content-between align-items-center 
                 {{request()->routeIs('user-configuration.*') || request()->routeIs('activity-configuration.*') || request()->routeIs('status-configuration.*') ? '' : 'collapsed'}}" 
@@ -95,14 +95,17 @@
                         </li>
                     </ul>
                 </div>
-            </li>
+            </li> -->
 
-            <li class="nav-item">
-                <a href="{{ route('audit.trail') }}" class="nav-link text-white {{ request()->routeIs('audit.trail') ? 'active bg-primary' : '' }}">
-                    <i class="bi bi-clock-history"></i>
-                    Audit Trail
+            <li class="nav-item mb-2">
+                <a href="{{ route('user-configuration.index') }}"
+                    class="nav-link text-white {{ request()->routeIs('user-configuration.*') ? 'active bg-primary' : '' }}">
+
+                    <i class="bi bi-person"></i>
+                    User Configuration
                 </a>
             </li>
+
         @endif
 
         @if(auth()->user()->role == 0)
@@ -239,6 +242,15 @@
                 </a>
             </li>
             
+        @endif
+
+        @if(auth()->user()->role == 0)
+            <li class="nav-item">
+                <a href="{{ route('audit.trail') }}" class="nav-link text-white {{ request()->routeIs('audit.trail') ? 'active bg-primary' : '' }}">
+                    <i class="bi bi-clock-history"></i>
+                    Audit Trail
+                </a>
+            </li>
         @endif
     </ul>
 

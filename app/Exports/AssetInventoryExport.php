@@ -15,6 +15,28 @@ class AssetInventoryExport implements FromQuery, WithHeadings, WithMapping
     public function __construct(array $filters = [])
     {
         $this->filters = $filters;
+
+        // Decrypt Asset Type ID
+        if (!empty($this->filters['asset_type'])) {
+            try {
+                $this->filters['asset_type'] = decryptId(
+                    $this->filters['asset_type']
+                );
+            } catch (\Throwable $e) {
+                $this->filters['asset_type'] = null;
+            }
+        }
+
+         // Decrypt Asset Model ID
+        if (!empty($this->filters['asset_model'])) {
+            try {
+                $this->filters['asset_model'] = decryptId(
+                    $this->filters['asset_model']
+                );
+            } catch (\Throwable $e) {
+                $this->filters['asset_model'] = null;
+            }
+        }
     }
 
     /**

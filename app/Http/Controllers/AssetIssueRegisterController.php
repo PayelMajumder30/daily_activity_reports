@@ -83,18 +83,60 @@ class AssetIssueRegisterController extends Controller
         /*
         | Search asset type
         */ 
-        if($request->filled('asset_type')) {
-            $query->whereHas('assetInventory.assetModel.assetType', function($q) use($request) {
-                $q->where('id', $request->asset_type);
-            });
-        }
+        // if($request->filled('asset_type')) {
+        //     $query->whereHas('assetInventory.assetModel.assetType', function($q) use($request) {
+        //         $q->where('id', $request->asset_type);
+        //     });
+        // }
 
          /*
         | Search asset model
         */ 
-        if($request->filled('asset_model')) {
-            $query->whereHas('assetInventory.assetModel', function($q) use($request) {
-                $q->where('id', $request->asset_model);
+        // if($request->filled('asset_model')) {
+        //     $query->whereHas('assetInventory.assetModel', function($q) use($request) {
+        //         $q->where('id', $request->asset_model);
+        //     });
+        // }
+ 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Decrypt Asset Type ID
+        |--------------------------------------------------------------------------
+        */
+        $assetTypeId = null;
+
+        if ($request->filled('asset_type')) {
+            try {
+                $assetTypeId = decryptId($request->asset_type);
+            } catch (\Exception $e) {
+                $assetTypeId = null;
+            }
+        }
+
+        // Asset Type
+        if ($assetTypeId) {
+            $query->whereHas('assetInventory.assetModel.assetType', function ($q) use ($assetTypeId) {
+                $q->where('id', $assetTypeId);
+            });
+        }
+
+
+        // Decrypt Asset Model ID
+        $assetModelId = null;
+
+        if ($request->filled('asset_model')) {
+            try {
+                $assetModelId = decryptId($request->asset_model);
+            } catch (\Exception $e) {
+                $assetModelId = null;
+            }
+        }
+
+        // Asset Model
+        if ($assetModelId) {
+            $query->whereHas('assetInventory.assetModel', function ($q) use ($assetModelId) {
+                $q->where('id', $assetModelId);
             });
         }
 
@@ -115,10 +157,17 @@ class AssetIssueRegisterController extends Controller
         $issueStatuses = AssetIssueRegister::query()->whereNotNull('issue_status')->where('issue_status', '!=', '')->distinct()
                                                     ->orderBy('issue_status')->pluck('issue_status');
 
-        $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();         
-        $assetModels = AssetModel::where('status', 1)->orderBy('model_name')->get();                     
+        $assetTypes = AssetType::where('status', 1)->orderBy('name')->get();      
+        
+        // Filter Asset Models by Asset Type if selected
+        $assetModelsQuery = AssetModel::where('status', 1);
+        if ($assetTypeId) {
+            $assetModelsQuery->where('asset_type_id', $assetTypeId);
+        }
+        // $assetModels = AssetModel::where('status', 1)->orderBy('model_name')->get();    
+        $assetModels = $assetModelsQuery->orderBy('model_name')->get();                 
         $custodians = Custodian::with(['designation', 'discipline', 'section', 'location'])->where('status', 1)->orderBy('custodian_name')->get();
-        return view('asset-issue-register.index', compact('issueRegisters', 'issueStatuses', 'custodians', 'assetTypes', 'assetModels'));
+        return view('asset-issue-register.index', compact('issueRegisters', 'issueStatuses', 'custodians', 'assetTypes', 'assetModels', 'assetTypeId', 'assetModelId'));
     }
 
 
@@ -699,9 +748,7 @@ class AssetIssueRegisterController extends Controller
             'custodian' => [
                 'emp_id'        => $custodian->emp_id ?? '-',                   
                 'designation'   => $custodian->designation?->name ?? '-',                  
-                'department'    => $custodian->discipline?->name ?? '-',                   
-                // 'section'       => $custodian->section?->section_name ?? '-',  
-                // 'location_id'   => $custodian->location_id,                 
+                'department'    => $custodian->discipline?->name ?? '-',                                   
                 'location'      => $custodian->location?->name ?? '-',  
                 'station_id'    => $custodian->station_id,
                 'station'       => $custodian->station?->station_name ?? '-',                 

@@ -97,11 +97,73 @@ class AssetIssueRegisterExport implements FromCollection, WithHeadings, ShouldAu
         |--------------------------------------------------------------------------
         */
 
+        // if ($request->filled('asset_type')) {
+        //     $query->whereHas(
+        //         'assetInventory.assetModel.assetType',
+        //         function ($q) use ($request) {
+        //             $q->where('id', $request->asset_type);
+        //         }
+        //     );
+        // }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Decrypt Asset Type ID
+        |--------------------------------------------------------------------------
+        */
+
+        $assetTypeId = null;
+
         if ($request->filled('asset_type')) {
+            try {
+                $assetTypeId = decryptId($request->asset_type);
+            } catch (\Exception $e) {
+                $assetTypeId = null;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Asset Type Filter
+        |--------------------------------------------------------------------------
+        */
+
+        if ($assetTypeId) {
             $query->whereHas(
                 'assetInventory.assetModel.assetType',
-                function ($q) use ($request) {
-                    $q->where('id', $request->asset_type);
+                function ($q) use ($assetTypeId) {
+                    $q->where('id', $assetTypeId);
+                }
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Decrypt Asset Model ID
+        |--------------------------------------------------------------------------
+        */
+
+        $assetModelId = null;
+
+        if ($request->filled('asset_model')) {
+            try {
+                $assetModelId = decryptId($request->asset_model);
+            } catch (\Exception $e) {
+                $assetModelId = null;
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Asset Model Filter
+        |--------------------------------------------------------------------------
+        */
+
+        if ($assetModelId) {
+            $query->whereHas(
+                'assetInventory.assetModel',
+                function ($q) use ($assetModelId) {
+                    $q->where('id', $assetModelId);
                 }
             );
         }

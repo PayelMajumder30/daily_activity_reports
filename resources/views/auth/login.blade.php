@@ -19,7 +19,7 @@
             <div class="card shadow">
 
                 <div class="card-header text-center bg-primary text-white">
-                    <h4>Daily Activity Management System</h4>
+                    <h4>IT MIS</h4>
                 </div>
 
                 <div class="card-body">

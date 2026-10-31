@@ -35,7 +35,7 @@
 
         <div class="card-body">
 
-            <form action="{{ route('user-configuration.store') }}" method="POST">
+            <form action="{{ route('user-configuration.store') }}" method="POST" autocomplete="off">
                 @csrf
 
                 <!-- Row 1 -->

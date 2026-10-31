@@ -92,38 +92,32 @@
                         <input type="text" name="tag_no" value="{{ request('tag_no') }}" class="form-control" placeholder="Tag No">
                     </div>
 
-                     {{-- Asset Type --}}
+                    {{-- Asset Type --}}
                     <div class="col-md-4">
-                        <label class="form-label">
-                            Asset Type
-                        </label>
-
-                        <select name="asset_type" class="form-select">                     
+                        <label class="form-label">Asset Type</label>
+                        <select name="asset_type" class="form-select">         
                             <option value="">
                                 All Asset Types
                             </option>
-
                             @foreach($assetTypes as $type)
-
-                                <option value="{{ $type->id }}" {{ request('asset_type') == $type->id ? 'selected' : '' }}>                                 
+                                <option value="{{ encryptId($type->id) }}" 
+                                    {{ (request('asset_type') == encryptId($type->id) || (isset($assetTypeId) && $assetTypeId == $type->id)) ? 'selected' : '' }}>         
                                     {{ ucwords($type->name) }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
-                       {{-- Asset Model --}}
+                    {{-- Asset Model --}}
                     <div class="col-md-4">
                         <label class="form-label">Asset Model</label>
-
-                        <select name="asset_model" id="asset_model" class="form-select">                           
+                        <select name="asset_model" id="asset_model" class="form-select">         
                             <option value="">
                                 All Asset Models
                             </option>
-
                             @foreach($assetModels as $assetModel)
-                                <option value="{{ $assetModel->id }}"
-                                    {{ request('asset_model') == $assetModel->id ? 'selected' : '' }}>
+                                <option value="{{ encryptId($assetModel->id) }}"
+                                    {{ (request('asset_model') == encryptId($assetModel->id) || (isset($assetModelId) && $assetModelId == $assetModel->id)) ? 'selected' : '' }}>
                                     {{ ucwords($assetModel->model_name) }}
                                 </option>
                             @endforeach
