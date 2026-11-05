@@ -10,7 +10,7 @@ use App\Imports\AssetInventoryImport;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Models\{AssetInventory, AssetType, AssetModel, Location, AirportStation, AssetOutstationHistory, AssetRepairHistory, AssetReplacementHistory};
+use App\Models\{AssetInventory, AssetType, AssetModel, Location, AirportStation, AssetOutstationHistory, AssetRepairHistory, AssetReplacementHistory, IncidentIssueRegister};
 
 class AssetInventoryController extends Controller
 {
@@ -1657,6 +1657,59 @@ class AssetInventoryController extends Controller
     }
 
     // Open repair details
+    // public function getRepairDetails($id)
+    // {
+    //     try {
+    //         $id = decryptId($id);
+
+    //         $asset = AssetInventory::with([
+    //             'assetModel.assetType',
+    //             'location',
+    //             'station',
+    //             'assetRepairHistory' => function ($query) {
+    //                 $query->latest('id');
+    //             }
+    //         ])->find($id);
+
+    //         if (!$asset) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Asset not found.'
+    //             ], 404);
+    //         }
+
+    //         $activeRepair = $asset->assetRepairHistory()->whereNull('return_date')->latest('id')->first();                                   
+
+    //         return response()->json([
+    //             'success' => true,
+
+    //             'asset' => [
+    //                 'id'         => encryptId($asset->id),
+    //                 'tag_no'     => $asset->tag_no ?? '-',
+    //                 'serial_no'  => $asset->serial_no ?? '-',
+    //                 'asset_type' => $asset->assetModel?->assetType?->name ?? '-',
+    //                 'asset_model'=> $asset->assetModel?->model_name ?? '-',
+    //                 'location'   => $asset->location?->name ?? '-',
+    //                 'station'    => $asset->station?->station_name ?? '-',
+    //                 'status'     => $asset->asset_status,
+    //             ],
+
+    //             'repair' => $activeRepair ? [
+    //                 'id'          => encryptId($activeRepair->id),
+    //                 'vendor_name' => $activeRepair->vendor_name,
+    //                 'send_date'   => $activeRepair->send_date?->format('d-m-Y'),
+    //                 'remarks'     => $activeRepair->remarks,
+    //             ] : null,
+    //         ]);
+
+    //     } catch (\Throwable $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Unable to load repair details.'
+    //         ], 500);
+    //     }
+    // }
+
     public function getRepairDetails($id)
     {
         try {
@@ -1680,10 +1733,22 @@ class AssetInventoryController extends Controller
 
             $activeRepair = $asset->assetRepairHistory()->whereNull('return_date')->latest('id')->first();                                   
 
-            return response()->json([
-                'success' => true,
+            // Simply fetch all Open incidents directly with their support user (engineer)
+            $openIncidents = IncidentIssueRegister::where('status', 'Open')
+                ->with('supportUser')
+                ->get()
+                ->map(function ($incident) {
+                    return [
+                        'id'            => encryptId($incident->id),
+                        'call_id'       => $incident->call_id,
+                        'engineer_name' => $incident->supportUser?->name ?? 'N/A',
+                    ];
+                });
 
-                'asset' => [
+            return response()->json([
+                'success'        => true,
+                'open_incidents' => $openIncidents,
+                'asset'          => [
                     'id'         => encryptId($asset->id),
                     'tag_no'     => $asset->tag_no ?? '-',
                     'serial_no'  => $asset->serial_no ?? '-',
@@ -1693,37 +1758,103 @@ class AssetInventoryController extends Controller
                     'station'    => $asset->station?->station_name ?? '-',
                     'status'     => $asset->asset_status,
                 ],
-
-                'repair' => $activeRepair ? [
-                    'id'          => encryptId($activeRepair->id),
-                    'vendor_name' => $activeRepair->vendor_name,
-                    'send_date'   => $activeRepair->send_date?->format('d-m-Y'),
-                    'remarks'     => $activeRepair->remarks,
+                'repair'         => $activeRepair ? [
+                    'id'                         => encryptId($activeRepair->id),
+                    'incident_issue_register_id' => $activeRepair->incident_issue_register_id ? encryptId($activeRepair->incident_issue_register_id) : null,
+                    'call_id'                    => $activeRepair->incidentIssueRegister?->call_id ?? '-',
+                    'engineer_name'              => $activeRepair->incidentIssueRegister?->supportUser?->name ?? '-',
+                    'vendor_name'                => $activeRepair->vendor_name,
+                    'send_date'                  => $activeRepair->send_date?->format('d-m-Y'),
+                    'remarks'                    => $activeRepair->remarks,
                 ] : null,
             ]);
 
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unable to load repair details.'
+                'message' => 'Unable to load repair details: ' . $e->getMessage()
             ], 500);
         }
     }
 
     // Send asset for repair
+    // public function sendForRepair(Request $request)
+    // {
+    //     $request->validate([
+    //         'asset_id'   => 'required',
+    //         'vendor_name'=> 'required|string|max:255',
+    //         'send_date'  => 'required|date',
+    //         'remarks'    => 'nullable|string',
+    //     ]);
+
+    //     try {
+    //         DB::beginTransaction();
+
+    //         $assetId    = decryptId($request->asset_id);
+    //         $asset      = AssetInventory::where('id', $assetId)->lockForUpdate()->first();                              
+
+    //         if (!$asset) {
+    //             throw new \Exception('Asset not found.');
+    //         }
+
+    //         if ($asset->asset_status !== 'Available') {
+    //             throw new \Exception(
+    //                 'Only Available assets can be sent for repair.'
+    //             );
+    //         }
+
+    //         AssetRepairHistory::create([
+    //             'asset_inventory_id' => $asset->id,
+    //             'vendor_name'        => $request->vendor_name,
+    //             'send_date'          => $request->send_date,
+    //             'return_date'        => null,
+    //             'remarks'            => $request->remarks,
+    //             'created_by'         => auth()->id(),
+    //         ]);
+
+    //         $asset->update(['asset_status' => 'Repair',]);                         
+
+    //         eventLog(
+    //             'Update',
+    //             'Asset Inventory',
+    //             'Asset ' . $asset->tag_no . ' sent for repair to vendor ' .
+    //             $request->vendor_name . ' on ' .
+    //             $request->send_date
+    //         );
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Asset sent for repair successfully.'
+    //         ]);
+
+    //     } catch (\Throwable $e) {
+
+    //         DB::rollBack();
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $e->getMessage()
+    //         ], 422);
+    //     }
+    // }
+
     public function sendForRepair(Request $request)
     {
         $request->validate([
-            'asset_id'   => 'required',
-            'vendor_name'=> 'required|string|max:255',
-            'send_date'  => 'required|date',
-            'remarks'    => 'nullable|string',
+            'asset_id'                   => 'required',
+            'incident_issue_register_id' => 'required',
+            'vendor_name'                => 'required|string|max:255',
+            'send_date'                  => 'required|date',
+            'remarks'                    => 'nullable|string',
         ]);
 
         try {
             DB::beginTransaction();
 
             $assetId    = decryptId($request->asset_id);
+            $incidentId = decryptId($request->incident_issue_register_id);
             $asset      = AssetInventory::where('id', $assetId)->lockForUpdate()->first();                              
 
             if (!$asset) {
@@ -1731,29 +1862,20 @@ class AssetInventoryController extends Controller
             }
 
             if ($asset->asset_status !== 'Available') {
-                throw new \Exception(
-                    'Only Available assets can be sent for repair.'
-                );
+                throw new \Exception('Only Available assets can be sent for repair.');
             }
 
             AssetRepairHistory::create([
-                'asset_inventory_id' => $asset->id,
-                'vendor_name'        => $request->vendor_name,
-                'send_date'          => $request->send_date,
-                'return_date'        => null,
-                'remarks'            => $request->remarks,
-                'created_by'         => auth()->id(),
+                'asset_inventory_id'         => $asset->id,
+                'incident_issue_register_id' => $incidentId,
+                'vendor_name'                => $request->vendor_name,
+                'send_date'                  => $request->send_date,
+                'return_date'                => null,
+                'remarks'                    => $request->remarks,
+                'created_by'                 => auth()->id(),
             ]);
 
-            $asset->update(['asset_status' => 'Repair',]);                         
-
-            eventLog(
-                'Update',
-                'Asset Inventory',
-                'Asset ' . $asset->tag_no . ' sent for repair to vendor ' .
-                $request->vendor_name . ' on ' .
-                $request->send_date
-            );
+            $asset->update(['asset_status' => 'Repair']);                         
 
             DB::commit();
 
@@ -1763,9 +1885,7 @@ class AssetInventoryController extends Controller
             ]);
 
         } catch (\Throwable $e) {
-
             DB::rollBack();
-
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()

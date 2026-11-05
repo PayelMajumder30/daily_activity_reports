@@ -35,40 +35,6 @@ class UserConfigurationController extends Controller
      * Store a newly created resource in storage.
      */
 
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'name'      => 'required|string|max:255',
-    //         'email'     => 'required|email|unique:users,email',
-    //         'password'  => 'required|min:6',
-    //         'role'      => 'required|in:0,1,2',
-    //         'location_id'   => 'required|exists:locations,id',
-    //         'station_id'    => 'required|exists:airport_stations,id',
-    //     ], [
-    //         'email.unique'          => 'This email already registered',
-    //         'location_id.required'  => 'Please select a location / region',
-    //         'station_id.required'   => 'Please select an airport / station',
-    //     ]);
-
-    //     User::create([
-    //         'name'      => $request->name,
-    //         'email'     => $request->email,
-    //         'password'  => Hash::make($request->password),
-    //         'role'      => $request->role,
-    //         'location_id'   => $request->location_id,
-    //         'station_id'    => $request->station_id,
-    //     ]);
-
-    //     eventLog(
-    //         'Create',
-    //         'User',
-    //         'Created user: ' . $request->name
-    //     );
-
-    //     return redirect()->route('user-configuration.index')->with('success', 'User added successfully.');
-                        
-    // }
-
     public function store(Request $request)
     {
         $request->validate([
@@ -81,7 +47,7 @@ class UserConfigurationController extends Controller
                 'unique:users,user_name',
             ],
 
-            'email'         => 'required|email|unique:users,email',
+            'email'         => 'nullable|email|unique:users,email',
             'password'      => 'required|min:6',
             'role'          => 'required|in:0,1,2',
             'location_id'   => 'required|exists:locations,id',
@@ -154,23 +120,6 @@ class UserConfigurationController extends Controller
     {
         // dd($id);
         $user = User::findOrFail(decryptId($id));
-
-        // $request->validate([
-        //     'name'      =>'required',
-        //     'email'     =>'required|email|unique:users,email,'.$user->id,
-        //     'role'      =>'required|in:0,1,2',
-        //     'location_id'   => ['required', 'exists:locations,id',],
-        //     'station_id'    => ['required', Rule::exists('airport_stations', 'id')
-        //                             ->where(function ($query) use ($request) {
-        //                                 $query->where('location_id', $request->location_id)->where('status', 1);                                               
-        //                             }),
-        //                         ],
-        //     'password'      => 'nullable|min:6',
-        // ],[
-        //     'email.unique'  => 'This email already registered',
-        //     'location_id.required'  => 'Please select a region',
-        //     'station_id.required'   => 'Please select an airport/station',
-        // ]);
 
         $request->validate([
             'name'      => 'required|string|max:255',

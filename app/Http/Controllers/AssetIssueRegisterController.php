@@ -213,10 +213,7 @@ class AssetIssueRegisterController extends Controller
         */
 
         if ($issue->issue_status === 'Returned') {
-
-            return $assetName .
-                ' returned to IT Department by ' .
-                $currentCustodian;
+            return $assetName . ' returned to IT Department by ' . $currentCustodian;                          
         }
 
         /*
@@ -472,13 +469,9 @@ class AssetIssueRegisterController extends Controller
 
         try {
             foreach ($request->asset_inventory_ids as $assetId) {
-                $asset = AssetInventory::where('id', $assetId)
-                    ->lockForUpdate()
-                    ->firstOrFail();
+                $asset = AssetInventory::where('id', $assetId)->lockForUpdate()->firstOrFail();                                 
 
-                $custodian = Custodian::where('id', $request->custodian_id)
-                    ->where('status', 1)
-                    ->first();
+                $custodian = Custodian::where('id', $request->custodian_id)->where('status', 1)->first();                                   
 
                 if (!$custodian) {
                     throw new \Exception('Selected custodian is not active.');

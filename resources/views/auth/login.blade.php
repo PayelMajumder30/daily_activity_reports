@@ -19,7 +19,7 @@
             <div class="card shadow">
 
                 <div class="card-header text-center bg-primary text-white">
-                    <h4>IT MIS</h4>
+                    <h4>IT Management Information System</h4>
                 </div>
 
                 <div class="card-body">
@@ -33,8 +33,13 @@
                         </div>
 
                         <div class="mb-3">
-                            <label>Password</label>
-                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>       
+                            <label class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror" required>   
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="bi bi-eye" id="toggleIcon"></i>   
+                                </button> 
+                            </div>
                         </div>
 
                         @error('name')
@@ -57,6 +62,23 @@
 </div>
 
 <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
+
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        let passwordInput = document.getElementById('password');
+        let icon = document.getElementById('toggleIcon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        }
+    });
+</script>
 
 </body>
 </html>

@@ -33,4 +33,8 @@ class IncidentIssueRegister extends Model
     {
         return $this->belongsTo(IssueCategory::class, 'category_id');                          
     }
+
+    public function repairHistories(): HasMany {
+        return $this->hasMany(AssetRepairHistory::class, 'incident_issue_register_id');
+    }
 }

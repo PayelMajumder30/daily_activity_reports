@@ -687,7 +687,6 @@ class IncidentIssueRegisterController extends Controller
             $engineerQuery->whereIn('station_id', $stationIds );
         }
 
-
         $engineer = $engineerQuery->first();
 
         if (!$engineer) {

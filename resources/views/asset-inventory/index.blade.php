@@ -764,6 +764,20 @@
                                     <input type="hidden" id="repair_record_id">       
 
                                     <div class="row">
+                                        <!-- Call ID Dropdown -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="repair_call_id" class="form-label">Call ID <span class="text-danger">*</span></label>
+                                            <select id="repair_call_id" class="form-select">
+                                                <option value="">Select Call ID</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Engineer Name Field -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="repair_engineer_name" class="form-label">Engineer Name</label>
+                                            <input type="text" id="repair_engineer_name" class="form-control bg-light" placeholder="Auto-filled engineer name" readonly>
+                                        </div>
+
                                         <div class="col-md-6 mb-3">
                                             <label for="repair_vendor_name" class="form-label">Vendor Name <span class="text-danger">*</span></label>
                                             <input type="text" id="repair_vendor_name" class="form-control" placeholder="Enter vendor name">       
@@ -1675,13 +1689,21 @@
 
             // Reset Modal
             function resetRepairModal() {
-                $('#repair_asset_id, #repair_record_id, #repair_vendor_name, #repair_send_date, #repair_return_date, #repair_remarks').val('');
+                $('#repair_asset_id, #repair_record_id, #repair_vendor_name, #repair_send_date, #repair_return_date, #repair_remarks, #repair_engineer_name').val('');
+                $('#repair_call_id').html('<option value="">Select Call ID</option>').prop('disabled', false);
                 $('#repair_tag_no, #repair_serial_no, #repair_asset_type, #repair_asset_model, #repair_location, #repair_station').text('-');
                 $('#repair_vendor_name, #repair_send_date, #repair_return_date, #repair_remarks').prop('readonly', false);
                 
                 $('#repairSendDateWrapper, #btnSendForRepair').show();
                 $('#repairReturnDateWrapper, #btnReturnFromRepair, #repairHistoryWrapper').hide();
             }
+
+            // Auto-fill Engineer Name when Call ID is selected
+            $(document).on('change', '#repair_call_id', function () {
+                let selectedOption = $(this).find(':selected');
+                let engineerName = selectedOption.data('engineer') || '';
+                $('#repair_engineer_name').val(engineerName);
+            });
 
             // Load Repair Modal Details
             $(document).on('click', '.btnRepair', function () {
@@ -1705,13 +1727,27 @@
                         $('#repair_location').text(asset.location || '-');
                         $('#repair_station').text(asset.station || '-');
 
+                        let callIdSelect = $('#repair_call_id');
+
                         if (asset.status === 'Available') {
+                            // Populate Open Incidents Dropdown
+                            if (res.open_incidents && res.open_incidents.length > 0) {
+                                res.open_incidents.forEach(incident => {
+                                    callIdSelect.append(`<option value="${incident.id}" data-engineer="${escapeHtml(incident.engineer_name)}">${incident.call_id}</option>`);
+                                });
+                            }
                             $('#repair_send_date').val(getToday());
                             $('#repairReturnDateWrapper, #btnReturnFromRepair').hide();
                             $('#repairSendDateWrapper, #btnSendForRepair').show();
                         } else if (asset.status === 'Repair') {
                             const repair = res.repair || {};
                             $('#repair_record_id').val(repair.id || '');
+                            
+                            if (repair.incident_issue_register_id) {
+                                callIdSelect.html(`<option value="${repair.incident_issue_register_id}" selected>${repair.call_id}</option>`).prop('disabled', true);
+                                $('#repair_engineer_name').val(repair.engineer_name);
+                            }
+
                             $('#repair_vendor_name').val(repair.vendor_name || '').prop('readonly', true);
                             $('#repair_send_date').val(formatDate(repair.send_date)).prop('readonly', true);
                             $('#repair_return_date').val(getToday()).prop('readonly', false);
@@ -1759,19 +1795,22 @@
                 });
             }
 
-            // Event: Send For Repair
+            // Event: Send For Repair         
             $(document).on('click', '#btnSendForRepair', function () {
                 let btn = $(this);
                 let assetId = $('#repair_asset_id').val();
+                let callId = $('#repair_call_id').val();
                 let vendor = $('#repair_vendor_name').val().trim();
                 let sendDate = $('#repair_send_date').val();
 
+                if (!callId) return $('#repair_call_id').focus(), notify('error', 'Please select a Call ID.');
                 if (!vendor) return $('#repair_vendor_name').focus(), notify('error', 'Please enter vendor name.');
                 if (!sendDate) return $('#repair_send_date').focus(), notify('error', 'Please select send date.');
 
                 submitRepairAction("{{ route('asset-inventory.repair.send') }}", {
                     _token: "{{ csrf_token() }}",
                     asset_id: assetId,
+                    incident_issue_register_id: callId,
                     vendor_name: vendor,
                     send_date: sendDate,
                     remarks: $('#repair_remarks').val().trim()

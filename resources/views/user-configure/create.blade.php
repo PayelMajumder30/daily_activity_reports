@@ -64,7 +64,7 @@
                     </div>
 
                     <div class="col-md-4 mb-3">
-                        <label>Email <span class="text-danger">*</span></label>
+                        <label>Email</label>
 
                         <input type="email" name="email"                           
                             class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}">
@@ -180,57 +180,6 @@
 
         let oldStationId = "{{ old('station_id') }}";
         let oldLocationId = "{{ old('location_id') }}";
-
-        // $('#location_id').on('change', function () {
-
-        //     let locationId = $(this).val();
-        //     let stationDropdown = $('#station_id');
-
-        //     stationDropdown.html('<option value="">Loading...</option>');
-
-        //     if (locationId) {
-        //         let url = "{{ route('user-configuration.stations', ':locationId') }}".replace(':locationId', locationId);
-        //         $.ajax({
-        //             url: url,
-        //             type: "GET",
-
-        //             success: function (stations) {
-
-        //                 stationDropdown.empty();
-
-        //                 stationDropdown.append(
-        //                     '<option value="">Select Station</option>'
-        //                 );
-
-        //                 $.each(stations, function (key, station) {
-
-        //                     stationDropdown.append(
-        //                         '<option value="' + station.id + '">' +
-        //                         station.station_name +
-        //                         '</option>'
-        //                     );
-
-        //                 });
-
-        //             },
-
-        //             error: function () {
-
-        //                 stationDropdown.html(
-        //                     '<option value="">Unable to load stations</option>'
-        //                 );
-
-        //             }
-        //         });
-
-        //     } else {
-
-        //         stationDropdown.html(
-        //             '<option value="">Select Station</option>'
-        //         );
-        //     }
-
-        // });
         
         function loadStations(locationId, selectedStationId = '') {
 

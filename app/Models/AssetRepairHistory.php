@@ -10,7 +10,7 @@ class AssetRepairHistory extends Model
     //
     public $table = 'asset_repair_histories';
     
-    protected $fillable = ['asset_inventory_id', 'vendor_name', 'send_date', 'return_date', 'remarks', 'created_by'];
+    protected $fillable = ['asset_inventory_id', 'incident_issue_register_id', 'vendor_name', 'send_date', 'return_date', 'remarks', 'created_by'];
 
     protected $casts = [
         'send_date'   => 'date',
@@ -25,6 +25,11 @@ class AssetRepairHistory extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');          
+    }
+
+    public function incidentIssueRegister(): BelongsTo {
+        
+        return $this->belongsTo(IncidentIssueRegister::class, 'incident_issue_register_id');
     }
 
 }
