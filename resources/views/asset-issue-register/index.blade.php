@@ -267,7 +267,7 @@
                                         <button type="button" class="btn btn-sm btn-primary retain-asset"                                                                                     
                                             data-id="{{ encryptId($issue->id) }}" data-custodian="{{ ucwords($issue->custodian->custodian_name ?? '') }}"                        
                                             data-tag="{{ $issue->assetInventory->tag_no ?? '' }}" title="Retain Asset">                                                                 
-                                            <i class="bi bi-archive-fill"></i>
+                                            <i class="bi bi-person-workspace"></i>
                                         </button>
                                     @endif
                                    

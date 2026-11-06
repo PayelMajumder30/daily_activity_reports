@@ -192,6 +192,7 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/outstation/details/{id}', [AssetInventoryController::class, 'getOutstationDetails'])->name('outstation.details');  
         Route::get('/outstation/history/{id}', [AssetInventoryController::class, 'outstationHistory'])->name('outstation.history');   
         Route::get('/outstation/history/{id}/export', [AssetInventoryController::class, 'exportOutstationHistory'])->name('outstation.history.export');  
+        Route::get('/asset-history/{id}/', [AssetInventoryController::class, 'assetHistory'])->name('asset.history');  
 
         Route::post('/scrap/{id}', [AssetInventoryController::class, 'scrap'])->name('scrap'); 
 

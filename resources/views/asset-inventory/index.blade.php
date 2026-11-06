@@ -263,8 +263,8 @@
 
                             <td>
 
-                                <button type="button" class="btn btn-sm btn-info view-outstation-history"                                   
-                                        data-id="{{ $item->id }}" title="View Outstation History">                                   
+                                <button type="button" class="btn btn-sm btn-info view-asset-history"                                   
+                                        data-id="{{ $item->id }}" title="View Asset History">                                   
                                     <i class="bi bi-eye"></i>
                                 </button>
 
@@ -571,137 +571,107 @@
             {{-- =========================================================
                 Outstation History Modal 
              ========================================================= --}}
-            <div class="modal fade" id="outstationHistoryModal" tabindex="-1"
-                aria-labelledby="outstationHistoryModalLabel" aria-hidden="true">
+            <div class="modal fade" id="assetHistoryModal" tabindex="-1" aria-labelledby="assetHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
 
-                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="assetHistoryModalLabel">
+                    <i class="bi bi-clock-history me-2"></i>Complete Asset History
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
 
-                    <div class="modal-content">
-
-                        <div class="modal-header">
-
-                            <h5 class="modal-title" id="outstationHistoryModalLabel">
-                                <i class="bi bi-clock-history"></i>
-                                Outstation History
-                            </h5>
-
-                            <button type="button" class="btn-close" data-bs-dismiss="modal">                                                                    
-                            </button>
-
-                        </div>
-
-                        <div class="modal-body">
-
-                            <!-- Asset Details -->
-                            <div class="card mb-3">
-
-                                <div class="card-header">
-                                    <strong>Asset Details</strong>
-                                </div>
-
-                                <div class="card-body">
-
-                                    <div class="row">
-
-                                        <div class="col-md-3 mb-2">
-                                            <strong>Asset Tag:</strong>
-                                            <span id="history_tag">-</span>
-                                        </div>
-
-                                        <div class="col-md-3 mb-2">
-                                            <strong>Serial No:</strong>
-                                            <span id="history_serial">-</span>
-                                        </div>
-
-                                        <div class="col-md-3 mb-2">
-                                            <strong>Asset Type:</strong>
-                                            <span id="history_type">-</span>
-                                        </div>
-
-                                        <div class="col-md-3 mb-2">
-                                            <strong>Asset Model:</strong>
-                                            <span id="history_model">-</span>
-                                        </div>
-
-                                        <div class="col-md-3 mb-2">
-                                            <strong>Current Region:</strong>
-                                            <span id="history_current_location">-</span>
-                                        </div>
-
-                                        <div class="col-md-3 mb-2">
-                                            <strong>Current Station:</strong>
-                                            <span id="history_current_station">-</span>
-                                        </div>
-
-                                        <div class="col-md-3 mb-2">
-                                            <strong>Asset Status:</strong>
-                                            <span id="history_status">-</span>
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
+            <div class="modal-body">
+                <!-- Asset Details Summary Card -->
+                <div class="card mb-3 shadow-sm border-0 bg-light">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <strong>Asset Tag:</strong> <span id="history_tag">-</span>
                             </div>
-
-
-                            <!-- History -->
-                            <div class="card">
-
-                                <div class="card-header d-flex justify-content-between align-items-center">
-
-                                    <strong>
-                                        <i class="bi bi-arrow-left-right"></i>
-                                        Movement History
-                                    </strong>
-
-                                    <button type="button" class="btn btn-sm btn-success" id="exportOutstationHistoryBtn">                                                                                      
-                                        <i class="bi bi-file-earmark-excel"></i>
-                                        Export History
-                                    </button>
-
-                                </div>
-
-                                <div class="card-body">
-
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>SL</th>
-                                                    <th>Outstation Date</th>
-                                                    <th>From Region</th>
-                                                    <th>From Station</th>
-                                                    <th>To Region</th>
-                                                    <th>To Station</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody id="outstationHistoryTableBody">
-
-                                                <tr>
-                                                    <td colspan="7" class="text-center">                                                       
-                                                        No history found.
-                                                    </td>
-                                                </tr>
-
-                                            </tbody>
-
-                                        </table>
-
-                                    </div>
-
-                                </div>
-
+                            <div class="col-md-3 mb-2">
+                                <strong>Serial No:</strong> <span id="history_serial">-</span>
                             </div>
-
+                            <div class="col-md-3 mb-2">
+                                <strong>Asset Type:</strong> <span id="history_type">-</span>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <strong>Asset Model:</strong> <span id="history_model">-</span>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <strong>Current Region:</strong> <span id="history_current_location">-</span>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <strong>Current Station:</strong> <span id="history_current_station">-</span>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <strong>Asset Status:</strong> <span id="history_status">-</span>
+                            </div>
                         </div>
-
                     </div>
+                </div>
 
+                <!-- 1. Asset Issue Register History Section -->
+                <div class="card mb-4 shadow-sm border-0">
+                    <div class="card-header bg-primary text-white fw-bold">
+                        <i class="bi bi-person-workspace me-2"></i>Asset Issue & Transfer History
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped align-middle mb-0">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Custodian Name</th>
+                                        <th>Issue Status</th>
+                                        <th>Issued Date</th>
+                                        <th>Transfer Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assetIssueHistoryTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">Loading issue history...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Asset Repair History Section -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-secondary text-white fw-bold">
+                        <i class="bi bi-tools me-2"></i>Asset Repair History
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped align-middle mb-0">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Call ID & Engineer</th>
+                                        <th>Vendor Name</th>
+                                        <th>Send Date</th>
+                                        <th>Return Date</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assetRepairHistoryTableBody">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">Loading repair history...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
             </div>
+
+        </div>
+    </div>
+</div>
 
             {{-- =========================================================
              Repair Modal 
@@ -1424,243 +1394,88 @@
             return $('<div>').text(value ?? '-').html();
         }
 
-        $(document).on('click', '.view-outstation-history', function () {
+        // Trigger button on the index table (make sure your view button uses class 'view-asset-history' and data-id)
+        $(document).on('click', '.view-asset-history', function () {
+            let assetId = $(this).data('id');
 
-                let assetId = $(this).data('id');
+            // Reset details & tables
+            $('#history_tag, #history_serial, #history_type, #history_model, #history_current_location, #history_current_station, #history_status').text('Loading...');
+            
+            $('#assetIssueHistoryTableBody').html(`<tr><td colspan="5" class="text-center"><i class="bi bi-hourglass-split"></i> Loading issue history...</td></tr>`);
+            $('#assetRepairHistoryTableBody').html(`<tr><td colspan="6" class="text-center"><i class="bi bi-hourglass-split"></i> Loading repair history...</td></tr>`);
 
-                currentOutstationAssetId = assetId;
+            // Show Modal
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('assetHistoryModal')).show();
 
-                // Reset asset details
-                $('#history_tag').text('Loading...');
-                $('#history_serial').text('Loading...');
-                $('#history_type').text('Loading...');
-                $('#history_model').text('Loading...');
-                $('#history_current_location').text('Loading...');
-                $('#history_current_station').text('Loading...');
-                $('#history_status').text('Loading...');
+            // AJAX Call
+            let url = "{{ route('asset-inventory.asset.history', ':id') }}".replace(':id', assetId);
 
-                // Reset history table
-                $('#outstationHistoryTableBody').html(`
-                    <tr>
-                        <td colspan="6" class="text-center">
-                            <i class="bi bi-hourglass-split"></i>
-                            Loading history...
-                        </td>
-                    </tr>
-                `);
-
-                $('#exportOutstationHistoryBtn').prop('disabled', true);
-
-                // Open only the Outstation History modal
-                const modalElement = document.getElementById('outstationHistoryModal');
-
-                bootstrap.Modal.getOrCreateInstance(modalElement).show();
-
-                // Fetch history
-                let url = "{{ route('asset-inventory.outstation.history', ':id') }}"
-                    .replace(':id', assetId);
-
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-
-                    success: function (response) {
-
-                        if (!response.success) {
-
-                            $('#outstationHistoryTableBody').html(`
-                                <tr>
-                                    <td colspan="6" class="text-center text-danger">
-                                        Unable to load outstation history.
-                                    </td>
-                                </tr>
-                            `);
-
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: response.message || 'Unable to load history.'
-                            });
-
-                            return;
-                        }
-
-                        let asset = response.asset || {};
-
-                        // Fill asset details
-                        $('#history_tag').text(asset.tag_no || '-');
-                        $('#history_serial').text(asset.serial_no || '-');
-                        $('#history_type').text(asset.asset_type || '-');
-                        $('#history_model').text(asset.asset_model || '-');
-                        $('#history_current_location').text(asset.location || '-');
-                        $('#history_current_station').text(asset.station || '-');
-                        $('#history_status').text(asset.asset_status || '-');
-
-                        // Fill history table
-                        let tbody = $('#outstationHistoryTableBody');
-                        tbody.empty();
-
-                        if (!response.history || response.history.length === 0) {
-
-                            tbody.html(`
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">
-                                        No outstation history found.
-                                    </td>
-                                </tr>
-                            `);
-
-                        } else {
-
-                            $.each(response.history, function (index, item) {
-
-                                tbody.append(`
-                                    <tr>
-                                        <td>${index + 1}</td>
-                                        <td>${escapeHtml(item.outstation_date || '-')}</td>
-                                        <td>${escapeHtml(item.from_location || '-')}</td>
-                                        <td>${escapeHtml(item.from_station || '-')}</td>
-                                        <td>${escapeHtml(item.to_location || '-')}</td>
-                                        <td>${escapeHtml(item.to_station || '-')}</td>
-                                    </tr>
-                                `);
-
-                            });
-                        }
-
-                        $('#exportOutstationHistoryBtn').prop('disabled', false);
-
-                    },
-
-                    error: function (xhr) {
-
-                        $('#outstationHistoryTableBody').html(`
-                            <tr>
-                                <td colspan="6" class="text-center text-danger">
-                                    Unable to load outstation history.
-                                </td>
-                            </tr>
-                        `);
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Unable to Load History',
-                            text: xhr.responseJSON?.message ||
-                                'Unable to fetch outstation history.'
-                        });
-
-                    }
-                });
-
-            });
-
-            /*
-            |--------------------------------------------------------------------------
-            | Export Outstation History
-            |--------------------------------------------------------------------------
-            */
-            $('#exportOutstationHistoryBtn').on('click', function () {
-
-                if (!currentOutstationAssetId) {
-
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Asset Not Selected',
-                        text: 'Please select an asset first.'
-                    });
-
-                    return;
-                }
-
-                let url = "{{ route('asset-inventory.outstation.history.export', ':id') }}".replace(':id', currentOutstationAssetId);                                     
-
-                window.location.href = url;
-            });
-
-            $(document).on('click', '.scrap-asset', function () {
-
-                let assetId = $(this).data('id');
-
-                Swal.fire({
-
-                    icon: 'warning',
-                    title: 'Mark Asset as Physically Damaged?',
-                    text: 'This asset will be marked as physically damaged.',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, Mark Damaged',
-                    cancelButtonText: 'Cancel',
-                    reverseButtons: true
-
-                }).then(function (result) {
-
-                    if (!result.isConfirmed) {
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function (response) {
+                    if (!response.success) {
+                        Swal.fire('Error', response.message || 'Unable to load asset history.', 'error');
                         return;
                     }
 
+                    let asset = response.asset || {};
+                    $('#history_tag').text(asset.tag_no || '-');
+                    $('#history_serial').text(asset.serial_no || '-');
+                    $('#history_type').text(asset.asset_type || '-');
+                    $('#history_model').text(asset.asset_model || '-');
+                    $('#history_current_location').text(asset.location || '-');
+                    $('#history_current_station').text(asset.station || '-');
+                    $('#history_status').text(asset.asset_status || '-');
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | Scrap Asset
-                    |--------------------------------------------------------------------------
-                    */
+                    // Populate Issue History Table
+                    let issueTbody = $('#assetIssueHistoryTableBody');
+                    issueTbody.empty();
+                    if (!response.issue_history || response.issue_history.length === 0) {
+                        issueTbody.html(`<tr><td colspan="5" class="text-center text-muted">No issue history found.</td></tr>`);
+                    } else {
+                        $.each(response.issue_history, function (index, item) {
+                            issueTbody.append(`
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${escapeHtml(item.custodian)}</td>
+                                    <td>${escapeHtml(item.issue_status)}</td>
+                                    <td>${escapeHtml(item.issued_date)}</td>
+                                    <td>${escapeHtml(item.transfer_date)}</td>
+                                </tr>
+                            `);
+                        });
+                    }
 
-                    $.ajax({
-
-                        url: "{{ route('asset-inventory.scrap', ':id') }}".replace(':id', assetId),                     
-                        type: 'POST',
-                        data: {
-                            _token: "{{ csrf_token() }}"
-                        },
-
-                        beforeSend: function () {
-
-                            Swal.fire({
-
-                                title: 'Processing...',
-                                text: 'Updating asset status.',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                                didOpen: function () {
-                                    Swal.showLoading();
-                                }
-
-                            });
-
-                        },
-
-                        success: function (response) {
-
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Asset Updated',
-                                text: response.message
-
-                            }).then(function () {
-
-                                window.location.href =
-                                    "{{ route('asset-inventory.index') }}";
-                            });
-
-                        },
-
-                        error: function (xhr) {
-                            let response = xhr.responseJSON;
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Unable to Update Asset',
-                                text: response?.message || 'Something went wrong.'                          
-                            });
-
-                        }
-
-                    });
-
-                });
-
+                    // Populate Repair History Table
+                    let repairTbody = $('#assetRepairHistoryTableBody');
+                    repairTbody.empty();
+                    if (!response.repair_history || response.repair_history.length === 0) {
+                        repairTbody.html(`<tr><td colspan="6" class="text-center text-muted">No repair history found.</td></tr>`);
+                    } else {
+                        $.each(response.repair_history, function (index, item) {
+                            repairTbody.append(`
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>
+                                        <strong>${escapeHtml(item.call_id)}</strong><br>
+                                        <small class="text-muted"><i class="bi bi-person"></i> ${escapeHtml(item.engineer_name)}</small>
+                                    </td>
+                                    <td>${escapeHtml(item.vendor_name)}</td>
+                                    <td>${escapeHtml(item.send_date)}</td>
+                                    <td>${escapeHtml(item.return_date)}</td>
+                                    <td>${escapeHtml(item.remarks)}</td>
+                                </tr>
+                            `);
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    Swal.fire('Error', xhr.responseJSON?.message || 'Unable to fetch asset history.', 'error');
+                }
             });
-        
-
         });
+        
 
         $(document).ready(function () {
 
@@ -2032,6 +1847,7 @@
                 });
             });
         });
+    });
 
     
 </script>

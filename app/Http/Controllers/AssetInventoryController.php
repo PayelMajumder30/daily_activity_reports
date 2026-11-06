@@ -10,7 +10,8 @@ use App\Imports\AssetInventoryImport;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Models\{AssetInventory, AssetType, AssetModel, Location, AirportStation, AssetOutstationHistory, AssetRepairHistory, AssetReplacementHistory, IncidentIssueRegister};
+use App\Models\{AssetInventory, AssetType, AssetModel, Location, AirportStation, AssetOutstationHistory, AssetRepairHistory, AssetReplacementHistory, 
+IncidentIssueRegister, AssetIssueRegister};
 
 class AssetInventoryController extends Controller
 {
@@ -1543,6 +1544,76 @@ class AssetInventoryController extends Controller
             $fileName
         );
     }
+
+ public function assetHistory($id)
+{
+    $asset = AssetInventory::with([
+        'assetModel.assetType',
+        'location',
+        'station'
+    ])->find($id);
+
+    if (!$asset) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Asset not found.'
+        ], 404);
+    }
+
+    // 1. Fetch Asset Issue Register History
+    $issueHistory = AssetIssueRegister::with(['custodian'])
+        ->where('asset_inventory_id', $asset->id)
+        ->orderByDesc('issued_date')
+        ->orderByDesc('id')
+        ->get();
+
+    // 2. Fetch Incidents linked to this asset via asset_issue_registers
+    $incidents = IncidentIssueRegister::whereHas('assetIssueRegister', function ($q) use ($asset) {
+            $q->where('asset_inventory_id', $asset->id);
+        })
+        ->with(['supportUser', 'repairHistories'])
+        ->orderByDesc('call_generated_at')
+        ->get();
+
+    $repairHistoryData = $incidents->map(function ($incident) {
+        $repairRecord = $incident->repairHistories->first();
+
+        return [
+            'call_id'       => $incident->call_id ?? '-',
+            'engineer_name' => ucwords($incident->supportUser?->name ?? '-'),
+            'vendor_name'   => ucwords($repairRecord?->vendor_name ?? '-'),
+            'send_date'     => $repairRecord?->send_date?->format('d-m-Y') ?? '-',
+            'return_date'   => $repairRecord?->return_date?->format('d-m-Y') ?? '-',
+            'remarks'       => $repairRecord?->remarks ?? $incident->remarks ?? '-',
+        ];
+    })->values();
+
+    return response()->json([
+        'success' => true,
+        'asset' => [
+            'id'            => $asset->id,
+            'tag_no'        => $asset->tag_no,
+            'serial_no'     => $asset->serial_no ?? '-',
+            'asset_type'    => $asset->assetModel?->assetType?->name ?? '-',                 
+            'asset_model'   => $asset->assetModel?->model_name ?? '-',                
+            'location'      => $asset->location?->name ?? '-',               
+            'station'       => $asset->station?->station_name ?? '-',                  
+            'asset_status'  => $asset->asset_status ?? '-',
+        ],
+
+        'issue_history' => $issueHistory->map(function ($item) {
+            return [
+                'id'            => $item->id,
+                'custodian'     => ucwords($item->custodian?->custodian_name ?? '-'),
+                'issue_status'  => ucwords($item->issue_status ?? '-'),
+                'issued_date'   => $item->issued_date?->format('d-m-Y') ?? '-',
+                'transfer_date' => $item->transfer_date?->format('d-m-Y') ?? '-',
+            ];
+        })->values(),
+
+        'repair_history' => $repairHistoryData
+    ]);
+}
 
     public function scrap($id)
     {
