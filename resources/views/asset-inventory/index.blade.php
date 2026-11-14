@@ -263,8 +263,7 @@
 
                             <td>
 
-                                <button type="button" class="btn btn-sm btn-info view-asset-history"                                   
-                                        data-id="{{ $item->id }}" title="View Asset History">                                   
+                                <button type="button" class="btn btn-sm btn-info view-asset-history" data-id="{{ $item->id }}" title="View Asset History">                                                                                                             
                                     <i class="bi bi-eye"></i>
                                 </button>
 
@@ -378,8 +377,7 @@
 
                                 </div>
 
-                                <div id="excelImportErrors"
-                                    class="alert alert-danger d-none">
+                                <div id="excelImportErrors" class="alert alert-danger d-none">
 
                                 </div>
 
@@ -569,109 +567,115 @@
 
 
             {{-- =========================================================
-                Outstation History Modal 
+                Assset History Modal 
              ========================================================= --}}
             <div class="modal fade" id="assetHistoryModal" tabindex="-1" aria-labelledby="assetHistoryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
+                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                    <div class="modal-content">
 
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="assetHistoryModalLabel">
-                    <i class="bi bi-clock-history me-2"></i>Complete Asset History
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        <div class="modal-header bg-dark text-white">
+                            <h5 class="modal-title" id="assetHistoryModalLabel">
+                                <i class="bi bi-clock-history me-2"></i>Complete Asset History
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- Asset Details Summary Card -->
+                            <div class="card mb-3 shadow-sm border-0 bg-light">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-2">
+                                            <strong>Asset Tag:</strong> <span id="history_tag">-</span>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <strong>Serial No:</strong> <span id="history_serial">-</span>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <strong>Asset Type:</strong> <span id="history_type">-</span>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <strong>Asset Model:</strong> <span id="history_model">-</span>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <strong>Current Region:</strong> <span id="history_current_location">-</span>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <strong>Current Station:</strong> <span id="history_current_station">-</span>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <strong>Asset Status:</strong> <span id="history_status">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 1. Asset Issue Register History Section -->
+                            <div class="card mb-4 shadow-sm border-0">
+                                <div class="card-header bg-primary text-white fw-bold">
+                                    <i class="bi bi-person-workspace me-2"></i>Asset Issue & Transfer History
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped align-middle mb-0">
+                                            <thead class="table-secondary">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Custodian Name</th>
+                                                    <th>Issue Status</th>
+                                                    <th>Issued Date</th>
+                                                    <th>Transfer Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="assetIssueHistoryTableBody">
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted">Loading issue history...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light download-issue-history">
+                                        <i class="bi bi-file-earmark-excel me-1"></i> Download Excel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 2. Asset Repair History Section -->
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-secondary text-white fw-bold">
+                                    <i class="bi bi-tools me-2"></i>Asset Repair History
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped align-middle mb-0">
+                                            <thead class="table-secondary">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Call ID & Engineer</th>
+                                                    <th>Vendor Name</th>
+                                                    <th>Send Date</th>
+                                                    <th>Return Date</th>
+                                                    <th>Remarks</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="assetRepairHistoryTableBody">
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">Loading repair history...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-light download-repair-history">
+                                        <i class="bi bi-file-earmark-excel me-1"></i> Download Excel
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
             </div>
-
-            <div class="modal-body">
-                <!-- Asset Details Summary Card -->
-                <div class="card mb-3 shadow-sm border-0 bg-light">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3 mb-2">
-                                <strong>Asset Tag:</strong> <span id="history_tag">-</span>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <strong>Serial No:</strong> <span id="history_serial">-</span>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <strong>Asset Type:</strong> <span id="history_type">-</span>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <strong>Asset Model:</strong> <span id="history_model">-</span>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <strong>Current Region:</strong> <span id="history_current_location">-</span>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <strong>Current Station:</strong> <span id="history_current_station">-</span>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <strong>Asset Status:</strong> <span id="history_status">-</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 1. Asset Issue Register History Section -->
-                <div class="card mb-4 shadow-sm border-0">
-                    <div class="card-header bg-primary text-white fw-bold">
-                        <i class="bi bi-person-workspace me-2"></i>Asset Issue & Transfer History
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped align-middle mb-0">
-                                <thead class="table-secondary">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Custodian Name</th>
-                                        <th>Issue Status</th>
-                                        <th>Issued Date</th>
-                                        <th>Transfer Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="assetIssueHistoryTableBody">
-                                    <tr>
-                                        <td colspan="5" class="text-center text-muted">Loading issue history...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. Asset Repair History Section -->
-                <div class="card shadow-sm border-0">
-                    <div class="card-header bg-secondary text-white fw-bold">
-                        <i class="bi bi-tools me-2"></i>Asset Repair History
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped align-middle mb-0">
-                                <thead class="table-secondary">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Call ID & Engineer</th>
-                                        <th>Vendor Name</th>
-                                        <th>Send Date</th>
-                                        <th>Return Date</th>
-                                        <th>Remarks</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="assetRepairHistoryTableBody">
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted">Loading repair history...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-    </div>
-</div>
 
             {{-- =========================================================
              Repair Modal 
@@ -1398,6 +1402,11 @@
         $(document).on('click', '.view-asset-history', function () {
             let assetId = $(this).data('id');
 
+            // Store selected asset ID for download buttons
+            $('#assetHistoryModal').data('asset-id', assetId);
+
+
+
             // Reset details & tables
             $('#history_tag, #history_serial, #history_type, #history_model, #history_current_location, #history_current_station, #history_status').text('Loading...');
             
@@ -1474,6 +1483,35 @@
                     Swal.fire('Error', xhr.responseJSON?.message || 'Unable to fetch asset history.', 'error');
                 }
             });
+        });
+
+        // Download Asset Issue & Transfer History
+        $(document).on('click', '.download-issue-history', function () {
+            let assetId = $('#assetHistoryModal').data('asset-id');
+
+            if (!assetId) {
+                toastr.error('Asset ID not found.');
+                return;
+            }
+
+            // Correct route generation using Laravel Blade helper
+            let url = "{{ route('asset-inventory.asset.history.export', ':id') }}".replace(':id', assetId);
+            window.location.href = url;
+        });
+
+
+        // Download Asset Repair History
+        $(document).on('click', '.download-repair-history', function () {
+            let assetId = $('#assetHistoryModal').data('asset-id');
+
+            if (!assetId) {
+                toastr.error('Asset ID not found.');
+                return;
+            }
+
+            // Correct route generation using Laravel Blade helper
+            let url = "{{ route('asset-inventory.repair-history.export', ':id') }}".replace(':id', assetId);
+            window.location.href = url;
         });
         
 

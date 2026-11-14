@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::table('custodians', function (Blueprint $table) {
             //
             $table->foreignId('section_id')->nullable()->after('discipline_id')->constrained('dept_sections')->nullOnDelete();
-            $table->string('emp_id')->string('emp_id')->after('section_id');
+            $table->string('emp_id')->nullable()->after('section_id');
         });
     }
 

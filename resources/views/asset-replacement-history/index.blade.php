@@ -32,11 +32,18 @@
                 Search Asset replacement history
             </h5>
 
-            <a href="{{ route('replacement.history.export', request()->query()) }}" class="btn btn-success btn-sm">               
-                <i class="bi bi-file-earmark-excel"></i>
-                Export to Excel
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('asset-replacement.old-entry') }}" class="btn btn-sm btn-warning"> 
+                    <i class="bi bi-clock-history"></i>
+                    Old Replacement Entry
+                </a>
+                <a href="{{ route('replacement.history.export', request()->query()) }}" class="btn btn-success btn-sm">               
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Export to Excel
+                </a>
+            </div>              
         </div>
+
         <div class="card-body">
             <form method="GET" action="{{ route('replacement.history.index') }}">                           
 
@@ -102,9 +109,8 @@
         <div class="card-body">
             {{-- Replacement History Table --}}
             <div class="table-responsive">
-                <table id="replacementHistoryTable"
-                       class="table table-bordered table-striped table-hover align-middle">
-
+                <table id="replacementHistoryTable" class="table table-bordered table-striped table-hover align-middle">
+                       
                     <thead class="table-dark">
                         <tr>
                             <th>SL No.</th>

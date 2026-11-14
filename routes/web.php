@@ -194,6 +194,9 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
         Route::get('/outstation/history/{id}/export', [AssetInventoryController::class, 'exportOutstationHistory'])->name('outstation.history.export');  
         Route::get('/asset-history/{id}/', [AssetInventoryController::class, 'assetHistory'])->name('asset.history');  
 
+        Route::get('/issue-history/export/{id}/', [AssetInventoryController::class, 'exportIssueHistory'])->name('asset.history.export');  
+        Route::get('/repair-history/export/{id}/', [AssetInventoryController::class, 'exportRepairHistory'])->name('repair-history.export');  
+
         Route::post('/scrap/{id}', [AssetInventoryController::class, 'scrap'])->name('scrap'); 
 
         Route::get('repair/details/{id}', [AssetInventoryController::class, 'getRepairDetails'])->name('repair.details');  
@@ -214,6 +217,11 @@ Route::middleware(['auth', 'prevent-back-history', 'user.status'])->group(functi
     // asset replacement register
     Route::get('/asset-replacement-register', [AssetInventoryController::class, 'replacementIndex'])->name('replacement.history.index');
     Route::get('/asset-replacement-register/export', [AssetInventoryController::class, 'exportReplacement'])->name('replacement.history.export');
+
+    // Old Asset Replacement Entry
+    Route::get('/asset-replacement/old-entry', [AssetInventoryController::class, 'oldReplacementEntry'])->name('asset-replacement.old-entry');
+    Route::post('/asset-replacement/old-entry/store', [AssetInventoryController::class, 'storeOldReplacementEntry'])->name('asset-replacement.old-entry.store');
+        
 
     // asset register
     Route::prefix('issue-register')->name('issue-register.')->group(function() {

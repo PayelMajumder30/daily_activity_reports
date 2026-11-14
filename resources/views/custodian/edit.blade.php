@@ -78,11 +78,7 @@
                     <div class="col-md-3 mb-3">
 
                         <label class="form-label">
-
                             Employee ID
-
-                            <span class="text-danger">*</span>
-
                         </label>
 
                         <input type="text" name="emp_id" value="{{ old('emp_id', $custodian->emp_id) }}" class="form-control @error('emp_id') is-invalid @enderror"
@@ -133,7 +129,7 @@
                     <div class="col-md-3 mb-3">
 
                         <label class="form-label">
-                            Email <span class="text-danger">*</span>
+                            Email 
                         </label>
 
                         <input type="email" name="email" value="{{ old('email', $custodian->email) }}" class="form-control @error('email') is-invalid @enderror" placeholder="Enter email address">

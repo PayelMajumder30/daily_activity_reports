@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use App\Exports\{AssetInventoryExport, AssetInventoryTemplateExport, AssetOutstationHistoryExport, OutstationHistoryExport, AssetReplacementHistoryExport};
+use App\Exports\{AssetInventoryExport, AssetInventoryTemplateExport, AssetOutstationHistoryExport, OutstationHistoryExport, AssetReplacementHistoryExport, 
+AssetIssueHistoryExport, AssetRepairHistoryExport};
 use App\Imports\AssetInventoryImport;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -1545,75 +1546,97 @@ class AssetInventoryController extends Controller
         );
     }
 
- public function assetHistory($id)
-{
-    $asset = AssetInventory::with([
-        'assetModel.assetType',
-        'location',
-        'station'
-    ])->find($id);
+    public function assetHistory($id)
+    {
+        $asset = AssetInventory::with([
+            'assetModel.assetType',
+            'location',
+            'station'
+        ])->find($id);
 
-    if (!$asset) {
+        if (!$asset) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Asset not found.'
+            ], 404);
+        }
+
+        // 1. Fetch Asset Issue Register History
+        $issueHistory = AssetIssueRegister::with(['custodian'])
+            ->where('asset_inventory_id', $asset->id)
+            ->orderByDesc('issued_date')
+            ->orderByDesc('id')
+            ->get();
+
+        // 2. Fetch Incidents linked to this asset via asset_issue_registers
+        $incidents = IncidentIssueRegister::whereHas('assetIssueRegister', function ($q) use ($asset) {
+                $q->where('asset_inventory_id', $asset->id);
+            })
+            ->with(['supportUser', 'repairHistories'])
+            ->orderByDesc('call_generated_at')
+            ->get();
+
+        $repairHistoryData = $incidents->map(function ($incident) {
+            $repairRecord = $incident->repairHistories->first();
+
+            return [
+                'call_id'       => $incident->call_id ?? '-',
+                'engineer_name' => ucwords($incident->supportUser?->name ?? '-'),
+                'vendor_name'   => ucwords($repairRecord?->vendor_name ?? '-'),
+                'send_date'     => $repairRecord?->send_date?->format('d-m-Y') ?? '-',
+                'return_date'   => $repairRecord?->return_date?->format('d-m-Y') ?? '-',
+                'remarks'       => $repairRecord?->remarks ?? $incident->remarks ?? '-',
+            ];
+        })->values();
+
         return response()->json([
-            'success' => false,
-            'message' => 'Asset not found.'
-        ], 404);
+            'success' => true,
+            'asset' => [
+                'id'            => $asset->id,
+                'tag_no'        => $asset->tag_no,
+                'serial_no'     => $asset->serial_no ?? '-',
+                'asset_type'    => $asset->assetModel?->assetType?->name ?? '-',                 
+                'asset_model'   => $asset->assetModel?->model_name ?? '-',                
+                'location'      => $asset->location?->name ?? '-',               
+                'station'       => $asset->station?->station_name ?? '-',                  
+                'asset_status'  => $asset->asset_status ?? '-',
+            ],
+
+            'issue_history' => $issueHistory->map(function ($item) {
+                return [
+                    'id'            => $item->id,
+                    'custodian'     => ucwords($item->custodian?->custodian_name ?? '-'),
+                    'issue_status'  => ucwords($item->issue_status ?? '-'),
+                    'issued_date'   => $item->issued_date?->format('d-m-Y') ?? '-',
+                    'transfer_date' => $item->transfer_date?->format('d-m-Y') ?? '-',
+                ];
+            })->values(),
+
+            'repair_history' => $repairHistoryData
+        ]);
     }
 
-    // 1. Fetch Asset Issue Register History
-    $issueHistory = AssetIssueRegister::with(['custodian'])
-        ->where('asset_inventory_id', $asset->id)
-        ->orderByDesc('issued_date')
-        ->orderByDesc('id')
-        ->get();
+    public function exportIssueHistory($id)
+    {
+        $asset = AssetInventory::findOrFail($id);
+        
+        // Replace slashes with hyphens to prevent HeaderUtils exception
+        $cleanTagNo = str_replace(['/', '\\'], '-', $asset->tag_no);
 
-    // 2. Fetch Incidents linked to this asset via asset_issue_registers
-    $incidents = IncidentIssueRegister::whereHas('assetIssueRegister', function ($q) use ($asset) {
-            $q->where('asset_inventory_id', $asset->id);
-        })
-        ->with(['supportUser', 'repairHistories'])
-        ->orderByDesc('call_generated_at')
-        ->get();
+        return Excel::download(new AssetIssueHistoryExport($asset->id), 'Asset_Issue_Transfer_History_' . $cleanTagNo . '.xlsx');
+    }
 
-    $repairHistoryData = $incidents->map(function ($incident) {
-        $repairRecord = $incident->repairHistories->first();
+    public function exportRepairHistory($id)
+    {
+        $asset = AssetInventory::findOrFail($id);
+        
+        // Replace slashes with hyphens to prevent HeaderUtils exception
+        $cleanTagNo = str_replace(['/', '\\'], '-', $asset->tag_no);
 
-        return [
-            'call_id'       => $incident->call_id ?? '-',
-            'engineer_name' => ucwords($incident->supportUser?->name ?? '-'),
-            'vendor_name'   => ucwords($repairRecord?->vendor_name ?? '-'),
-            'send_date'     => $repairRecord?->send_date?->format('d-m-Y') ?? '-',
-            'return_date'   => $repairRecord?->return_date?->format('d-m-Y') ?? '-',
-            'remarks'       => $repairRecord?->remarks ?? $incident->remarks ?? '-',
-        ];
-    })->values();
+        return Excel::download(new AssetRepairHistoryExport($asset->id), 'Asset_Repair_History_' . $cleanTagNo . '.xlsx');
+    }
 
-    return response()->json([
-        'success' => true,
-        'asset' => [
-            'id'            => $asset->id,
-            'tag_no'        => $asset->tag_no,
-            'serial_no'     => $asset->serial_no ?? '-',
-            'asset_type'    => $asset->assetModel?->assetType?->name ?? '-',                 
-            'asset_model'   => $asset->assetModel?->model_name ?? '-',                
-            'location'      => $asset->location?->name ?? '-',               
-            'station'       => $asset->station?->station_name ?? '-',                  
-            'asset_status'  => $asset->asset_status ?? '-',
-        ],
-
-        'issue_history' => $issueHistory->map(function ($item) {
-            return [
-                'id'            => $item->id,
-                'custodian'     => ucwords($item->custodian?->custodian_name ?? '-'),
-                'issue_status'  => ucwords($item->issue_status ?? '-'),
-                'issued_date'   => $item->issued_date?->format('d-m-Y') ?? '-',
-                'transfer_date' => $item->transfer_date?->format('d-m-Y') ?? '-',
-            ];
-        })->values(),
-
-        'repair_history' => $repairHistoryData
-    ]);
-}
+    
 
     public function scrap($id)
     {
@@ -1849,67 +1872,6 @@ class AssetInventoryController extends Controller
     }
 
     // Send asset for repair
-    // public function sendForRepair(Request $request)
-    // {
-    //     $request->validate([
-    //         'asset_id'   => 'required',
-    //         'vendor_name'=> 'required|string|max:255',
-    //         'send_date'  => 'required|date',
-    //         'remarks'    => 'nullable|string',
-    //     ]);
-
-    //     try {
-    //         DB::beginTransaction();
-
-    //         $assetId    = decryptId($request->asset_id);
-    //         $asset      = AssetInventory::where('id', $assetId)->lockForUpdate()->first();                              
-
-    //         if (!$asset) {
-    //             throw new \Exception('Asset not found.');
-    //         }
-
-    //         if ($asset->asset_status !== 'Available') {
-    //             throw new \Exception(
-    //                 'Only Available assets can be sent for repair.'
-    //             );
-    //         }
-
-    //         AssetRepairHistory::create([
-    //             'asset_inventory_id' => $asset->id,
-    //             'vendor_name'        => $request->vendor_name,
-    //             'send_date'          => $request->send_date,
-    //             'return_date'        => null,
-    //             'remarks'            => $request->remarks,
-    //             'created_by'         => auth()->id(),
-    //         ]);
-
-    //         $asset->update(['asset_status' => 'Repair',]);                         
-
-    //         eventLog(
-    //             'Update',
-    //             'Asset Inventory',
-    //             'Asset ' . $asset->tag_no . ' sent for repair to vendor ' .
-    //             $request->vendor_name . ' on ' .
-    //             $request->send_date
-    //         );
-
-    //         DB::commit();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Asset sent for repair successfully.'
-    //         ]);
-
-    //     } catch (\Throwable $e) {
-
-    //         DB::rollBack();
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => $e->getMessage()
-    //         ], 422);
-    //     }
-    // }
 
     public function sendForRepair(Request $request)
     {
@@ -2374,6 +2336,286 @@ class AssetInventoryController extends Controller
         $filters = $request->only(['tag_no', 'asset_type',]);
 
         return Excel::download(new AssetReplacementHistoryExport($filters), 'Asset_Replacement_History_' . now()->format('Ymd') . '.xlsx');
+    }
+
+    // public function oldReplacementEntry(Request $request)
+    // {
+    //     $assetModels = AssetModel::where('status', 1)->orderBy('model_name')->get();         
+
+    //     $assets = collect();
+    //     $selectedAsset = null;
+
+    //     // Search existing assets from Asset Inventory
+    //     if ($request->filled('asset_model_id') || $request->filled('serial_no')) {
+
+    //         $query = AssetInventory::with([
+    //             'assetType',
+    //             'assetModel',
+    //             'location',
+    //             'station'
+    //         ]);
+
+    //         // Search by selected model
+    //         if ($request->filled('asset_model_id')) {
+    //             $query->where('asset_model_id', $request->asset_model_id);
+    //         }
+
+    //         // Search by serial number
+    //         if ($request->filled('serial_no')) {
+    //             $serialNo = trim($request->serial_no);
+
+    //             $query->where('serial_no', 'like', '%' . $serialNo . '%');
+    //         }
+
+    //         // Call Coordinator station restriction
+    //         if (auth()->user()->role == 1) {
+    //             $stationIds = permittedStationIds();
+
+    //             $query->whereIn('station_id', $stationIds);
+    //         }
+
+    //         $assets = $query->orderBy('tag_no')->get();
+    //     }
+
+    //     // Fetch selected asset
+    //     if ($request->filled('selected_asset_id')) {
+
+    //         $selectedAsset = AssetInventory::with([
+    //             'assetType',
+    //             'assetModel',
+    //             'location',
+    //             'station'
+    //         ])->findOrFail($request->selected_asset_id);
+
+    //         // Check station permission
+    //         if (auth()->user()->role == 1) {
+
+    //             abort_unless(
+    //                 in_array($selectedAsset->station_id, permittedStationIds()),
+    //                 403
+    //             );
+    //         }
+    //     }
+
+    //     // Old model dropdown should contain only models of selected asset type
+    //     $oldAssetModels = collect();
+
+    //     if ($selectedAsset) {
+
+    //         $oldAssetModels = AssetModel::where(
+    //             'asset_type_id',
+    //             $selectedAsset->asset_type_id
+    //         )
+    //         ->where('status', 1)
+    //         ->orderBy('model_name')
+    //         ->get();
+    //     }
+
+    //     return view('asset-replacement-history.old-entry', compact(
+    //         'assetModels',
+    //         'assets',
+    //         'selectedAsset',
+    //         'oldAssetModels'
+    //     ));
+    // }
+
+    public function oldReplacementEntry(Request $request)
+    {
+        // Asset Model dropdown
+        $assetModelsQuery = AssetModel::where('status', 1);
+
+        // Restrict non-management users to models available in permitted
+        // locations and stations
+        if (auth()->user()->role != 0) {
+
+            $stationIds = permittedStationIds();
+            $locationIds = permittedLocationIds();
+
+            $assetModelsQuery->whereIn('id', function ($query) use ($stationIds, $locationIds) {
+                $query->select('asset_model_id')
+                    ->from('asset_inventories')
+                    ->whereIn('station_id', $stationIds)
+                    ->whereIn('location_id', $locationIds)
+                    ->whereNotNull('asset_model_id');
+            });
+        }
+
+        $assetModels = $assetModelsQuery
+            ->orderBy('model_name')
+            ->get();
+
+        $assets = collect();
+        $selectedAsset = null;
+
+        // Search existing assets
+        if ($request->filled('asset_model_id') || $request->filled('serial_no')) {
+
+            $query = AssetInventory::with([
+                'assetType',
+                'assetModel',
+                'location',
+                'station'
+            ]);
+
+            if ($request->filled('asset_model_id')) {
+                $query->where('asset_model_id', $request->asset_model_id);
+            }
+
+            if ($request->filled('serial_no')) {
+                $query->where(
+                    'serial_no',
+                    'like',
+                    '%' . trim($request->serial_no) . '%'
+                );
+            }
+
+            // Apply location and station permissions
+            if (auth()->user()->role != 0) {
+                $query->whereIn('station_id', permittedStationIds())
+                    ->whereIn('location_id', permittedLocationIds());
+            }
+
+            $assets = $query->orderBy('tag_no')->get();
+        }
+
+        // Fetch selected asset
+        if ($request->filled('selected_asset_id')) {
+
+            $selectedAsset = AssetInventory::with([
+                'assetType',
+                'assetModel',
+                'location',
+                'station'
+            ])->findOrFail($request->selected_asset_id);
+
+            // Verify both station and location permissions
+            if (auth()->user()->role != 0) {
+
+                abort_unless(
+                    hasStationPermission($selectedAsset->station_id) &&
+                    hasLocationPermission($selectedAsset->location_id),
+                    403
+                );
+            }
+        }
+
+        // Old model dropdown: models belonging to the selected asset type
+        // Inactive models are also allowed for historical entries
+        $oldAssetModels = collect();
+
+        if ($selectedAsset) {
+            $oldAssetModels = AssetModel::where(
+                'asset_type_id',
+                $selectedAsset->asset_type_id
+            )
+            ->orderBy('model_name')
+            ->get();
+        }
+
+        return view('asset-replacement-history.old-entry', compact(
+            'assetModels',
+            'assets',
+            'selectedAsset',
+            'oldAssetModels'
+        ));
+    }
+
+    public function storeOldReplacementEntry(Request $request)
+    {
+        $validated = $request->validate([
+            'asset_inventory_id' => [
+                'required',
+                'integer',
+                'exists:asset_inventories,id'
+            ],
+
+            'old_asset_model_id' => [
+                'required',
+                'integer',
+                'exists:asset_models,id'
+            ],
+
+            'old_serial_no' => [
+                'required',
+                'string',
+                'max:50'
+            ],
+
+            'replaced_at' => [
+                'required',
+                'date'
+            ],
+
+            'remarks' => [
+                'nullable',
+                'string',
+                'max:2000'
+            ],
+        ]);
+
+        DB::transaction(function () use ($validated) {
+
+            $asset = AssetInventory::whereKey(
+                $validated['asset_inventory_id']
+            )->lockForUpdate()->firstOrFail();
+
+            // Restrict Call Coordinator to permitted stations
+            if (auth()->user()->role == 1) {
+
+                abort_unless(
+                    in_array($asset->station_id, permittedStationIds()),
+                    403
+                );
+            }
+
+            // Validate that the old model belongs to the same asset type
+            $oldModel = AssetModel::findOrFail(
+                $validated['old_asset_model_id']
+            );
+
+            if ($oldModel->asset_type_id != $asset->asset_type_id) {
+
+                throw ValidationException::withMessages([
+                    'old_asset_model_id' =>
+                        'Please select an old model belonging to the same asset type.'
+                ]);
+            }
+
+            $oldSerialNo = trim($validated['old_serial_no']);
+
+            // At least one detail must differ
+            if (
+                $oldModel->id == $asset->asset_model_id &&
+                $oldSerialNo === $asset->serial_no
+            ) {
+                throw ValidationException::withMessages([
+                    'old_serial_no' =>
+                        'Old model and serial number cannot both be the same as the current asset details.'
+                ]);
+            }
+
+            // Insert history only. Do not update Asset Inventory.
+            AssetReplacementHistory::create([
+
+                'asset_inventory_id' => $asset->id,
+
+                'old_asset_model_id' => $oldModel->id,
+                'new_asset_model_id' => $asset->asset_model_id,
+
+                'old_serial_no' => $oldSerialNo,
+                'new_serial_no' => $asset->serial_no,
+
+                'replaced_by' => auth()->id(),
+
+                'replaced_at' => $validated['replaced_at'],
+
+                'remarks' => $validated['remarks'] ?? null,
+            ]);
+        });
+
+        return redirect()->route('replacement.history.index')->with('success', 'Historical asset replacement entry saved successfully.');
+            
+            
     }
 
 }

@@ -106,9 +106,17 @@
                 </a>
             </li>
 
+            <li class="nav-item">
+                <a href="{{ route('user-location-permission.index') }}" class="nav-link text-white     
+                    {{ request()->routeIs('user-location-permission.*') ? 'active bg-primary' : '' }}">
+                        <i class="bi bi-shield-check"></i>
+                        User Location Permission
+                </a>
+            </li>
+
         @endif
 
-        @if(auth()->user()->role == 0)
+        @if(auth()->user()->role == 0 || auth()->user()->role == 1)
             <li class="nav-item mb-2">
                 <a class="nav-link text-white d-flex justify-content-between align-items-center
                     {{ request()->routeIs('designation.*')|| request()->routeIs('discipline.*')|| request()->routeIs('asset-type.*')|| request()->routeIs('asset-model.*')
@@ -182,13 +190,7 @@
                             </a>
                         </li>
                          
-                        <li class="nav-item">
-                            <a href="{{ route('user-location-permission.index') }}" class="nav-link text-white     
-                                {{ request()->routeIs('user-location-permission.*') ? 'active bg-primary' : '' }}">
-                                    <i class="bi bi-shield-check"></i>
-                                    User Location Permission
-                            </a>
-                        </li>
+                       
                     </ul>
                 </div>
             </li>

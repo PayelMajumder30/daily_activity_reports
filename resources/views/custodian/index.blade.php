@@ -223,8 +223,8 @@
                                     </strong>
                                 </td>
 
-                                <td>{{ $custodian->emp_id }}</td> 
-                                <td>{{ $custodian->email }}</td>                                                                 
+                                <td>{{ $custodian->emp_id ? $custodian->emp_id : 'N/A' }}</td> 
+                                <td>{{ $custodian->email ? $custodian->email : 'N/A'}}</td>                                                                 
                                 <td>{{ $custodian->designation ? ucwords($custodian->designation->name) : '-' }}</td>                                                                                                                                                                              
                                 <td>{{ $custodian->discipline ? ucwords($custodian->discipline->name): '-' }}</td>                                                                                                                                                                             
                                 <td>{{ $custodian->section ? ucwords($custodian->section->section_name): 'N/A' }}</td>                                                                                                                                                 

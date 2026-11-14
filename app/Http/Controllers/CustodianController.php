@@ -265,8 +265,8 @@ class CustodianController extends Controller
             'discipline_id'     => ['required', Rule::exists('disciplines', 'id')->where(function ($query) {$query->where('status', 1); }),],                                                                                                                                                                             
             'location_id'       => ['required', 'exists:locations,id',],
             'station_id'        => ['required', 'exists:airport_stations,id',],     
-            'emp_id'            => ['required', 'digits:8', 'unique:custodians,emp_id',],
-            'email'             => ['required', 'email', 'max:255','unique:custodians,email',],                                                          
+            'emp_id'            => ['nullable', 'digits:8', 'unique:custodians,emp_id',],
+            'email'             => ['nullable', 'email', 'max:255','unique:custodians,email',],                                                          
             'phone'             => ['nullable', 'string', 'max:10',],
                                              
         ], [
@@ -618,7 +618,7 @@ class CustodianController extends Controller
             ],
 
             'emp_id' => [
-                'required',
+                'nullable',
                 'digits:8',
                 'unique:custodians,emp_id,' . $custodian->id,
             ],

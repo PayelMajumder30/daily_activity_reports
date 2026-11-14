@@ -321,11 +321,6 @@ class AssetIssueRegisterController extends Controller
         |----------------------------------------------------------------------
         */
 
-        // $assets = AssetInventory::with([
-        //     'assetModel.assetType',
-        //     'location', 'station'
-        // ])->where('status', 1)->where('asset_status', 'Available')->orderBy('tag_no')->get();
-
         $assetsQuery = AssetInventory::with(['assetModel.assetType', 'location', 'station'])->where('status', 1)->where('asset_status', 'Available');
 
         if(auth()->user()->role == 1){
@@ -340,13 +335,6 @@ class AssetIssueRegisterController extends Controller
         |----------------------------------------------------------------------
         */
 
-        // $custodians = Custodian::with([
-        //                             'designation',
-        //                             'discipline',
-        //                             'location',
-        //                             'station',
-        //                             'section'
-        // ])->where('status', 1)->orderBy('custodian_name')->get();
         $custodiansQuery = Custodian::with(['designation', 'discipline', 'location', 'station', 'section'])->where('status', 1);
 
         if(auth()->user()->role == 1){
@@ -739,12 +727,17 @@ class AssetIssueRegisterController extends Controller
         return response()->json([
             'status' => true,
             'custodian' => [
-                'emp_id'        => $custodian->emp_id ?? '-',                   
-                'designation'   => $custodian->designation?->name ?? '-',                  
-                'department'    => $custodian->discipline?->name ?? '-',                                   
-                'location'      => $custodian->location?->name ?? '-',  
-                'station_id'    => $custodian->station_id,
-                'station'       => $custodian->station?->station_name ?? '-',                 
+                'custodian_name' => $custodian->custodian_name ?? '-',
+                'emp_id'         => $custodian->emp_id ?? '-',
+                'email'          => $custodian->email ?? '-',
+                'designation'    => $custodian->designation?->name ?? '-',
+                'department'     => $custodian->discipline?->name ?? '-',
+                'discipline_id'  => $custodian->discipline_id,
+                'section_id'     => $custodian->section_id,
+                'section'        => $custodian->section?->section_name ?? 'N/A',
+                'location'       => $custodian->location?->name ?? 'N/A',
+                'station'        => $custodian->station?->station_name ?? 'N/A',
+                // 'status'         => $custodian->status == 1 ? 'Active' : 'Inactive',                
             ]
 
         ]);
