@@ -10,7 +10,7 @@ class AssetIssueRegister extends Model
 {
     //
     public $table = 'asset_issue_registers';
-    protected $fillable = ['asset_inventory_id', 'custodian_id', 'user_type', 'operator_name', 'issued_date', 'retained_date', 'transfer_date', 'returned_date', 'issue_status', 'remarks'];
+    protected $fillable = ['asset_inventory_id', 'custodian_id', 'discipline_id', 'dept_section_id', 'user_type', 'operator_name', 'issued_date', 'retained_date', 'transfer_date', 'returned_date', 'issue_status', 'remarks'];
 
     protected $casts = [
         'issued_date'   => 'date',
@@ -29,8 +29,18 @@ class AssetIssueRegister extends Model
         return $this->belongsTo(Custodian::class,'custodian_id');    
     }
 
-    public function incidentIssues()
+    public function incidentIssues(): HasMany
     {
         return $this->hasMany(IncidentIssueRegister::class, 'asset_issue_register_id');                       
+    }
+
+    public function deptSection(): BelongsTo
+    {
+        return $this->belongsTo(DeptSection::class, 'dept_section_id');
+    }
+
+    public function discipline(): BelongsTo
+    {
+        return $this->belongsTo(Discipline::class, 'discipline_id');
     }
 }

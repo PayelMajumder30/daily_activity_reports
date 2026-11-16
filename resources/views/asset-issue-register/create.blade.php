@@ -251,7 +251,9 @@
                                         <th width="60"> SL</th>                                                                                 
                                         <th>Tag No.</th>                                                                                 
                                         <th> Asset Type </th>                                                                                  
-                                        <th> Asset Model </th>                                                                                    
+                                        <th> Asset Model </th> 
+                                        <th>Department</th>
+                                        <th>Section</th>                                                                                   
                                         <th width="80"> Action</th>                                                                                   
                                     </tr>
                                 </thead>
@@ -259,7 +261,7 @@
 
                                 <tbody id="selectedAssetsBody">
                                     <tr id="noAssetRow">
-                                        <td colspan="5" class="text-center text-muted">                                                                                       
+                                        <td colspan="7" class="text-center text-muted">                                                                                       
                                             No assets selected.
                                         </td>
                                     </tr>
@@ -327,6 +329,16 @@
                 @endforeach
 
             </select>
+
+            <select id="departmentOptionSource" style="display:none;">
+    <option value="">Select Department</option>
+
+    @foreach($disciplines as $discipline)
+        <option value="{{ $discipline->id }}">
+            {{ $discipline->name }}
+        </option>
+    @endforeach
+</select>
 
 
             {{-- ==============================================================
@@ -609,9 +621,9 @@ $(document).ready(function () {
        GET ASSETS SELECTED IN MODAL
     ============================================================== */
 
-    function getModalSelectedAssetIds(
-        excludeSelect = null
-    ) {
+    function getModalSelectedAssetIds(excludeSelect = null)
+        
+    {
 
         let ids = [];
 
@@ -648,104 +660,132 @@ $(document).ready(function () {
     function createAssetRow() {
 
         let row = $(`
-            <div class="row asset-row mb-3">
-                <div class="col-md-5">
+            <div class="row asset-row mb-3 border-bottom pb-3">
+
+                <div class="col-md-3">
                     <label class="form-label">
-                        Asset Tag
-                        <span class="text-danger">
-                            *
-                        </span>
-
+                        Asset Tag <span class="text-danger">*</span>
                     </label>
-
-                    <select
-                        class="form-select modal-asset-tag">
-
-                        <option value="">
-                            Select Asset Tag
-                        </option>
-
+                    <select class="form-select modal-asset-tag">
+                        <option value="">Select Asset Tag</option>
                     </select>
-
                 </div>
 
+                <div class="col-md-2">
+                    <label class="form-label">Asset Type</label>
+                    <input type="text"
+                        class="form-control modal-asset-type" readonly>
+                </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <label class="form-label">Asset Model</label>
+                    <input type="text"
+                        class="form-control modal-asset-model" readonly>
+                </div>
 
+                <div class="col-md-2">
                     <label class="form-label">
-                        Asset Type
+                        Department <span class="text-danger">*</span>
                     </label>
-
-                    <input type="text" class="form-control modal-asset-type" readonly>                        
-
+                    <select class="form-select modal-department"></select>    
                 </div>
 
-
-                <div class="col-md-3">
-
+                <div class="col-md-2">
                     <label class="form-label">
-                        Asset Model
+                        Section <span class="text-danger">*</span>
                     </label>
-
-                    <input type="text" class="form-control modal-asset-model" readonly>                       
-
+                    <select class="form-select modal-section" disabled>
+                        <option value="">Select Section</option>
+                    </select>
                 </div>
 
-
-                <div
-                    class="col-md-1 d-flex align-items-end">
-
-                    <button type="button" class="btn btn-danger remove-asset-row" title="Remove">                                                            
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button"
+                        class="btn btn-danger remove-asset-row"
+                        title="Remove">
                         <i class="bi bi-trash"></i>
                     </button>
-
                 </div>
 
             </div>
         `);
 
+        // Asset options
+        row.find('.modal-asset-tag').append($('#assetOptionSource').html());       
 
-        /*
-        |--------------------------------------------------------------
-        | Add all options from hidden source
-        |--------------------------------------------------------------
-        */
-
-        let sourceOptions = $('#assetOptionSource').html();
-                     
-        row.find('.modal-asset-tag').append(sourceOptions);
+        // Department options
+        row.find('.modal-department').append($('#departmentOptionSource').html());
             
-        /*
-        |--------------------------------------------------------------
-        | Add row to modal
-        |--------------------------------------------------------------
-        */
-
         $('#assetRows').append(row);
 
-        /*
-        |--------------------------------------------------------------
-        | Initialize Select2
-        |--------------------------------------------------------------
-        */
-
-        initializeAssetSelect(
-            row.find('.modal-asset-tag')
-        );
-
-
-        /*
-        |--------------------------------------------------------------
-        | Update available assets
-        |--------------------------------------------------------------
-        */
-
-        refreshModalAssetOptions();
-
+        initializeAssetSelect(row.find('.modal-asset-tag'));
         return row;
-
     }
 
+    $(document).on('change', '.modal-department', function () {
+
+        let departmentId = $(this).val();
+
+        let row = $(this).closest('.asset-row');
+
+        let sectionSelect = row.find('.modal-section');
+
+        sectionSelect.empty().append(
+            '<option value="">Select Section</option>'
+        );
+
+        sectionSelect.prop('disabled', true);
+
+        if (!departmentId) {
+            return;
+        }
+
+        let url = "{{ route('asset-issue-register.department-sections', ':id') }}"
+            .replace(':id', departmentId);
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+
+            success: function (response) {
+
+                if (response.status && response.sections.length > 0) {
+
+                    $.each(response.sections, function (index, section) {
+
+                        sectionSelect.append(`
+                            <option value="${section.id}">
+                                ${$('<div>').text(section.section_name).html()}
+                            </option>
+                        `);
+
+                    });
+
+                    sectionSelect.prop('disabled', false);
+
+                } else {
+
+                    sectionSelect.empty().append(
+                        '<option value="">No Section Required</option>'
+                    );
+
+                    sectionSelect.prop('disabled', true);
+
+                }
+            },
+
+            error: function () {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to load department sections.'
+                });
+
+            }
+        });
+
+    });
 
     /* ==============================================================
        REFRESH ASSET OPTIONS
@@ -760,12 +800,7 @@ $(document).ready(function () {
 
                 let currentSelect = $(this);                   
                 let currentValue = currentSelect.val();                   
-                let modalSelectedIds =
-                    getModalSelectedAssetIds(
-                        currentSelect
-                    );
-
-
+                let modalSelectedIds = getModalSelectedAssetIds(currentSelect);
                 /*
                 |------------------------------------------------------
                 | Rebuild options
@@ -810,11 +845,8 @@ $(document).ready(function () {
                         |--------------------------------------------------
                         */
 
-                        if (
-                            mainSelectedIds.includes(
-                                String(assetId)
-                            )
-                        ) {
+                        if (mainSelectedIds.includes(String(assetId)))   
+                        {
                             return;
                         }
 
@@ -853,14 +885,8 @@ $(document).ready(function () {
                 |------------------------------------------------------
                 */
 
-                if (
-                    currentValue &&
-                    currentSelect.find(
-                        'option[value="' +
-                        currentValue +
-                        '"]'
-                    ).length
-                ) {
+                if (currentValue && currentSelect.find('option[value="' + currentValue +'"]' ).length)   
+                {
                     currentSelect.val(currentValue);                       
 
                 } else {
@@ -908,14 +934,9 @@ $(document).ready(function () {
             .each(function () {
 
                 if (
-                    $(this)
-                        .hasClass(
-                            'select2-hidden-accessible'
-                        )
+                    $(this).hasClass('select2-hidden-accessible')                       
                 ) {
-
                     $(this).select2('destroy');
-
                 }
 
             });
@@ -984,7 +1005,6 @@ $(document).ready(function () {
 
         resetAssetModal();
 
-
         /*
         |--------------------------------------------------------------
         | Show modal
@@ -1000,9 +1020,7 @@ $(document).ready(function () {
        ASSET TAG CHANGE
     ============================================================== */
 
-    $(document).on(
-        'change',
-        '.modal-asset-tag',
+    $(document).on('change', '.modal-asset-tag',  
         function () {
 
             let currentSelect = $(this);       
@@ -1021,10 +1039,7 @@ $(document).ready(function () {
             |----------------------------------------------------------
             */
 
-            getAssetDetails(
-                currentSelect
-            );
-
+            getAssetDetails(currentSelect);
 
             /*
             |----------------------------------------------------------
@@ -1046,21 +1061,19 @@ $(document).ready(function () {
 
             let duplicate = false;
 
-            $('.modal-asset-tag')
-                .each(function () {
+            $('.modal-asset-tag').each(function () {
+                if (
+                    this !== currentSelect[0] &&
+                    String($(this).val()) ===
+                    String(selectedValue)
+                ) {
 
-                    if (
-                        this !== currentSelect[0] &&
-                        String($(this).val()) ===
-                        String(selectedValue)
-                    ) {
+                    duplicate = true;
+                    return false;
 
-                        duplicate = true;
-                        return false;
+                }
 
-                    }
-
-                });
+            });
 
 
             /*
@@ -1072,17 +1085,12 @@ $(document).ready(function () {
             if (duplicate) {
 
                 Swal.fire({
-
                     icon: 'warning',
                     title: 'Asset Already Selected',
                     text: 'This asset tag has already been selected in another row.'                       
-
                 });
 
-
-                currentSelect
-                    .val('')
-                    .trigger('change');
+                currentSelect.val('').trigger('change');                         
                 return;
 
             }
@@ -1103,81 +1111,65 @@ $(document).ready(function () {
        ADD MORE ASSET ROW
     ============================================================== */
 
-    $('#addMoreAssetRow').on(
-        'click',
-        function () {
+    $('#addMoreAssetRow').on('click', function () {
+        let rows = $('#assetRows .asset-row');
 
-            let rows =
-                $('#assetRows .asset-row');
+        /*
+        |----------------------------------------------------------
+        | Check last row
+        |----------------------------------------------------------
+        */
 
+        if (rows.length > 0) {
 
+            let lastRow = rows.last();                 
+            let lastValue = lastRow.find('.modal-asset-tag').val();
+                                                            
             /*
-            |----------------------------------------------------------
-            | Check last row
-            |----------------------------------------------------------
+            |------------------------------------------------------
+            | Last row must have asset
+            |------------------------------------------------------
             */
 
-            if (rows.length > 0) {
+            if (!lastValue) {
 
-                let lastRow = rows.last();                 
-                let lastValue = lastRow.find('.modal-asset-tag').val();
-                                                              
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Asset Tag Required',
+                    text: 'Please select an asset tag before adding another row.'                        
+                });
 
-                /*
-                |------------------------------------------------------
-                | Last row must have asset
-                |------------------------------------------------------
-                */
-
-                if (!lastValue) {
-
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Asset Tag Required',
-                        text:
-                            'Please select an asset tag before adding another row.'
-
-                    });
-
-                    return;
-
-                }
-
+                return;
             }
-
-
-            /*
-            |----------------------------------------------------------
-            | Create new row
-            |----------------------------------------------------------
-            */
-
-            createAssetRow();
-
-            /*
-            |----------------------------------------------------------
-            | Refresh options
-            |----------------------------------------------------------
-            */
-
-            refreshModalAssetOptions();
-
         }
-    );
+
+
+        /*
+        |----------------------------------------------------------
+        | Create new row
+        |----------------------------------------------------------
+        */
+
+        createAssetRow();
+
+        /*
+        |----------------------------------------------------------
+        | Refresh options
+        |----------------------------------------------------------
+        */
+
+        refreshModalAssetOptions();
+        
+    });
 
 
     /* ==============================================================
        REMOVE MODAL ROW
     ============================================================== */
 
-    $(document).on(
-        'click',
-        '.remove-asset-row',
+    $(document).on('click', '.remove-asset-row',      
         function () {
-
-            let rows =
-                $('#assetRows .asset-row');
-
+            let rows = $('#assetRows .asset-row');
 
             /*
             |----------------------------------------------------------
@@ -1203,12 +1195,9 @@ $(document).ready(function () {
             |----------------------------------------------------------
             */
 
-            let select =
-                $(this).closest('.asset-row').find('.modal-asset-tag');
+            let select = $(this).closest('.asset-row').find('.modal-asset-tag');               
             if (
-                select.hasClass(
-                    'select2-hidden-accessible'
-                )
+                select.hasClass('select2-hidden-accessible')          
             ) {
                 select.select2('destroy');
             }
@@ -1237,306 +1226,206 @@ $(document).ready(function () {
        DONE ADDING ASSETS
     ============================================================== */
 
-    $('#doneAddingAssets').on(
-        'click',
-        function () {
+    $('#doneAddingAssets').on('click', function () {
 
-            let selectedAssets = [];
-            let hasEmptyRow = false;
-            let duplicateFound = false;
+        let selectedAssets = [];
+        let hasEmptyAsset = false;
+        let hasEmptyDepartment = false;
+        let duplicateFound = false;
 
+        // Read all modal rows
+        $('#assetRows .asset-row').each(function () {
 
-            /*
-            |----------------------------------------------------------
-            | Read modal rows
-            |----------------------------------------------------------
-            */
+            let row = $(this);
 
-            $('#assetRows .asset-row')
-                .each(function () {
+            let select = row.find('.modal-asset-tag');
+            let assetId = select.val();
 
-                    let row = $(this);                       
-                    let select =
-                        row.find(
-                            '.modal-asset-tag'
-                        );
-
-                    let assetId = select.val();                 
-
-                    /*
-                    |--------------------------------------------------
-                    | Empty row
-                    |--------------------------------------------------
-                    */
-
-                    if (!assetId) {
-
-                        hasEmptyRow = true;
-                        return false;
-
-                    }
-
-
-                    /*
-                    |--------------------------------------------------
-                    | Check duplicate
-                    |--------------------------------------------------
-                    */
-
-                    let alreadyExists =
-                        selectedAssets.some(
-                            function (asset) {
-
-                                return String(asset.id) ===
-                                    String(assetId);
-
-                            }
-                        );
-
-
-                    if (alreadyExists) {
-
-                        duplicateFound = true;
-                        return false;
-
-                    }
-
-
-                    /*
-                    |--------------------------------------------------
-                    | Selected option
-                    |--------------------------------------------------
-                    */
-
-                    let option =
-                        select.find(
-                            'option:selected'
-                        );
-
-
-                    let tagNo =
-                        option.text().trim();
-
-
-                    let assetType =
-                        option.attr(
-                            'data-type'
-                        ) || '-';
-
-
-                    let assetModel =
-                        option.attr(
-                            'data-model'
-                        ) || '-';
-
-
-                    /*
-                    |--------------------------------------------------
-                    | Add to array
-                    |--------------------------------------------------
-                    */
-
-                    selectedAssets.push({
-
-                        id: assetId,
-                        tag_no: tagNo,
-                        asset_type: assetType,
-                        asset_model: assetModel
-
-                    });
-
-                });
-
-
-            /*
-            |----------------------------------------------------------
-            | Empty row validation
-            |----------------------------------------------------------
-            */
-
-            if (hasEmptyRow) {
-
-                Swal.fire({
-
-                    icon: 'warning',
-                    title: 'Asset Tag Required',
-                    text: 'Please select an asset tag in every row.'                        
-
-                });
-
-                return;
-
+            // Asset Tag validation
+            if (!assetId) {
+                hasEmptyAsset = true;
+                return false;
             }
 
+            // Duplicate validation
+            let alreadyExists = selectedAssets.some(function (asset) {
+                return String(asset.id) === String(assetId);
+            });
 
-            /*
-            |----------------------------------------------------------
-            | Duplicate validation
-            |----------------------------------------------------------
-            */
-
-            if (duplicateFound) {
-
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Duplicate Asset',
-                    text:
-                        'The same asset cannot be added more than once.'
-                });
-
-                return;
-
+            if (alreadyExists) {
+                duplicateFound = true;
+                return false;
             }
 
+            let option = select.find('option:selected');
 
-            /*
-            |----------------------------------------------------------
-            | No asset validation
-            |----------------------------------------------------------
-            */
+            let tagNo = option.text().trim();
+            let assetType = option.attr('data-type') || '-';
+            let assetModel = option.attr('data-model') || '-';
 
-            if (
-                selectedAssets.length === 0
-            ) {
+            let departmentSelect = row.find('.modal-department');
+            let sectionSelect = row.find('.modal-section');
 
-                Swal.fire({
+            let departmentId = departmentSelect.val();
+            let sectionId = sectionSelect.val() || '';
 
-                    icon: 'warning',
-                    title: 'No Asset Selected',
-                    text: 'Please select at least one asset.'                       
+            let departmentName = departmentSelect.find('option:selected').text().trim();
 
-                });
+            // Section is optional
+            let sectionName = sectionId
+                ? sectionSelect.find('option:selected').text().trim()
+                : '-';
 
-                return;
-
+            // Department is required
+            if (!departmentId) {
+                hasEmptyDepartment = true;
+                return false;
             }
 
+            // Store selected asset
+            selectedAssets.push({
 
-            /*
-            |----------------------------------------------------------
-            | Add assets to main table
-            |----------------------------------------------------------
-            */
+                id: assetId,
+                tag_no: tagNo,
+                asset_type: assetType,
+                asset_model: assetModel,
 
-            selectedAssets.forEach(
-                function (selected) {
+                discipline_id: departmentId,
+                department_name: departmentName,
 
-                    /*
-                    |--------------------------------------------------
-                    | Prevent duplicate in main table
-                    |--------------------------------------------------
-                    */
+                dept_section_id: sectionId,
+                section_name: sectionName
 
-                    if (
-                        $('#selectedAssetsBody tr[data-asset-id="' +
-                        selected.id +
-                        '"]').length
-                    ) {
+            });
 
-                        return;
+        });
 
-                    }
+        // -----------------------------------------
+        // VALIDATION
+        // -----------------------------------------
 
+        if (hasEmptyAsset) {
 
-                    /*
-                    |--------------------------------------------------
-                    | Remove empty row
-                    |--------------------------------------------------
-                    */
+            Swal.fire({
+                icon: 'warning',
+                title: 'Asset Tag Required',
+                text: 'Please select an asset tag in every row.'
+            });
 
-                    $('#noAssetRow').remove();
-
-
-                    /*
-                    |--------------------------------------------------
-                    | Row number
-                    |--------------------------------------------------
-                    */
-
-                    let rowNumber = $('#selectedAssetsBody tr[data-asset-id]').length + 1;                                                 
-
-                    /*
-                    |--------------------------------------------------
-                    | Create table row
-                    |--------------------------------------------------
-                    */
-
-                    let html = `
-
-                        <tr data-asset-id="${selected.id}">
-
-                            <td>
-                                ${rowNumber}
-                            </td>
-
-                            <td>
-                                <strong>
-                                    ${selected.tag_no}
-                                </strong>
-
-                                <input type="hidden" name="asset_inventory_ids[]" value="${selected.id}">                                                                                                       
-                            </td>
-
-                            <td>
-                                ${selected.asset_type}
-                            </td>
-
-                            <td>
-                                ${selected.asset_model}
-                            </td>
-
-                            <td>
-
-                                <button type="button" class="btn btn-sm btn-danger remove-asset" title="Remove Asset">                                                                                                       
-                                    <i class="bi bi-trash"></i>
-                                </button>
-
-                            </td>
-
-                        </tr>
-
-                    `;
-
-
-                    /*
-                    |--------------------------------------------------
-                    | Append row
-                    |--------------------------------------------------
-                    */
-
-                    $('#selectedAssetsBody').append(html);                      
-
-                }
-            );
-
-
-            /*
-            |----------------------------------------------------------
-            | Close modal
-            |----------------------------------------------------------
-            */
-
-            $('#addAssetModal').modal('hide');              
-
-            /*
-            |----------------------------------------------------------
-            | Reset modal
-            |----------------------------------------------------------
-            */
-
-            resetAssetModal();
-
+            return;
         }
-    );
+
+        if (hasEmptyDepartment) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Department Required',
+                text: 'Please select a department for every asset.'
+            });
+
+            return;
+        }
+
+        if (duplicateFound) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Duplicate Asset',
+                text: 'The same asset cannot be added more than once.'
+            });
+
+            return;
+        }
+
+        if (selectedAssets.length === 0) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Asset Selected',
+                text: 'Please select at least one asset.'
+            });
+
+            return;
+        }
+
+        // -----------------------------------------
+        // ADD ASSETS TO MAIN TABLE
+        // -----------------------------------------
+
+        selectedAssets.forEach(function (selected) {
+
+            // Prevent duplicate in main table
+            if (
+                $('#selectedAssetsBody tr[data-asset-id="' + selected.id + '"]').length
+            ) {
+                return;
+            }
+
+            $('#noAssetRow').remove();
+
+            let rowNumber =
+                $('#selectedAssetsBody tr[data-asset-id]').length + 1;
+
+            let html = `
+
+                <tr data-asset-id="${selected.id}">
+
+                    <td>${rowNumber}</td>
+
+                    <td>
+                        <strong>
+                            ${$('<div>').text(selected.tag_no).html()}
+                        </strong>
+
+                        <input type="hidden" name="asset_inventory_ids[]" value="${selected.id}">                                             
+                    </td>
+
+                    <td>
+                        ${$('<div>').text(selected.asset_type).html()}
+                    </td>
+
+                    <td>
+                        ${$('<div>').text(selected.asset_model).html()}
+                    </td>
+
+                    <td>
+                        ${$('<div>').text(selected.department_name).html()}
+                    </td>
+
+                    <td>
+                        ${$('<div>').text(selected.section_name).html()}
+                        <input type="hidden" name="discipline_ids[]" value="${selected.discipline_id}">  
+                        <input type="hidden" name="dept_section_ids[]" value="${selected.dept_section_id}">                              
+                    </td>
+
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger remove-asset" title="Remove Asset">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+
+                </tr>
+
+            `;
+
+            $('#selectedAssetsBody').append(html);
+
+        });
+
+        // Close modal
+        $('#addAssetModal').modal('hide');
+
+        // Reset modal
+        resetAssetModal();
+
+    });
 
 
     /* ==============================================================
        REMOVE ASSET FROM MAIN TABLE
     ============================================================== */
 
-    $(document).on(
-        'click',
-        '.remove-asset',
+    $(document).on('click', '.remove-asset',    
         function () {
 
             let row = $(this).closest('tr');            

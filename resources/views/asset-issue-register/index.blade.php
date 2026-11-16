@@ -180,9 +180,11 @@
                             <th>Tag No.</th>
                             <th>Asset Type</th>
                             <th>Asset Model</th>
+                            <th>Asset Department</th>
+                            <th>Asset Section</th>
                             <th>Custodian</th>
                             <th>Employee ID</th>
-                            <th>Department</th>
+                            <th>Custodian Department</th>
                             <th>User Type</th>
                             <th>Issued Date</th>
                             <th>Transfer Date</th>
@@ -207,6 +209,8 @@
 
                                 <td> {{ ucwords($issue->assetInventory->assetModel->assetType->name ?? 'N/A') }} </td>                                
                                 <td> {{ $issue->assetInventory->assetModel->model_name ?? 'N/A' }}</td>                                    
+                                <td> {{ $issue->discipline->name ?? 'N/A' }}</td>                                    
+                                <td> {{ $issue->deptSection->section_name ?? 'N/A' }}</td>                                    
                                 <td>{{ ucwords($issue->custodian->custodian_name ?? 'N/A') }}</td>
                                 <td>{{ $issue->custodian->emp_id ?? 'N/A' }} </td>
                                 <td>{{ ucwords($issue->custodian->discipline->name ?? 'N/A') }}</td>                                 
