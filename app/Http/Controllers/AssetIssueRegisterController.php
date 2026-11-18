@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Exports\CustodianAssetExport;
 use App\Exports\AssetIssueRegisterExport;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Models\{AssetInventory, Custodian, AssetIssueRegister, AssetTransfer, AssetType, AssetModel, Discipline, DeptSection};
+use App\Models\{AssetInventory, Custodian, AssetIssueRegister, AssetTransfer, AssetType, AssetModel, Discipline, DeptSection, AssetTransferHistory};
 
 class AssetIssueRegisterController extends Controller
 {
@@ -1018,28 +1018,28 @@ class AssetIssueRegisterController extends Controller
     }
 
     public function getDepartmentSections($id)
-{
-    $discipline = Discipline::where('id', $id)
-        ->where('status', 1)
-        ->first();
+    {
+        $discipline = Discipline::where('id', $id)
+            ->where('status', 1)
+            ->first();
 
-    if (!$discipline) {
+        if (!$discipline) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Department not found.'
+            ], 404);
+        }
+
+        $sections = DeptSection::where('discipline_id', $discipline->id)
+            ->where('status', 1)
+            ->orderBy('section_name')
+            ->get(['id', 'section_name']);
+
         return response()->json([
-            'status' => false,
-            'message' => 'Department not found.'
-        ], 404);
+            'status' => true,
+            'sections' => $sections
+        ]);
     }
-
-    $sections = DeptSection::where('discipline_id', $discipline->id)
-        ->where('status', 1)
-        ->orderBy('section_name')
-        ->get(['id', 'section_name']);
-
-    return response()->json([
-        'status' => true,
-        'sections' => $sections
-    ]);
-}
 
     /** 
      *  Retrieve complete custodianship details and currently issued assets. 
@@ -1171,17 +1171,19 @@ class AssetIssueRegisterController extends Controller
 
             $inventory = $issue->assetInventory;
             return [
-                'issue_id'      => encryptId($issue->id),
-                'tag_no'        => $inventory?->tag_no ?? '-',
-                'asset_type'    => $inventory?->assetModel?->assetType?->name ?? '-',                
-                'asset_model'   => $inventory?->assetModel?->model_name ?? '-',                  
-                'manufacturer'  => $inventory?->assetModel?->manufacturer ?? '-',                    
-                'serial_no'     => $inventory?->serial_no ?? '-',                  
-                'location'      => $inventory?->location?->name ?? '-',                   
-                'station'       => $inventory?->station?->station_name ?? '-',                   
-                'issued_date'   => $issue->issued_date ? $issue->issued_date->format('d-m-Y') : '-',                                                               
-                'issue_status'  => $issue->issue_status ?? '-',                   
-                'remarks'       => $issue->remarks ?? '-',
+                'issue_id'          => encryptId($issue->id),
+                'tag_no'            => $inventory?->tag_no ?? '-',
+                'asset_type'        => $inventory?->assetModel?->assetType?->name ?? '-',                
+                'asset_model'       => $inventory?->assetModel?->model_name ?? '-',                  
+                'manufacturer'      => $inventory?->assetModel?->manufacturer ?? '-',                    
+                'serial_no'         => $inventory?->serial_no ?? '-',                  
+                'location'          => $inventory?->location?->name ?? '-',                   
+                'station'           => $inventory?->station?->station_name ?? '-',          
+                'department_name'   => $issue->discipline?->name ?? '-',
+                'section_name'      => $issue->deptSection?->section_name ?? 'N/A',         
+                'issued_date'       => $issue->issued_date ? $issue->issued_date->format('d-m-Y') : '-',                                                               
+                'issue_status'      => $issue->issue_status ?? '-',                   
+                'remarks'           => $issue->remarks ?? '-',
                     
             ]; })->values();
     
@@ -1282,26 +1284,91 @@ class AssetIssueRegisterController extends Controller
     * @return \Illuminate\Http\JsonResponse Returns current issue details 
     * or an error response. */
 
+    // public function transferDetails($id)
+    // {
+    //     try {
+
+    //         $issueId = decryptId($id);
+
+    //     } catch (\Throwable $e) {
+
+    //         return response()->json([
+    //             'status'  => false,
+    //             'message' => 'Invalid issue selected.'
+    //         ], 400);
+    //     }
+
+
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Get currently issued asset
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     $issue = AssetIssueRegister::with([
+    //         'assetInventory',
+    //         'custodian.designation',
+    //         'custodian.discipline',
+    //         'custodian.section',
+    //         'custodian.location',
+    //     ])
+    //     ->where('id', $issueId)
+    //     ->where('issue_status', 'Issued')
+    //     ->first();
+
+
+    //     if (!$issue) {
+
+    //         return response()->json([
+    //             'status'  => false,
+    //             'message' => 'Issued asset not found.'
+    //         ], 404);
+    //     }
+
+    //      /*
+    //     |--------------------------------------------------------------------------
+    //     | Get active custodians except current custodian
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     $custodians = Custodian::with([
+    //         'designation',
+    //         'discipline',
+    //         'section'
+    //     ])
+    //     ->where('status', 1)
+    //     ->where('id', '!=', $issue->custodian_id)
+    //     ->orderBy('custodian_name')
+    //     ->get();
+    //     /*
+    //     |--------------------------------------------------------------------------
+    //     | Return current custodian details
+    //     |--------------------------------------------------------------------------
+    //     */
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'issue' => [
+    //             'issue_id'          => encryptId($issue->id),                   
+    //             'asset_tag'         => $issue->assetInventory?->tag_no ?? '-',                   
+    //             'custodian_id'      => $issue->custodian_id,                   
+    //             'custodian_name'    => $issue->custodian?->custodian_name ?? '-',                   
+    //             'emp_id'            => $issue->custodian?->emp_id ?? '-',                 
+    //         ],
+
+    //     ]);
+    // }
+
     public function transferDetails($id)
     {
         try {
-
             $issueId = decryptId($id);
-
         } catch (\Throwable $e) {
-
             return response()->json([
                 'status'  => false,
                 'message' => 'Invalid issue selected.'
             ], 400);
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Get currently issued asset
-        |--------------------------------------------------------------------------
-        */
 
         $issue = AssetIssueRegister::with([
             'assetInventory',
@@ -1309,40 +1376,22 @@ class AssetIssueRegisterController extends Controller
             'custodian.discipline',
             'custodian.section',
             'custodian.location',
+            'discipline',
+            'deptSection',
         ])
         ->where('id', $issueId)
         ->where('issue_status', 'Issued')
         ->first();
 
-
         if (!$issue) {
-
             return response()->json([
                 'status'  => false,
                 'message' => 'Issued asset not found.'
             ], 404);
         }
 
-         /*
-        |--------------------------------------------------------------------------
-        | Get active custodians except current custodian
-        |--------------------------------------------------------------------------
-        */
-
-        $custodians = Custodian::with([
-            'designation',
-            'discipline',
-            'section'
-        ])
-        ->where('status', 1)
-        ->where('id', '!=', $issue->custodian_id)
-        ->orderBy('custodian_name')
-        ->get();
-        /*
-        |--------------------------------------------------------------------------
-        | Return current custodian details
-        |--------------------------------------------------------------------------
-        */
+        // Retrieve active disciplines for selection dropdown
+        $disciplines = Discipline::where('status', 1)->orderBy('name')->get();
 
         return response()->json([
             'status' => true,
@@ -1352,8 +1401,10 @@ class AssetIssueRegisterController extends Controller
                 'custodian_id'      => $issue->custodian_id,                   
                 'custodian_name'    => $issue->custodian?->custodian_name ?? '-',                   
                 'emp_id'            => $issue->custodian?->emp_id ?? '-',                 
+                'department'        => $issue->discipline?->name ?? 'N/A',
+                'section'           => $issue->deptSection?->section_name ?? 'N/A',
             ],
-
+            'disciplines' => $disciplines,
         ]);
     }
 
@@ -1409,194 +1460,314 @@ class AssetIssueRegisterController extends Controller
     * transfer date, and remarks. 
     * @return \Illuminate\Http\JsonResponse Returns transfer success or error details. */
 
+    // public function transferAsset(Request $request)
+    // {
+    //     $request->validate([
+
+    //         'issue_id' => [
+    //             'required'
+    //         ],
+
+    //         'to_custodian_id' => [
+    //             'required',
+    //             'exists:custodians,id'
+    //         ],
+
+    //         'transfer_date' => [
+    //             'required',
+    //             'date'
+    //         ],
+
+    //         'remarks' => [
+    //             'nullable',
+    //             'string'
+    //         ],
+
+    //     ], [
+
+    //         'to_custodian_id.required'  => 'Please select the new custodian.',            
+    //         'transfer_date.required'    => 'Transfer date is required.',
+                
+    //     ]);
+
+
+    //     DB::beginTransaction();
+
+    //     try {
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Get Current Issue
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $issueId = decryptId($request->issue_id);
+
+    //         $issue = AssetIssueRegister::with([
+    //             'assetInventory',
+    //             'custodian'
+    //         ])
+    //         ->lockForUpdate()
+    //         ->findOrFail($issueId);
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Make Sure Asset Is Currently Issued
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         if ($issue->issue_status !== 'Issued') {
+    //             throw new \Exception(
+    //                 'Only currently issued assets can be transferred.'
+    //             );
+
+    //         }
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Current Custodian
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $fromCustodianId = $issue->custodian_id;
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Prevent Transfer To Same Custodian
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         if (
+    //             (int) $fromCustodianId ===
+    //             (int) $request->to_custodian_id
+    //         ) {
+
+    //             throw new \Exception(
+    //                 'Asset cannot be transferred to the same custodian.'
+    //             );
+
+    //         }
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Get New Custodian
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $toCustodian = Custodian::where('id', $request->to_custodian_id)
+    //             ->where('status', 1)
+    //             ->first();
+
+    //         if (!$toCustodian) {
+    //             throw new \Exception(
+    //                 'Selected custodian is not active.'
+    //             );
+    //         }
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Update Old Issue
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $issue->update([
+    //             'issue_status'  => 'Transferred',
+    //             'transfer_date' => $request->transfer_date,
+    //             'remarks'       => $request->remarks,
+    //         ]);
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Create Transfer History
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         AssetTransfer::create([
+
+    //             'asset_inventory_id'    => $issue->asset_inventory_id,               
+    //             'from_custodian_id'     => $fromCustodianId,                
+    //             'to_custodian_id'       => $request->to_custodian_id,                  
+    //             'transfer_date'         => $request->transfer_date,                 
+    //             'created_by'            => auth()->id(),                   
+    //             'remarks'               => $request->remarks,                 
+    //         ]);
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Create New Issue Record
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         AssetIssueRegister::create([
+
+    //             'asset_inventory_id'    => $issue->asset_inventory_id,                  
+    //             'custodian_id'          => $request->to_custodian_id,                 
+    //             'user_type'             => $issue->user_type,                   
+    //             'operator_name'         => $issue->operator_name,                 
+    //             'issued_date'           => $request->transfer_date,                 
+    //             'returned_date'         => null,
+    //             'retained_date'         => null,
+    //             'transfer_date'         => null,                
+    //             'issue_status'          => 'Issued',                   
+    //             'remarks'               => $request->remarks,                   
+    //         ]);
+
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Asset Remains Assigned
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         $issue->assetInventory->update([
+    //             'asset_status' => 'Assigned'
+    //         ]);
+
+    //         /*
+    //         |--------------------------------------------------------------------------
+    //         | Event Log
+    //         |--------------------------------------------------------------------------
+    //         */
+
+    //         eventLog(
+    //             'Transferred',
+    //             'Asset Issue Register',
+    //             'Asset ' .
+    //             ($issue->assetInventory?->tag_no ?? '-') .
+    //             ' transferred from ' .
+    //             ($issue->custodian?->custodian_name ?? '-') .
+    //             ' to ' .
+    //             ($toCustodian->custodian_name ?? '-') .
+    //             ' by user ID: ' .
+    //             auth()->id()
+    //         );
+
+
+    //         DB::commit();
+
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Asset transferred successfully.'                 
+    //         ]);
+
+    //     } catch (\Throwable $e) {
+
+    //         DB::rollBack();
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => $e->getMessage()               
+    //         ], 422);
+    //     }
+    // }
+
     public function transferAsset(Request $request)
     {
         $request->validate([
-
-            'issue_id' => [
-                'required'
-            ],
-
-            'to_custodian_id' => [
-                'required',
-                'exists:custodians,id'
-            ],
-
-            'transfer_date' => [
-                'required',
-                'date'
-            ],
-
-            'remarks' => [
-                'nullable',
-                'string'
-            ],
-
+            'issue_id'        => ['required'],
+            'to_custodian_id' => ['required', 'exists:custodians,id'],
+            'discipline_id'   => ['required', 'exists:disciplines,id'],
+            'dept_section_id' => ['nullable', 'exists:dept_sections,id'],
+            'transfer_date'   => ['required', 'date'],
+            'remarks'         => ['nullable', 'string'],
         ], [
-
-            'to_custodian_id.required'  => 'Please select the new custodian.',            
-            'transfer_date.required'    => 'Transfer date is required.',
-                
+            'to_custodian_id.required' => 'Please select the new custodian.',
+            'discipline_id.required'   => 'Please select the department.',
+            'transfer_date.required'   => 'Transfer date is required.',
         ]);
-
 
         DB::beginTransaction();
 
         try {
-
-            /*
-            |--------------------------------------------------------------------------
-            | Get Current Issue
-            |--------------------------------------------------------------------------
-            */
-
             $issueId = decryptId($request->issue_id);
 
-            $issue = AssetIssueRegister::with([
-                'assetInventory',
-                'custodian'
-            ])
-            ->lockForUpdate()
-            ->findOrFail($issueId);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Make Sure Asset Is Currently Issued
-            |--------------------------------------------------------------------------
-            */
+            $issue = AssetIssueRegister::with(['assetInventory', 'custodian'])
+                ->lockForUpdate()
+                ->findOrFail($issueId);
 
             if ($issue->issue_status !== 'Issued') {
-                throw new \Exception(
-                    'Only currently issued assets can be transferred.'
-                );
-
+                throw new \Exception('Only currently issued assets can be transferred.');
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Current Custodian
-            |--------------------------------------------------------------------------
-            */
-
-            $fromCustodianId = $issue->custodian_id;
-
-            /*
-            |--------------------------------------------------------------------------
-            | Prevent Transfer To Same Custodian
-            |--------------------------------------------------------------------------
-            */
-
-            if (
-                (int) $fromCustodianId ===
-                (int) $request->to_custodian_id
-            ) {
-
-                throw new \Exception(
-                    'Asset cannot be transferred to the same custodian.'
-                );
-
+            if ((int) $issue->custodian_id === (int) $request->to_custodian_id) {
+                throw new \Exception('Asset cannot be transferred to the same custodian.');
             }
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Get New Custodian
-            |--------------------------------------------------------------------------
-            */
 
             $toCustodian = Custodian::where('id', $request->to_custodian_id)
                 ->where('status', 1)
                 ->first();
 
             if (!$toCustodian) {
-                throw new \Exception(
-                    'Selected custodian is not active.'
-                );
+                throw new \Exception('Selected custodian is not active.');
             }
 
+            // Validate discipline and section
+            $discipline = Discipline::where('id', $request->discipline_id)->where('status', 1)->first();
+            if (!$discipline) {
+                throw new \Exception('Selected department is inactive or invalid.');
+            }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Update Old Issue
-            |--------------------------------------------------------------------------
-            */
+            $deptSection = null;
+            if (!empty($request->dept_section_id)) {
+                $deptSection = DeptSection::where('id', $request->dept_section_id)
+                    ->where('discipline_id', $request->discipline_id)
+                    ->where('status', 1)
+                    ->first();
+                if (!$deptSection) {
+                    throw new \Exception('Selected section is invalid for the chosen department.');
+                }
+            }
 
+            // 1. Update Old Issue record to Transferred
             $issue->update([
                 'issue_status'  => 'Transferred',
                 'transfer_date' => $request->transfer_date,
                 'remarks'       => $request->remarks,
             ]);
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Create Transfer History
-            |--------------------------------------------------------------------------
-            */
-
-            AssetTransfer::create([
-
-                'asset_inventory_id'    => $issue->asset_inventory_id,               
-                'from_custodian_id'     => $fromCustodianId,                
-                'to_custodian_id'       => $request->to_custodian_id,                  
-                'transfer_date'         => $request->transfer_date,                 
-                'created_by'            => auth()->id(),                   
-                'remarks'               => $request->remarks,                 
+            // 2. Create New Issue Record for the new custodian with manual department/section
+            $newIssue = AssetIssueRegister::create([
+                'asset_inventory_id' => $issue->asset_inventory_id,                  
+                'custodian_id'       => $request->to_custodian_id,                 
+                'discipline_id'      => $request->discipline_id,
+                'dept_section_id'    => $deptSection?->id,
+                'user_type'          => $issue->user_type,                   
+                'operator_name'      => $issue->operator_name,                 
+                'issued_date'        => $request->transfer_date,                 
+                'returned_date'      => null,
+                'retained_date'      => null,
+                'transfer_date'      => null,                
+                'issue_status'       => 'Issued',                   
+                'remarks'            => $request->remarks,                   
             ]);
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | Create New Issue Record
-            |--------------------------------------------------------------------------
-            */
-
-            AssetIssueRegister::create([
-
-                'asset_inventory_id'    => $issue->asset_inventory_id,                  
-                'custodian_id'          => $request->to_custodian_id,                 
-                'user_type'             => $issue->user_type,                   
-                'operator_name'         => $issue->operator_name,                 
-                'issued_date'           => $request->transfer_date,                 
-                'returned_date'         => null,
-                'retained_date'         => null,
-                'transfer_date'         => null,                
-                'issue_status'          => 'Issued',                   
-                'remarks'               => $request->remarks,                   
+            // 3. Create Transfer History mapping the old issue ID to the new issue ID
+            AssetTransferHistory::create([
+                'from_asset_issue_register_id' => $issue->id,
+                'to_asset_issue_register_id'   => $newIssue->id,
+                'transfer_date'                => $request->transfer_date,                 
+                'created_by'                   => auth()->id(),                   
+                'remarks'                      => $request->remarks,                 
             ]);
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | Asset Remains Assigned
-            |--------------------------------------------------------------------------
-            */
 
             $issue->assetInventory->update([
                 'asset_status' => 'Assigned'
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Event Log
-            |--------------------------------------------------------------------------
-            */
-
             eventLog(
                 'Transferred',
                 'Asset Issue Register',
-                'Asset ' .
-                ($issue->assetInventory?->tag_no ?? '-') .
-                ' transferred from ' .
-                ($issue->custodian?->custodian_name ?? '-') .
-                ' to ' .
-                ($toCustodian->custodian_name ?? '-') .
-                ' by user ID: ' .
-                auth()->id()
+                'Asset ' . ($issue->assetInventory?->tag_no ?? '-') .
+                ' transferred from ' . ($issue->custodian?->custodian_name ?? '-') .
+                ' to ' . ($toCustodian->custodian_name ?? '-') .
+                ' by user ID: ' . auth()->id()
             );
-
 
             DB::commit();
 
@@ -1606,7 +1777,6 @@ class AssetIssueRegisterController extends Controller
             ]);
 
         } catch (\Throwable $e) {
-
             DB::rollBack();
 
             return response()->json([
@@ -1615,8 +1785,6 @@ class AssetIssueRegisterController extends Controller
             ], 422);
         }
     }
-
-
     /** 
     * Export Asset Issue Register records to an Excel file. 
     * 

@@ -43,4 +43,15 @@ class AssetIssueRegister extends Model
     {
         return $this->belongsTo(Discipline::class, 'discipline_id');
     }
+
+    public function outgoingTransfers(): HasMany
+    {
+        return $this->hasMany(AssetTransfer::class, 'from_asset_issue_register_id');    
+        
+    }
+
+    public function incomingTransfers(): HasMany
+    {
+        return $this->hasMany(AssetTransfer::class, 'to_asset_issue_register_id');  
+    }
 }

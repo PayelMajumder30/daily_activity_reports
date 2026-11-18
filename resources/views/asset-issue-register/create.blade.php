@@ -331,14 +331,14 @@
             </select>
 
             <select id="departmentOptionSource" style="display:none;">
-    <option value="">Select Department</option>
+                <option value="">Select Department</option>
 
-    @foreach($disciplines as $discipline)
-        <option value="{{ $discipline->id }}">
-            {{ $discipline->name }}
-        </option>
-    @endforeach
-</select>
+                @foreach($disciplines as $discipline)
+                    <option value="{{ $discipline->id }}">
+                        {{ $discipline->name }}
+                    </option>
+                @endforeach
+            </select>
 
 
             {{-- ==============================================================
@@ -766,7 +766,7 @@ $(document).ready(function () {
                 } else {
 
                     sectionSelect.empty().append(
-                        '<option value="">No Section Required</option>'
+                        '<option value="">No Section Available</option>'
                     );
 
                     sectionSelect.prop('disabled', true);

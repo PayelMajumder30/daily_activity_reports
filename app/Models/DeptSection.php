@@ -26,7 +26,7 @@ class DeptSection extends Model
         return $this->hasMany(Custodian::class);
     }
 
-    public function deptSection(): HasMany
+    public function assetIssueRegister(): HasMany
     {
         return $this->hasMany(AssetIssueRegister::class, 'dept_section_id');                       
     }
