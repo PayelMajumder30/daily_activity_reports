@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -21,14 +22,40 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
-     */
+    */
+
     public function store(LoginRequest $request): RedirectResponse
     {
+        // Check if user exists
+        $user = User::where('user_name', $request->user_name)->first();
+
+        // Check if user exists by name
+        if ($user && $user->status == 0) {
+            return back()
+                ->withInput($request->only('user_name'))
+                ->withErrors([
+                    'name' => 'Your account has been deactivated. Please contact the administrator.',
+                ]);
+        }
+
+        // Authenticate user
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        if (auth()->user()->role == 0) {
+            return redirect()->route('dashboard');
+        }
+
+        if (auth()->user()->role == 1) {
+            return redirect()->route('uploader.index');
+        }
+
+        if (auth()->user()->role == 2) {
+            return redirect()->route('incident_issue_register.index');
+        }
+
+        return redirect()->route('dashboard');
     }
 
     /**
@@ -42,6 +69,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login');
     }
 }
