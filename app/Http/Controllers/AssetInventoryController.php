@@ -1751,58 +1751,6 @@ class AssetInventoryController extends Controller
     }
 
     // Open repair details
-    // public function getRepairDetails($id)
-    // {
-    //     try {
-    //         $id = decryptId($id);
-
-    //         $asset = AssetInventory::with([
-    //             'assetModel.assetType',
-    //             'location',
-    //             'station',
-    //             'assetRepairHistory' => function ($query) {
-    //                 $query->latest('id');
-    //             }
-    //         ])->find($id);
-
-    //         if (!$asset) {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Asset not found.'
-    //             ], 404);
-    //         }
-
-    //         $activeRepair = $asset->assetRepairHistory()->whereNull('return_date')->latest('id')->first();                                   
-
-    //         return response()->json([
-    //             'success' => true,
-
-    //             'asset' => [
-    //                 'id'         => encryptId($asset->id),
-    //                 'tag_no'     => $asset->tag_no ?? '-',
-    //                 'serial_no'  => $asset->serial_no ?? '-',
-    //                 'asset_type' => $asset->assetModel?->assetType?->name ?? '-',
-    //                 'asset_model'=> $asset->assetModel?->model_name ?? '-',
-    //                 'location'   => $asset->location?->name ?? '-',
-    //                 'station'    => $asset->station?->station_name ?? '-',
-    //                 'status'     => $asset->asset_status,
-    //             ],
-
-    //             'repair' => $activeRepair ? [
-    //                 'id'          => encryptId($activeRepair->id),
-    //                 'vendor_name' => $activeRepair->vendor_name,
-    //                 'send_date'   => $activeRepair->send_date?->format('d-m-Y'),
-    //                 'remarks'     => $activeRepair->remarks,
-    //             ] : null,
-    //         ]);
-
-    //     } catch (\Throwable $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Unable to load repair details.'
-    //         ], 500);
-    //     }
-    // }
 
     public function getRepairDetails($id)
     {

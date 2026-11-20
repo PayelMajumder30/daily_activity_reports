@@ -27,6 +27,8 @@ class AssetIssueRegisterExport implements FromCollection, WithHeadings, ShouldAu
             'custodian.designation',
             'custodian.discipline',
             'custodian.section',
+            'discipline',
+            'deptSection'
         ]);
 
         /*
@@ -90,21 +92,6 @@ class AssetIssueRegisterExport implements FromCollection, WithHeadings, ShouldAu
                 );
             });
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Asset Type
-        |--------------------------------------------------------------------------
-        */
-
-        // if ($request->filled('asset_type')) {
-        //     $query->whereHas(
-        //         'assetInventory.assetModel.assetType',
-        //         function ($q) use ($request) {
-        //             $q->where('id', $request->asset_type);
-        //         }
-        //     );
-        // }
 
         /*
         |--------------------------------------------------------------------------
@@ -185,7 +172,12 @@ class AssetIssueRegisterExport implements FromCollection, WithHeadings, ShouldAu
             return [
                 'Tag No.'       => $issue->assetInventory->tag_no ?? 'N/A',
                 'Asset Type'    => ucwords($issue->assetInventory->assetModel->assetType->name ?? 'N/A'),
-                'Asset Model'   => $issue->assetInventory->assetModel->model_name ?? 'N/A',                                                                                    
+                'Asset Model'   => $issue->assetInventory->assetModel->model_name ?? 'N/A',  
+                
+                 // Asset Department and Section
+                'Asset Department'  => ucwords($issue->discipline->name ?? 'N/A'),
+                'Asset Section' => ucwords($issue->deptSection->section_name ?? 'N/A'),
+
                 'Custodian'     => ucwords($issue->custodian->custodian_name ?? 'N/A'),                                          
                 'Employee ID'   => $issue->custodian->emp_id ?? 'N/A',
                 'Department'    => ucwords($issue->custodian->discipline->name ?? 'N/A'),                                           
@@ -207,6 +199,8 @@ class AssetIssueRegisterExport implements FromCollection, WithHeadings, ShouldAu
             'Tag No.',
             'Asset Type',
             'Asset Model',
+            'Asset Department',
+            'Asset Section',
             'Custodian',
             'Employee ID',
             'Department',

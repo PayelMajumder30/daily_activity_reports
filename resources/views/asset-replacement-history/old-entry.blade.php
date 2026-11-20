@@ -139,7 +139,7 @@
 
                                         <td>
                                             <a href="{{ route('asset-replacement.old-entry', ['asset_model_id' => request('asset_model_id'),                                          
-                                                'serial_no' => request('serial_no'), 'selected_asset_id' => $asset->id]) }}" class="btn btn-sm btn-success">
+                                                'serial_no' => request('serial_no'), 'selected_asset_id' => $asset->id]) }}#historical-replacement-card" class="btn btn-sm btn-success">
                                                 <i class="bi bi-check-circle"></i>
                                                 Select
                                             </a>
@@ -171,13 +171,13 @@
 
         {{-- Selected Asset and Historical Replacement Form --}}
         @if($selectedAsset)
-
-            <div class="card mb-4">
+    
+            <div class="card mb-4" id="historical-replacement-card" style="scroll-margin-top: 80px;">
 
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">
                         <i class="bi bi-arrow-repeat"></i>
-                        Historical Replacement Details
+                        Replacement Details
                     </h5>
                 </div>
 
@@ -245,16 +245,13 @@
                                     Old Asset Model <span class="text-danger">*</span>
                                 </label>
 
-                                <select name="old_asset_model_id" class="form-select" required>
+                                <select name="old_asset_model_id" id="old_asset_model_id" class="form-select" required>
                                     <option value="">Select Old Asset Model</option>
 
                                     @foreach($oldAssetModels as $model)
 
-                                        <option value="{{ $model->id }}"
-                                            {{ old('old_asset_model_id') == $model->id ? 'selected' : '' }}>
-
+                                        <option value="{{ $model->id }}" {{ old('old_asset_model_id') == $model->id ? 'selected' : '' }}>                                            
                                             {{ $model->model_name }}
-
                                         </option>
 
                                     @endforeach
@@ -292,9 +289,7 @@
 
                             {{-- Remarks --}}
                             <div class="col-md-12 mb-3">
-
                                 <label class="form-label">Remarks</label>
-
                                 <textarea name="remarks" class="form-control" rows="3" placeholder="Enter historical replacement remarks">{{ old('remarks') }}</textarea>
                             </div>
 
@@ -361,6 +356,18 @@
             });
         @endif
 
+        @if($selectedAsset)
+            const targetCard = document.getElementById('historical-replacement-card');
+            if (targetCard) {
+                targetCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        @endif
+
+        $('#old_asset_model_id').select2({
+            placeholder: 'Select Old Asset Model',
+            allowClear: true,
+            width: '100%'
+        });
         
         $('#saveOldReplacementBtn').on('click', function (e) {
 
@@ -387,7 +394,6 @@
         });
 
     });
-
 
 </script>
 @endpush

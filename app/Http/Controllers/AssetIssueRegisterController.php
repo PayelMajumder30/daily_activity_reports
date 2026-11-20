@@ -184,9 +184,8 @@ class AssetIssueRegisterController extends Controller
             ?? $asset->tag_no
             ?? 'Asset';
 
-        $currentCustodian = $issue->custodian?->custodian_name
-            ?? 'Unknown User';
-
+        $currentCustodian = $issue->custodian?->custodian_name ?? 'Unknown User';
+            
         /*
         |--------------------------------------------------------------------------
         | Returned
@@ -212,11 +211,9 @@ class AssetIssueRegisterController extends Controller
 
             if ($transfer) {
 
-                $from = $transfer->fromCustodian?->custodian_name
-                    ?? 'Unknown User';
-
-                $to = $transfer->toCustodian?->custodian_name
-                    ?? 'Unknown User';
+                $from = $transfer->fromCustodian?->custodian_name ?? 'Unknown User';
+                   
+                $to = $transfer->toCustodian?->custodian_name ?? 'Unknown User';               
 
                 return $assetName .
                     ' transferred from ' .
@@ -243,9 +240,7 @@ class AssetIssueRegisterController extends Controller
             $transfer = $asset->assetTransfers
                 ->filter(function ($transfer) use ($issue) {
                     return $transfer->to_custodian_id == $issue->custodian_id && $transfer->transfer_date <= $issue->issued_date;                                                                 
-                })
-                ->sortByDesc('id')
-                ->first();
+                })->sortByDesc('id')->first(); 
 
             /*
             | Asset came from another user
@@ -253,9 +248,8 @@ class AssetIssueRegisterController extends Controller
 
             if ($transfer) {
 
-                $from = $transfer->fromCustodian?->custodian_name
-                    ?? 'Unknown User';
-
+                $from = $transfer->fromCustodian?->custodian_name ?? 'Unknown User';
+                    
                 return $assetName .
                     ' transferred from ' .
                     $from .
@@ -675,10 +669,8 @@ class AssetIssueRegisterController extends Controller
             |--------------------------------------------------------------------------
             */
 
-            $custodian = Custodian::where('id', $request->custodian_id)
-                ->where('status', 1)
-                ->first();
-
+            $custodian = Custodian::where('id', $request->custodian_id)->where('status', 1)->first();
+                
             if (!$custodian) {
                 throw new \Exception('Selected custodian is not active.');
             }
@@ -820,7 +812,7 @@ class AssetIssueRegisterController extends Controller
                     'asset_inventory_id'    => $asset->id,
                     'custodian_id'          => $custodian->id,
 
-                    'discipline_id'      => $discipline->id,
+                    'discipline_id'         => $discipline->id,
                     'dept_section_id'       => $deptSection?->id,
                     
                     'user_type'             => $request->user_type,

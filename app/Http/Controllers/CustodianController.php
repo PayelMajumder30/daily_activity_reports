@@ -689,57 +689,72 @@ class CustodianController extends Controller
 
         $sectionId = null;
 
-        if ($hasSections) {
+        // if ($hasSections) {
 
-            /*
-            | Department has sections
-            | Therefore section is required
-            */
+        //     /*
+        //     | Department has sections
+        //     | Therefore section is required
+        //     */
 
-            if (!$request->filled('section_id')) {
-
-                return back()
-                    ->withErrors([
-                        'section_id' => 'Section is required.'])->withInput();                                                           
-            }
+        //     if (!$request->filled('section_id')) {
+        //         return back()->withErrors(['section_id' => 'Section is required.'])->withInput();                                                                                 
+        //     }
 
 
-            /*
-            | Check section belongs to department
-            */
+        //     /*
+        //     | Check section belongs to department
+        //     */
 
-            $sectionExists = DeptSection::where(
-                'id',
-                $request->section_id
-            )
-            ->where(
-                'discipline_id',
-                $request->discipline_id
-            )
-            ->where('status', 1)
-            ->exists();
+        //     $sectionExists = DeptSection::where(
+        //         'id',
+        //         $request->section_id
+        //     )
+        //     ->where(
+        //         'discipline_id',
+        //         $request->discipline_id
+        //     )
+        //     ->where('status', 1)
+        //     ->exists();
 
+
+        //     if (!$sectionExists) {
+
+        //         return back()
+        //             ->withErrors([
+        //                 'section_id' =>
+        //                     'Selected section does not belong to the selected department.'
+        //             ])
+        //             ->withInput();
+        //     }
+
+        //     $sectionId = $request->section_id;
+
+        // } else {
+
+        //     /*
+        //     | Department has no sections
+        //     | Store NULL
+        //     */
+
+        //     $sectionId = null;
+        // }
+
+        if ($request->filled('section_id')) {
+
+            $sectionExists = DeptSection::where('id', $request->section_id)
+                ->where('discipline_id', $request->discipline_id)
+                ->where('status', 1)
+                ->exists();
 
             if (!$sectionExists) {
-
                 return back()
                     ->withErrors([
-                        'section_id' =>
-                            'Selected section does not belong to the selected department.'
+                        'section_id' => 'Selected section does not belong to the selected department.'
                     ])
                     ->withInput();
             }
 
             $sectionId = $request->section_id;
-
-        } else {
-
-            /*
-            | Department has no sections
-            | Store NULL
-            */
-
-            $sectionId = null;
         }
 
         /*
