@@ -791,15 +791,15 @@ class AssetIssueRegisterController extends Controller
                 |--------------------------------------------------------------------------
                 */
 
-                if (
-                    (int) $asset->station_id !==
-                    (int) $custodian->station_id
-                ) {
+                // if (
+                //     (int) $asset->station_id !==
+                //     (int) $custodian->station_id
+                // ) {
 
-                    throw new \Exception(
-                        "Asset {$asset->tag_no} does not belong to the custodian's station."
-                    );
-                }
+                //     throw new \Exception(
+                //         "Asset {$asset->tag_no} does not belong to the custodian's station."
+                //     );
+                // }
 
                 /*
                 |--------------------------------------------------------------------------
@@ -1122,19 +1122,6 @@ class AssetIssueRegisterController extends Controller
                 'message' => 'Custodian not found.'
             ], 404);
         }
-
-        // if (
-        //     auth()->user()->role == 1 &&
-        //     (
-        //         (int) $custodian->location_id !== (int) auth()->user()->location_id ||
-        //         (int) $custodian->station_id !== (int) auth()->user()->station_id
-        //     )
-        // ) {
-        //     return response()->json([
-        //         'status'  => false,
-        //         'message' => 'You are not authorized to access this custodian.'
-        //     ], 403);
-        // }
 
 
         /*

@@ -692,7 +692,7 @@ $(document).ready(function () {
 
                 <div class="col-md-2">
                     <label class="form-label">
-                        Section <span class="text-danger">*</span>
+                        Section
                     </label>
                     <select class="form-select modal-section" disabled>
                         <option value="">Select Section</option>
@@ -725,11 +725,8 @@ $(document).ready(function () {
     $(document).on('change', '.modal-department', function () {
 
         let departmentId = $(this).val();
-
         let row = $(this).closest('.asset-row');
-
         let sectionSelect = row.find('.modal-section');
-
         sectionSelect.empty().append(
             '<option value="">Select Section</option>'
         );

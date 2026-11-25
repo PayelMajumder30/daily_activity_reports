@@ -265,7 +265,7 @@
                             <div class="col-md-6 mb-3">
 
                                 <label class="form-label">
-                                    Old Serial Number <span class="text-danger">*</span>
+                                    Old Serial Number 
                                 </label>
 
                                 <input type="text" name="old_serial_no" class="form-control" placeholder="Enter old serial number"

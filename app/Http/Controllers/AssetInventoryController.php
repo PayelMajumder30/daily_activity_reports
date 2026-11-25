@@ -913,247 +913,6 @@ class AssetInventoryController extends Controller
     }
 
     
-    // public function outstation(Request $request)
-    // {
-    //     $request->validate([
-
-    //         'asset_inventory_id' => [
-    //             'required',
-    //             'exists:asset_inventories,id'
-    //         ],
-
-    //         'to_location_id' => [
-    //             'required',
-    //             'exists:locations,id'
-    //         ],
-
-    //         'to_station_id' => [
-    //             'required',
-
-    //             Rule::exists('airport_stations', 'id')
-    //                 ->where(function ($query) use ($request) {
-
-    //                     $query->where(
-    //                         'location_id',
-    //                         $request->to_location_id
-    //                     )->where('status', 1);                        
-
-    //                 }),
-    //         ],
-
-    //         'outstation_date' => [
-    //             'required',
-    //             'date'
-    //         ],
-
-    //     ]);
-
-    //     try {
-
-    //         DB::beginTransaction();
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Lock Current Inventory
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         $asset = AssetInventory::with([
-    //             'assetModel',
-    //             'assetType',
-    //             'location',
-    //             'station'
-    //         ])
-    //         ->where('id', $request->asset_inventory_id)
-    //         ->lockForUpdate()
-    //         ->first();
-
-    //         if (!$asset) {
-
-    //             DB::rollBack();
-
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Asset not found.'
-    //             ], 404);
-    //         }
-
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Only Available Assets Can Be Moved
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         if ($asset->asset_status !== 'Available') {
-
-    //             DB::rollBack();
-
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Only Available assets can be moved to another station.'                       
-    //             ], 422);
-    //         }
-
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Prevent Same Station
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         if (
-    //             (int) $asset->station_id ===
-    //             (int) $request->to_station_id
-    //         ) {
-
-    //             DB::rollBack();
-
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Destination station cannot be the current station.'                       
-    //             ], 422);
-    //         }
-
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Verify Destination Station
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         $destinationStation = AirportStation::where(
-    //             'id',
-    //             $request->to_station_id
-    //         )
-    //         ->where(
-    //             'location_id',
-    //             $request->to_location_id
-    //         )
-    //         ->where('status', 1)
-    //         ->first();
-
-    //         if (!$destinationStation) {
-
-    //             DB::rollBack();
-
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Invalid destination station.'
-    //             ], 422);
-    //         }
-
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Save Original Location / Station Before Updating Asset
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         $fromLocationId     = $asset->location_id;
-    //         $fromStationId      = $asset->station_id;
-    //         $fromStationName    = $asset->station?->station_name ?? '-';
-                
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Update SAME Inventory Record
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         $asset->update([
-    //             'location_id'   => $request->to_location_id,
-    //             'station_id'    => $request->to_station_id,
-    //             'asset_status'  => 'Available',
-    //         ]);
-
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Create Outstation History
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         AssetOutstationHistory::create([
-
-    //             'asset_inventory_id'    => $asset->id,
-    //             'from_location_id'      => $fromLocationId,
-    //             'from_station_id'       => $fromStationId,
-    //             'to_location_id'        => $request->to_location_id,
-    //             'to_station_id'         => $request->to_station_id,
-    //             'outstation_date'       => $request->outstation_date,
-    //             'remarks'               => $request->remarks ?? null,
-    //             'created_by'            => auth()->id(),
-
-    //         ]);
-
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Event Log
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         eventLog(
-
-    //             'Outstation',
-    //             'Asset Inventory',
-    //             'Asset ' . $asset->tag_no .
-    //             ' moved from ' .
-    //             $fromStationName .
-    //             ' to ' .
-    //             ($destinationStation->station_name ?? '-')
-
-    //         );
-
-
-    //         /*
-    //         |--------------------------------------------------------------------------
-    //         | Commit Transaction
-    //         |--------------------------------------------------------------------------
-    //         */
-
-    //         DB::commit();
-
-    //         return response()->json([
-
-    //             'success' => true,
-    //             'message' =>
-    //                 'Asset successfully moved to ' .
-    //                 $destinationStation->station_name .
-    //                 '.'
-
-    //         ]);
-
-    //     } catch (\Throwable $e) {
-
-    //         DB::rollBack();
-
-    //         return response()->json([
-    //             'success'   => false,
-    //             'message'   => 'Unable to move asset.',
-    //             'error'     => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
-    // public function getOutstationStations($locationId) {
-
-    //     $stations = AirportStation::where('location_id', $locationId)
-    //         ->where('status', 1)
-    //         ->orderBy('station_name')
-    //         ->get([
-    //             'id',
-    //             'station_name',
-    //             'short_name'
-    //         ]);
-
-    //     return response()->json([
-    //         'success'   => true,
-    //         'stations'  => $stations
-    //     ]);
-    // }
-
     public function outstation(Request $request)
     {
         $request->validate([
@@ -1399,30 +1158,34 @@ class AssetInventoryController extends Controller
     
     public function getOutstationStations($locationId)
     {
-        $user = auth()->user();
+        // $user = auth()->user();
 
-        // Verify destination region permission
-        if (
-            $user->role == 1 &&
-            !hasLocationPermission((int) $locationId)
-        ) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You do not have permission to access this region.',
-            ], 403);
-        }
+        // // Verify destination region permission
+        // if (
+        //     $user->role == 1 &&
+        //     !hasLocationPermission((int) $locationId)
+        // ) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'You do not have permission to access this region.',
+        //     ], 403);
+        // }
 
-        $query = AirportStation::where('location_id', $locationId)
-            ->where('status', 1);
+        // $query = AirportStation::where('location_id', $locationId)
+        //     ->where('status', 1);
 
-        // Call Coordinator: show only permitted stations
-        if ($user->role == 1) {
-            $stationIds = permittedStationIds();
+        // // Call Coordinator: show only permitted stations
+        // if ($user->role == 1) {
+        //     $stationIds = permittedStationIds();
 
-            $query->whereIn('id', $stationIds);
-        }
+        //     $query->whereIn('id', $stationIds);
+        // }
 
-        $stations = $query->orderBy('station_name')->get();
+        // $stations = $query->orderBy('station_name')->get();
+        $stations = AirportStation::where('location_id', $locationId)
+                        ->where('status', 1)
+                        ->orderBy('station_name')
+                        ->get();
 
         return response()->json([
             'success' => true,
@@ -2404,7 +2167,7 @@ class AssetInventoryController extends Controller
             ],
 
             'old_serial_no' => [
-                'required',
+                'nullable',
                 'string',
                 'max:50'
             ],

@@ -270,9 +270,8 @@
                                 {{-- Physically Damaged --}}
                                 @if($item->asset_status !== 'Damaged')
 
-                                    <button type="button" class="btn btn-sm btn-danger scrap-asset"                                                                         
-                                        data-id="{{ $item->id }}" title="Physically Damaged">
-                                                                            
+                                    <button type="button" class="btn btn-sm btn-danger scrap-asset" data-id="{{ $item->id }}" title="Physically Damaged">                                                                         
+                                                                                                                  
                                         <i class="bi bi-tools text-warning"></i>
 
                                     </button>
@@ -281,9 +280,8 @@
 
                                 @if(in_array($item->asset_status, ['Available', 'Repair']))
 
-                                    <button type="button" class="btn btn-sm btn-warning btnRepair"                                               
-                                            data-id="{{ encryptId($item->id) }}"  title="Repair">
-                                            
+                                    <button type="button" class="btn btn-sm btn-warning btnRepair" data-id="{{ encryptId($item->id) }}"  title="Repair">                                               
+                                                                                       
                                         <i class="bi bi-wrench-adjustable"></i>
                                     </button>
 

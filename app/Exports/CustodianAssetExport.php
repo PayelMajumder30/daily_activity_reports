@@ -37,6 +37,7 @@ class CustodianAssetExport implements FromArray, WithHeadings
             'Asset Airport / Station',
             'Asset Department',
             'Asset Section',
+            'User Type',
             'Issued Date',
             'Issue Status',
             'Remarks',
@@ -88,6 +89,8 @@ class CustodianAssetExport implements FromArray, WithHeadings
                 $inventory->station?->station_name ?? 'N/A',
                 $issue->discipline?->name ?? '-',
                 $issue->deptSection?->section_name ?? 'N/A',
+                // User Type
+                $issue->user_type ?? '-',
                 $issue->issued_date? $issue->issued_date->format('d-m-Y'): '-',                                    
                 $issue->issue_status ?? '-',
                 $issue->remarks ?? '-',
@@ -114,6 +117,7 @@ class CustodianAssetExport implements FromArray, WithHeadings
                 $custodian->station?->station_name ?? 'N/A',
 
                 'No currently issued assets',
+                '-',
                 '-',
                 '-',
                 '-',
